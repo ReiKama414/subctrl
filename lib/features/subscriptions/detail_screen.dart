@@ -38,7 +38,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               break;
             }
           }
-          if (sub == null) return const AppPage(child: Text('Subscription not found.'));
+          if (sub == null) return AppPage(child: Text(context.l10n.subscriptionNotFound));
           return FutureBuilder(
             future: _extras(sub),
             builder: (context, snap) {
@@ -92,8 +92,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     SectionLabel(context.l10n.currentPrice),
                     TerminalAmount(MoneyMath.format(sub.currentPrice, sub.currency)),
                     Text('≈ ${MoneyMath.format(q.convertedAmount, q.baseCurrency)}  FX ${q.exchangeRate.toStringAsFixed(2)}'),
-                    if (q.foreignFee > 0) Text('Foreign fee ≈ ${MoneyMath.format(q.foreignFee, q.baseCurrency)}'),
-                    Text('Estimated charge ≈ ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}'),
+                    if (q.foreignFee > 0) Text('${context.l10n.foreignFee} ≈ ${MoneyMath.format(q.foreignFee, q.baseCurrency)}'),
+                    Text('${context.l10n.estimatedCharge} ≈ ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}'),
                   ],
                 ),
               ),
@@ -156,7 +156,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Uses / month'),
+                title: Text(context.l10n.usesPerMonth),
                 subtitle: Text('${sub.usageCountPerMonth ?? 0}'),
                 trailing: const Icon(Icons.edit, size: 16),
                 onTap: () => _editUsageCount(sub),
@@ -199,13 +199,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 ),
               if (sub.officialWebsiteUrl != null)
                 ListTile(
-                  title: const Text('Official website'),
+                  title: Text(context.l10n.officialWebsite),
                   subtitle: Text(sub.officialWebsiteUrl!),
                   onTap: () => launchUrl(Uri.parse(sub.officialWebsiteUrl!)),
                 ),
               if (sub.manageSubscriptionUrl != null)
                 ListTile(
-                  title: const Text('Manage subscription'),
+                  title: Text(context.l10n.manageSubscription),
                   subtitle: Text(sub.manageSubscriptionUrl!),
                   onTap: () => launchUrl(Uri.parse(sub.manageSubscriptionUrl!)),
                 ),
@@ -240,21 +240,22 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   }
 
   Future<void> _editUsageCount(SubscriptionView sub) async {
+    final l10n = context.l10n;
     final controller = TextEditingController(text: '${sub.usageCountPerMonth ?? ''}');
     final value = await showDialog<int?>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Uses / month'),
+        title: Text(l10n.usesPerMonth),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(hintText: 'e.g. 4'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, int.tryParse(controller.text.trim())),
-            child: const Text('SAVE'),
+            child: Text(l10n.save),
           ),
         ],
       ),

@@ -56,7 +56,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       body: AppPage(
         child: ListView(
           children: [
-            Text('STEP ${step + 1} / 5', style: AppTypography.label(context.colors.textMuted)),
+            Text(l10n.stepOf(step + 1, 5), style: AppTypography.label(context.colors.textMuted)),
             const SizedBox(height: 12),
             if (step == 0) _stepService(services),
             if (step == 1) _stepPlan(),
@@ -115,7 +115,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionLabel(context.l10n.selectPlan),
-        if (plans.isEmpty) const Text('No suggested plans. You can set price on the next step.'),
+        if (plans.isEmpty) Text(context.l10n.noSuggestedPlans),
         for (final p in plans)
           ListTile(
             selected: plan?.id == p.id,
@@ -144,7 +144,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionLabel(context.l10n.billing),
-        TextField(controller: price, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Price')),
+        TextField(controller: price, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: context.l10n.currentPrice)),
         const SizedBox(height: 8),
         DropdownButton<String>(
           value: AppCurrencies.iso.contains(currency) ? currency : 'USD',
@@ -159,7 +159,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           onChanged: (v) => setState(() => cycle = v ?? cycle),
         ),
         ListTile(
-          title: const Text('Start date'),
+          title: Text(context.l10n.startDate),
           trailing: Text(start.toIso8601String().substring(0, 10)),
           onTap: () async {
             final d = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2100), initialDate: start);
@@ -167,7 +167,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           },
         ),
         ListTile(
-          title: const Text('Next billing date'),
+          title: Text(context.l10n.nextBillingDate),
           trailing: Text((nextBilling ?? BillingMath.addCycle(start, cycle: cycle)).toIso8601String().substring(0, 10)),
           onTap: () async {
             final d = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2100), initialDate: nextBilling ?? start);
@@ -176,10 +176,10 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         ),
         const SizedBox(height: 8),
         Text('${MoneyMath.format(parsed, currency)}  FX ${q.exchangeRate.toStringAsFixed(2)}  ≈ ${MoneyMath.format(q.convertedAmount, q.baseCurrency)}'),
-        if (q.foreignFee > 0) Text('Foreign fee ${q.estimatedCharge == 0 ? '' : ''}≈ ${MoneyMath.format(q.foreignFee, q.baseCurrency)}'),
-        Text('Estimated charge ≈ ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}'),
-        if (q.rateUpdatedAt != null) Text('Last updated: ${q.rateUpdatedAt}'),
-        if (engine.lastError != null) Text('${engine.lastError}\nUsing last known rate: ${q.exchangeRate.toStringAsFixed(2)}'),
+        if (q.foreignFee > 0) Text('${context.l10n.foreignFee} ≈ ${MoneyMath.format(q.foreignFee, q.baseCurrency)}'),
+        Text('${context.l10n.estimatedCharge} ≈ ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}'),
+        if (q.rateUpdatedAt != null) Text('${context.l10n.lastUpdated}: ${q.rateUpdatedAt}'),
+        if (engine.lastError != null) Text('${engine.lastError}\n${context.l10n.usingLastKnownRate} ${q.exchangeRate.toStringAsFixed(2)}'),
       ],
     );
   }

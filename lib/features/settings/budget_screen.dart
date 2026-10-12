@@ -5,6 +5,7 @@ import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
@@ -42,8 +43,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       byCat[s.categorySlug] = (byCat[s.categorySlug] ?? 0) + fx.monthlyBase(s);
     }
 
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('BUDGET')),
+      appBar: AppBar(title: Text(l10n.budget)),
       body: AppPage(
         child: budgetsAsync.when(
           loading: () => const SkeletonBlock(height: 80),
@@ -65,7 +67,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SectionLabel('TOTAL'),
+                      SectionLabel(l10n.total),
                       Text(
                         '${MoneyMath.format(snapShot.spent, fx.baseCurrency)} / ${MoneyMath.format(snapShot.limit, fx.baseCurrency)}',
                       ),
@@ -83,7 +85,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: totalCtrl,
-                  decoration: const InputDecoration(labelText: 'Monthly total budget'),
+                  decoration: InputDecoration(labelText: l10n.monthlyTotalBudget),
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 8),
@@ -99,10 +101,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                         );
                     ref.invalidate(budgetsProvider);
                   },
-                  child: const Text('SAVE TOTAL'),
+                  child: Text(l10n.saveTotal),
                 ),
                 const SizedBox(height: 24),
-                const SectionLabel('CATEGORY BUDGETS'),
+                SectionLabel(l10n.categoryBudgets),
                 const SizedBox(height: 8),
                 for (final cat in CategorySlug.values) ...[
                   Builder(builder: (_) {
@@ -166,7 +168,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                                     }
                                     ref.invalidate(budgetsProvider);
                                   },
-                                  child: const Text('SAVE'),
+                                  child: Text(l10n.save),
                                 ),
                               ],
                             ),

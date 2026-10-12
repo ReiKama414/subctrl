@@ -98,11 +98,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
             DropdownButton<double>(
               value: [0.0, 1.0, 1.5, 2.0].contains(prefs.foreignFeePercent) ? prefs.foreignFeePercent : 0,
-              items: const [
-                DropdownMenuItem(value: 0.0, child: Text('Foreign fee 0%')),
-                DropdownMenuItem(value: 1.0, child: Text('1%')),
-                DropdownMenuItem(value: 1.5, child: Text('1.5%')),
-                DropdownMenuItem(value: 2.0, child: Text('2%')),
+              items: [
+                DropdownMenuItem(value: 0.0, child: Text(l10n.foreignFeeOption('0'))),
+                DropdownMenuItem(value: 1.0, child: Text(l10n.foreignFeeOption('1'))),
+                DropdownMenuItem(value: 1.5, child: Text(l10n.foreignFeeOption('1.5'))),
+                DropdownMenuItem(value: 2.0, child: Text(l10n.foreignFeeOption('2'))),
               ],
               onChanged: (v) {
                 if (v != null) {
@@ -113,16 +113,20 @@ class SettingsScreen extends ConsumerWidget {
             ListTile(
               title: Text(l10n.updateRates),
               subtitle: Text([
-                if (fx.updatedAt != null) 'Last updated: ${fx.updatedAt}',
+                if (fx.updatedAt != null) '${l10n.lastUpdated}: ${fx.updatedAt}',
                 if (fx.lastError != null) fx.lastError!,
-                if (fx.lastError != null && fx.updatedAt != null) 'Using last known rate.',
+                if (fx.lastError != null && fx.updatedAt != null) l10n.usingLastKnownRate,
               ].join('\n')),
               onTap: () async {
                 final r = await ref.read(fxServiceProvider).refresh();
                 ref.invalidate(ratesProvider);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(r.ok ? 'Rates updated.' : '${r.message}\nUsing last known rate.')),
+                    SnackBar(
+                      content: Text(
+                        r.ok ? l10n.ratesUpdated : '${r.message}\n${l10n.usingLastKnownRate}',
+                      ),
+                    ),
                   );
                 }
               },
@@ -141,11 +145,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
             SectionLabel(l10n.notifications),
-            const ListTile(
-              title: Text(
-                'Renewal, trial, promo, cancel deadline, price change, and annual renewal use local notifications. No network required.',
-              ),
-            ),
+            ListTile(title: Text(l10n.notificationsBody)),
             SectionLabel(l10n.security),
             SwitchListTile(
               title: Text(l10n.biometricLock),
@@ -162,6 +162,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
             ),
             SectionLabel(l10n.account),
+            ListTile(title: Text(l10n.accountOptionalNote)),
             ...['google', 'line', 'guest'].map((p) {
               final linked = identities.any((i) => i.provider == p);
               return ListTile(
@@ -189,7 +190,7 @@ class SettingsScreen extends ConsumerWidget {
               );
             }),
             ListTile(
-              title: const Text('Sync'),
+              title: Text(l10n.sync),
               subtitle: FutureBuilder(
                 future: ref.read(syncServiceProvider).status(),
                 builder: (_, s) => Text(s.data ?? '…'),
@@ -203,7 +204,7 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () async {
                 final path = await ref.read(exportServiceProvider).backupFile();
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup written: $path')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.backupWritten(path))));
                 }
               },
             ),
@@ -235,13 +236,11 @@ class SettingsScreen extends ConsumerWidget {
             ListTile(title: Text(l10n.version), subtitle: Text(AppInfo.version)),
             ListTile(
               title: Text(l10n.privacy),
-              subtitle: const Text(
-                'Data stays on this device unless you export it. Card numbers beyond last 4, CVV, and account passwords are never stored.',
-              ),
+              subtitle: Text(l10n.privacyBody),
             ),
             ListTile(
               title: Text(l10n.terms),
-              subtitle: const Text('Local-first subscription ledger. Third-party brands remain their owners\' trademarks.'),
+              subtitle: Text(l10n.termsBody),
             ),
           ],
         ),
@@ -255,13 +254,13 @@ class SettingsScreen extends ConsumerWidget {
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.addCustomProfile),
-        content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: 'e.g. SIDE PROJECT')),
+        title: Text(l10n.customProfileTitle),
+        content: TextField(controller: ctrl, decoration: InputDecoration(hintText: l10n.addCustomProfile)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(l10n.save),
+            child: Text(l10n.create),
           ),
         ],
       ),
@@ -321,17 +320,18 @@ class SettingsScreen extends ConsumerWidget {
     ref.invalidate(ratesProvider);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Manual rate saved: 1 USD = $value $code')),
+        SnackBar(content: Text(l10n.manualRateSaved(value.toString(), code))),
       );
     }
   }
 
   Future<void> _restoreFromBackup(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final raw = await ref.read(exportServiceProvider).readLocalBackup();
     if (raw == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No local backup found. Create a backup first.')),
+          SnackBar(content: Text(l10n.noLocalBackup)),
         );
       }
       return;
@@ -357,7 +357,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(l10n.next)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(l10n.continueAction)),
         ],
       ),
     );
@@ -390,7 +390,7 @@ class SettingsScreen extends ConsumerWidget {
       ref.invalidate(paymentMethodsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Restored ${result.subscriptionCount} subscriptions.')),
+          SnackBar(content: Text(l10n.restoreSuccess(result.subscriptionCount))),
         );
       }
     } on RestoreFormatError catch (e) {
@@ -399,7 +399,7 @@ class SettingsScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.restoreFailed('$e'))));
       }
     }
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subctrl/app/theme/tokens.dart';
-import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
@@ -23,6 +22,7 @@ class HomeScreen extends ConsumerWidget {
     final hide = prefs?.hideAmounts == true;
     final budgets = ref.watch(budgetsProvider).valueOrNull ?? [];
     final l10n = context.l10n;
+    final c = context.colors;
     return async.when(
       loading: () => const AppPage(child: Padding(padding: EdgeInsets.all(24), child: SkeletonBlock(height: 80))),
       error: (e, _) => AppPage(child: Text('$e')),
@@ -31,7 +31,6 @@ class HomeScreen extends ConsumerWidget {
         final monthly = subs.fold<double>(0, (p, s) => p + fx.monthlyBase(s));
         final year = ForecastEngine(fx).nextTwelveMonths(subs).fold<double>(0, (p, m) => p + m.totalBase);
         final actions = ActionEngine.build(subs, methods);
-        final fxCount = subs.where((s) => s.currency != fx.baseCurrency).length;
         final totalBudget = budgets.where((b) => b.scope == 'total').firstOrNull;
         final overBudget = totalBudget != null && monthly > totalBudget.monthlyAmount;
         return ListView(
@@ -41,89 +40,55 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SectionLabel(l10n.controlCenter),
-                  const SizedBox(height: 8),
                   const ProfileSwitcher(compact: true),
-                  const SizedBox(height: 12),
-                  if (overBudget)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: StatusMark(
-                        l10n.overBudget,
-                        tone: context.colors.warning,
-                      ),
-                    ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SurfaceCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SectionLabel(l10n.monthlyLoad),
-                              const SizedBox(height: 8),
-                              TerminalAmount(hide ? '••••' : MoneyMath.format(monthly, fx.baseCurrency), size: 28),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: SurfaceCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SectionLabel(l10n.yearForecast),
-                              const SizedBox(height: 8),
-                              TerminalAmount(hide ? '••••' : MoneyMath.format(year, fx.baseCurrency), size: 22),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 20),
+                  SectionLabel(l10n.monthlyLoad),
+                  const SizedBox(height: 8),
+                  TerminalAmount(hide ? '••••' : MoneyMath.format(monthly, fx.baseCurrency), size: 36),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${l10n.yearForecast}  ${hide ? '••••' : MoneyMath.format(year, fx.baseCurrency)}',
+                    style: AppTypography.body(c.textMuted),
                   ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      StatusMark('${subs.where((s) => s.status == SubscriptionStatus.active || s.status == SubscriptionStatus.trial || s.status == SubscriptionStatus.promo).length} ${l10n.activeCount}'),
-                      StatusMark('$fxCount ${l10n.foreign}'),
-                      StatusMark('${actions.length} ${l10n.actionRequiredCount}', tone: actions.isEmpty ? null : context.colors.warning),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                  if (overBudget) ...[
+                    const SizedBox(height: 10),
+                    StatusMark(l10n.overBudget, tone: c.warning),
+                  ],
+                  const SizedBox(height: 28),
                   SectionLabel(l10n.actionRequired),
                   const SizedBox(height: 8),
                   if (actions.isEmpty)
-                    Text(l10n.noUrgentDeadlines, style: AppTypography.body(context.colors.textMuted))
+                    Text(l10n.noUrgentDeadlines, style: AppTypography.body(c.textMuted))
                   else
-                    ...actions.map((a) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: SurfaceCard(
-                            onTap: a.subscriptionId.isEmpty ? null : () => context.push('/subs/${a.subscriptionId}'),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(a.title, style: AppTypography.label(context.colors.textPrimary)),
-                                const SizedBox(height: 6),
-                                Text(a.headline, style: AppTypography.label(context.colors.accent)),
-                                const SizedBox(height: 6),
-                                for (final line in a.lines) Text(line, style: AppTypography.body(context.colors.textSecondary)),
-                              ],
+                    ...actions.take(3).map(
+                          (a) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: SurfaceCard(
+                              onTap: a.subscriptionId.isEmpty ? null : () => context.push('/subs/${a.subscriptionId}'),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(a.title, style: AppTypography.label(c.textPrimary)),
+                                  const SizedBox(height: 4),
+                                  Text(a.headline, style: AppTypography.label(c.accent)),
+                                ],
+                              ),
                             ),
                           ),
-                        )),
-                  const SizedBox(height: 16),
+                        ),
+                  const SizedBox(height: 20),
                   SectionLabel(l10n.upcomingPayments),
-                  const SizedBox(height: 8),
-                  ..._upcoming(subs).map((s) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(s.serviceName),
-                        subtitle: Text(s.nextBillingDate?.toIso8601String().substring(0, 10) ?? '—'),
-                        trailing: Text(hide ? '••••' : MoneyMath.format(s.currentPrice, s.currency)),
-                        onTap: () => context.push('/subs/${s.id}'),
-                      )),
+                  const SizedBox(height: 4),
+                  ..._upcoming(subs).map(
+                    (s) => ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: Text(s.serviceName),
+                      subtitle: Text(s.nextBillingDate?.toIso8601String().substring(0, 10) ?? '—'),
+                      trailing: Text(hide ? '••••' : MoneyMath.format(s.currentPrice, s.currency)),
+                      onTap: () => context.push('/subs/${s.id}'),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -136,6 +101,6 @@ class HomeScreen extends ConsumerWidget {
   List<SubscriptionView> _upcoming(List<SubscriptionView> subs) {
     final list = [...subs.where((s) => s.nextBillingDate != null)]
       ..sort((a, b) => a.nextBillingDate!.compareTo(b.nextBillingDate!));
-    return list.take(6).toList();
+    return list.take(5).toList();
   }
 }

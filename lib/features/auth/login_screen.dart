@@ -74,10 +74,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Text(AppInfo.name, style: AppTypography.label(c.textPrimary).copyWith(fontSize: 16)),
                         const SizedBox(height: 6),
                         Text(l10n.appTagline, style: AppTypography.body(c.textSecondary)),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.loginLead,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.body(c.textMuted),
+                        ),
                         const SizedBox(height: 28),
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
+                            onPressed: _busy ? null : () => _go(AuthProviderId.guest.name),
+                            child: Text(l10n.continueLocally),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.loginOptionalHint,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.body(c.textMuted).copyWith(fontSize: 12),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
                             onPressed: _busy ? null : () => _go(AuthProviderId.google.name),
                             child: Text(l10n.continueGoogle),
                           ),
@@ -90,12 +110,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Text(l10n.continueLine),
                           ),
                         ),
-                        TextButton(
-                          onPressed: _busy ? null : () => _go(AuthProviderId.guest.name),
-                          child: Text(l10n.continueLocally),
-                        ),
                         if (_error != null) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Text(_error!, style: AppTypography.body(c.danger), textAlign: TextAlign.center),
                         ],
                         const SizedBox(height: 16),

@@ -54,7 +54,7 @@ class SubscriptionsScreen extends ConsumerWidget {
             child: Row(
               children: [
                 ChoiceChip(
-                  label: const Text('ALL CATS'),
+                  label: Text(l10n.allCats),
                   selected: query.category == null,
                   onSelected: (_) => ref.read(subListQueryProvider.notifier).state = query.copyWith(clearCategory: true),
                 ),

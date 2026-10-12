@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/money.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
 class YearReviewScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class YearReviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final year = DateTime.now().year;
     final payments = ref.watch(financeRepoProvider);
+    final l10n = context.l10n;
     return FutureBuilder(
       future: payments.payments(),
       builder: (context, snap) {
@@ -32,7 +34,6 @@ class YearReviewScreen extends ConsumerWidget {
           most = subs.where((s) => s.id == id).map((s) => s.serviceName).firstOrNull ?? id;
         }
         String increase = '—';
-        // biggest increase from price history isn't loaded fully; use monthly
         var maxM = 0.0;
         for (final s in subs) {
           final m = fx.monthlyBase(s);
@@ -47,17 +48,17 @@ class YearReviewScreen extends ConsumerWidget {
             .fold<double>(0, (p, s) => p + fx.quote(s.currentPrice, s.currency).estimatedCharge);
         final foreign = yearPays.where((p) => p.originalCurrency != fx.baseCurrency).fold<double>(0, (p, e) => p + e.actualChargedAmount);
         return Scaffold(
-          appBar: AppBar(title: const Text('YEAR IN REVIEW')),
+          appBar: AppBar(title: Text(l10n.yearInReview)),
           body: AppPage(
             child: ListView(
               children: [
                 SectionLabel('$year'),
-                _row('TOTAL SPENT', MoneyMath.format(total, fx.baseCurrency)),
-                _row('MOST EXPENSIVE', most),
-                _row('BIGGEST INCREASE', increase),
-                _row('CANCELLED', '$cancelled'),
-                _row('ESTIMATED SAVINGS', MoneyMath.format(savings, fx.baseCurrency)),
-                _row('FOREIGN SPEND', MoneyMath.format(foreign, fx.baseCurrency)),
+                _row(l10n.totalSpent, MoneyMath.format(total, fx.baseCurrency)),
+                _row(l10n.mostExpensive, most),
+                _row(l10n.biggestIncrease, increase),
+                _row(l10n.cancelledCount, '$cancelled'),
+                _row(l10n.cancelledSavings, MoneyMath.format(savings, fx.baseCurrency)),
+                _row(l10n.foreignSpend, MoneyMath.format(foreign, fx.baseCurrency)),
               ],
             ),
           ),
@@ -66,5 +67,7 @@ class YearReviewScreen extends ConsumerWidget {
     );
   }
 
-  Widget _row(String k, String v) => ListTile(title: SectionLabel(k), trailing: Text(v));
+  Widget _row(String k, String v) {
+    return ListTile(title: Text(k), trailing: Text(v));
+  }
 }

@@ -53,9 +53,11 @@ class AppLocalizations {
     'calendar': 'CALENDAR',
     'noEvents': 'NO EVENTS',
     'noEventsBody': 'Nothing scheduled on this date.',
-    'continueGoogle': 'Continue with Google',
-    'continueLine': 'Continue with LINE',
-    'continueLocally': 'Continue locally',
+    'continueGoogle': 'Link Google (optional)',
+    'continueLine': 'Link LINE (optional)',
+    'continueLocally': 'Continue on this device',
+    'loginLead': 'Everything stays on this device.',
+    'loginOptionalHint': 'Account link is optional — for future sync only. Not required to use the app.',
     'loginFooter': 'Your subscriptions.\nUnder your control.',
     'next': 'NEXT',
     'getStarted': 'GET STARTED',
@@ -84,6 +86,8 @@ class AppLocalizations {
     'overwriteRestore': 'OVERWRITE & RESTORE',
     'cancel': 'CANCEL',
     'save': 'SAVE',
+    'create': 'CREATE',
+    'continueAction': 'CONTINUE',
     'loadDemo': 'Load demo data',
     'clearDemo': 'Clear demo data',
     'paymentMethods': 'Payment methods',
@@ -125,6 +129,50 @@ class AppLocalizations {
     'total': 'TOTAL',
     'cancelledSavings': 'Cancelled savings / month',
     'yearInReview': 'Year in review',
+    'allCats': 'ALL CATS',
+    'stepOf': 'STEP {0} / {1}',
+    'noSuggestedPlans': 'No suggested plans. Set price on the next step.',
+    'startDate': 'Start date',
+    'nextBillingDate': 'Next billing date',
+    'foreignFee': 'Foreign fee',
+    'estimatedCharge': 'Estimated charge',
+    'lastUpdated': 'Last updated',
+    'ratesUpdated': 'Rates updated.',
+    'usingLastKnownRate': 'Using last known rate.',
+    'foreignFeeOption': 'Foreign fee {0}%',
+    'sync': 'Sync',
+    'backupWritten': 'Backup written: {0}',
+    'noLocalBackup': 'No local backup found. Create a backup first.',
+    'restoreSuccess': 'Restored {0} subscriptions.',
+    'restoreFailed': 'Restore failed: {0}',
+    'privacyBody':
+        'Data stays on this device unless you export it. Card numbers beyond last 4, CVV, and account passwords are never stored.',
+    'termsBody': 'Local-first subscription ledger. Third-party brands remain their owners\' trademarks.',
+    'notificationsBody':
+        'Renewal, trial, promo, cancel deadline, price change, and annual renewal use local notifications. No network required.',
+    'current': 'CURRENT',
+    'newValue': 'NEW',
+    'saveLabel': 'SAVE',
+    'simCancel': 'CANCEL TO COMPARE',
+    'perMonth': '/ month',
+    'perYear': '/ year',
+    'addMethod': 'ADD METHOD',
+    'expiry': 'Expiry',
+    'saveTotal': 'SAVE TOTAL',
+    'categoryBudgets': 'CATEGORY BUDGETS',
+    'monthlyTotalBudget': 'Monthly total budget',
+    'usesPerMonth': 'Uses / month',
+    'officialWebsite': 'Official website',
+    'manageSubscription': 'Manage subscription',
+    'subscriptionNotFound': 'Subscription not found.',
+    'manualRateSaved': 'Manual rate saved: 1 USD = {0} {1}',
+    'accountOptionalNote': 'Optional identity link. App works fully offline as Guest.',
+    'customProfileTitle': 'Custom profile',
+    'totalSpent': 'TOTAL SPENT',
+    'mostExpensive': 'MOST EXPENSIVE',
+    'biggestIncrease': 'BIGGEST LOAD',
+    'cancelledCount': 'CANCELLED',
+    'foreignSpend': 'FOREIGN SPEND',
   };
 
   static const _zh = <String, String>{
@@ -162,9 +210,11 @@ class AppLocalizations {
     'calendar': '日曆',
     'noEvents': '沒有事件',
     'noEventsBody': '這天沒有排程。',
-    'continueGoogle': '使用 Google 繼續',
-    'continueLine': '使用 LINE 繼續',
-    'continueLocally': '本機繼續使用',
+    'continueGoogle': '連結 Google（可選）',
+    'continueLine': '連結 LINE（可選）',
+    'continueLocally': '在本機繼續使用',
+    'loginLead': '資料保存在這台裝置。',
+    'loginOptionalHint': '帳號連結為可選，僅供之後同步；不是使用 App 的必要條件。',
     'loginFooter': '你的訂閱。\n由你掌控。',
     'next': '下一步',
     'getStarted': '開始使用',
@@ -192,6 +242,8 @@ class AppLocalizations {
     'overwriteRestore': '覆寫並還原',
     'cancel': '取消',
     'save': '儲存',
+    'create': '建立',
+    'continueAction': '繼續',
     'loadDemo': '載入示範資料',
     'clearDemo': '清除示範資料',
     'paymentMethods': '付款方式',
@@ -233,6 +285,48 @@ class AppLocalizations {
     'total': '合計',
     'cancelledSavings': '已取消節省／月',
     'yearInReview': '年度回顧',
+    'allCats': '全部分類',
+    'stepOf': '步驟 {0} / {1}',
+    'noSuggestedPlans': '沒有建議方案，請在下一步設定價格。',
+    'startDate': '開始日期',
+    'nextBillingDate': '下次扣款日',
+    'foreignFee': '外幣手續費',
+    'estimatedCharge': '預估扣款',
+    'lastUpdated': '上次更新',
+    'ratesUpdated': '匯率已更新。',
+    'usingLastKnownRate': '使用上次已知匯率。',
+    'foreignFeeOption': '外幣手續費 {0}%',
+    'sync': '同步',
+    'backupWritten': '備份已寫入：{0}',
+    'noLocalBackup': '找不到本機備份，請先建立備份。',
+    'restoreSuccess': '已還原 {0} 筆訂閱。',
+    'restoreFailed': '還原失敗：{0}',
+    'privacyBody': '除非你主動匯出，資料都留在這台裝置。不會儲存完整卡號、CVV 或帳號密碼。',
+    'termsBody': '本機優先的訂閱帳本。第三方品牌商標歸其權利人所有。',
+    'notificationsBody': '續訂、試用、優惠、取消期限、價格變動與年度續訂使用本機通知，不需網路。',
+    'current': '目前',
+    'newValue': '模擬後',
+    'saveLabel': '可節省',
+    'simCancel': '勾選要取消的項目',
+    'perMonth': '／月',
+    'perYear': '／年',
+    'addMethod': '新增付款方式',
+    'expiry': '到期',
+    'saveTotal': '儲存總預算',
+    'categoryBudgets': '分類預算',
+    'monthlyTotalBudget': '每月總預算',
+    'usesPerMonth': '每月使用次數',
+    'officialWebsite': '官方網站',
+    'manageSubscription': '管理訂閱',
+    'subscriptionNotFound': '找不到訂閱。',
+    'manualRateSaved': '已儲存手動匯率：1 USD = {0} {1}',
+    'accountOptionalNote': '可選身分連結。Guest 模式可完整離線使用。',
+    'customProfileTitle': '自訂檔案',
+    'totalSpent': '年度總支出',
+    'mostExpensive': '最高花費',
+    'biggestIncrease': '最高月額',
+    'cancelledCount': '已取消',
+    'foreignSpend': '外幣支出',
   };
 
   static const _ja = <String, String>{
@@ -270,9 +364,11 @@ class AppLocalizations {
     'calendar': 'カレンダー',
     'noEvents': '予定なし',
     'noEventsBody': 'この日の予定はありません。',
-    'continueGoogle': 'Google で続行',
-    'continueLine': 'LINE で続行',
-    'continueLocally': 'ローカルで続行',
+    'continueGoogle': 'Google を連携（任意）',
+    'continueLine': 'LINE を連携（任意）',
+    'continueLocally': 'この端末で続ける',
+    'loginLead': 'データはこの端末に保存されます。',
+    'loginOptionalHint': 'アカウント連携は任意です。将来の同期用で、利用に必須ではありません。',
     'loginFooter': 'あなたの契約を。\nあなたの管理下に。',
     'next': '次へ',
     'getStarted': 'はじめる',
@@ -300,6 +396,8 @@ class AppLocalizations {
     'overwriteRestore': '上書きして復元',
     'cancel': 'キャンセル',
     'save': '保存',
+    'create': '作成',
+    'continueAction': '続行',
     'loadDemo': 'デモデータを読み込む',
     'clearDemo': 'デモデータを削除',
     'paymentMethods': '支払い方法',
@@ -341,6 +439,48 @@ class AppLocalizations {
     'total': '合計',
     'cancelledSavings': '解約による節約／月',
     'yearInReview': '年間レビュー',
+    'allCats': '全カテゴリ',
+    'stepOf': 'ステップ {0} / {1}',
+    'noSuggestedPlans': '提案プランはありません。次の画面で価格を設定してください。',
+    'startDate': '開始日',
+    'nextBillingDate': '次回請求日',
+    'foreignFee': '外貨手数料',
+    'estimatedCharge': '見積請求額',
+    'lastUpdated': '最終更新',
+    'ratesUpdated': '為替を更新しました。',
+    'usingLastKnownRate': '前回のレートを使用します。',
+    'foreignFeeOption': '外貨手数料 {0}%',
+    'sync': '同期',
+    'backupWritten': 'バックアップを書き込みました: {0}',
+    'noLocalBackup': 'ローカルバックアップがありません。先にバックアップを作成してください。',
+    'restoreSuccess': '{0} 件の契約を復元しました。',
+    'restoreFailed': '復元に失敗しました: {0}',
+    'privacyBody': '書き出さない限りデータはこの端末に残ります。カード番号（下4桁以外）、CVV、パスワードは保存しません。',
+    'termsBody': 'ローカル優先のサブスク台帳です。第三者ブランドの商標は各権利者に帰属します。',
+    'notificationsBody': '更新・トライアル・プロモ・解約期限・価格変更・年次更新は端末内通知を使用します。ネットワークは不要です。',
+    'current': '現在',
+    'newValue': '変更後',
+    'saveLabel': '節約',
+    'simCancel': '解約して比較',
+    'perMonth': '／月',
+    'perYear': '／年',
+    'addMethod': '支払い方法を追加',
+    'expiry': '有効期限',
+    'saveTotal': '合計予算を保存',
+    'categoryBudgets': 'カテゴリ予算',
+    'monthlyTotalBudget': '月次合計予算',
+    'usesPerMonth': '月あたり利用回数',
+    'officialWebsite': '公式サイト',
+    'manageSubscription': '契約を管理',
+    'subscriptionNotFound': '契約が見つかりません。',
+    'manualRateSaved': '手動レートを保存: 1 USD = {0} {1}',
+    'accountOptionalNote': '任意の身分連携。Guest でもオフラインで完全に使えます。',
+    'customProfileTitle': 'カスタムプロファイル',
+    'totalSpent': '年間支出合計',
+    'mostExpensive': '最大支出',
+    'biggestIncrease': '最大月額',
+    'cancelledCount': '解約済み',
+    'foreignSpend': '外貨支出',
   };
 
   String t(String key) {
@@ -351,6 +491,14 @@ class AppLocalizations {
       _ => _en,
     };
     return map[key] ?? _en[key] ?? key;
+  }
+
+  String _fmt(String key, List<String> args) {
+    var s = t(key);
+    for (var i = 0; i < args.length; i++) {
+      s = s.replaceAll('{$i}', args[i]);
+    }
+    return s;
   }
 
   String get appTagline => t('appTagline');
@@ -390,6 +538,8 @@ class AppLocalizations {
   String get continueGoogle => t('continueGoogle');
   String get continueLine => t('continueLine');
   String get continueLocally => t('continueLocally');
+  String get loginLead => t('loginLead');
+  String get loginOptionalHint => t('loginOptionalHint');
   String get loginFooter => t('loginFooter');
   String get next => t('next');
   String get getStarted => t('getStarted');
@@ -417,6 +567,8 @@ class AppLocalizations {
   String get overwriteRestore => t('overwriteRestore');
   String get cancel => t('cancel');
   String get save => t('save');
+  String get create => t('create');
+  String get continueAction => t('continueAction');
   String get loadDemo => t('loadDemo');
   String get clearDemo => t('clearDemo');
   String get paymentMethods => t('paymentMethods');
@@ -458,6 +610,48 @@ class AppLocalizations {
   String get total => t('total');
   String get cancelledSavings => t('cancelledSavings');
   String get yearInReview => t('yearInReview');
+  String get allCats => t('allCats');
+  String stepOf(int step, int total) => _fmt('stepOf', ['$step', '$total']);
+  String get noSuggestedPlans => t('noSuggestedPlans');
+  String get startDate => t('startDate');
+  String get nextBillingDate => t('nextBillingDate');
+  String get foreignFee => t('foreignFee');
+  String get estimatedCharge => t('estimatedCharge');
+  String get lastUpdated => t('lastUpdated');
+  String get ratesUpdated => t('ratesUpdated');
+  String get usingLastKnownRate => t('usingLastKnownRate');
+  String foreignFeeOption(String pct) => _fmt('foreignFeeOption', [pct]);
+  String get sync => t('sync');
+  String backupWritten(String path) => _fmt('backupWritten', [path]);
+  String get noLocalBackup => t('noLocalBackup');
+  String restoreSuccess(int count) => _fmt('restoreSuccess', ['$count']);
+  String restoreFailed(String err) => _fmt('restoreFailed', [err]);
+  String get privacyBody => t('privacyBody');
+  String get termsBody => t('termsBody');
+  String get notificationsBody => t('notificationsBody');
+  String get current => t('current');
+  String get newValue => t('newValue');
+  String get saveLabel => t('saveLabel');
+  String get simCancel => t('simCancel');
+  String get perMonth => t('perMonth');
+  String get perYear => t('perYear');
+  String get addMethod => t('addMethod');
+  String get expiry => t('expiry');
+  String get saveTotal => t('saveTotal');
+  String get categoryBudgets => t('categoryBudgets');
+  String get monthlyTotalBudget => t('monthlyTotalBudget');
+  String get usesPerMonth => t('usesPerMonth');
+  String get officialWebsite => t('officialWebsite');
+  String get manageSubscription => t('manageSubscription');
+  String get subscriptionNotFound => t('subscriptionNotFound');
+  String manualRateSaved(String value, String code) => _fmt('manualRateSaved', [value, code]);
+  String get accountOptionalNote => t('accountOptionalNote');
+  String get customProfileTitle => t('customProfileTitle');
+  String get totalSpent => t('totalSpent');
+  String get mostExpensive => t('mostExpensive');
+  String get biggestIncrease => t('biggestIncrease');
+  String get cancelledCount => t('cancelledCount');
+  String get foreignSpend => t('foreignSpend');
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

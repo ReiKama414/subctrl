@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
 class SimulatorScreen extends ConsumerStatefulWidget {
@@ -16,11 +17,12 @@ class _SimulatorScreenState extends ConsumerState<SimulatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final subs = ref.watch(scopedSubscriptionsProvider);
     final fx = ref.watch(currencyEngineProvider);
     final result = WhatIfEngine(fx).simulate(subs, selected);
     return Scaffold(
-      appBar: AppBar(title: const Text('WHAT-IF')),
+      appBar: AppBar(title: Text(l10n.whatIf)),
       body: AppPage(
         child: ListView(
           children: [
@@ -28,20 +30,20 @@ class _SimulatorScreenState extends ConsumerState<SimulatorScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SectionLabel('CURRENT'),
-                  TerminalAmount('${MoneyMath.format(result.currentMonthly, fx.baseCurrency)} / month', size: 22),
+                  SectionLabel(l10n.current),
+                  TerminalAmount('${MoneyMath.format(result.currentMonthly, fx.baseCurrency)} ${l10n.perMonth}', size: 22),
                   const SizedBox(height: 12),
-                  const SectionLabel('NEW'),
-                  TerminalAmount('${MoneyMath.format(result.newMonthly, fx.baseCurrency)} / month', size: 22),
+                  SectionLabel(l10n.newValue),
+                  TerminalAmount('${MoneyMath.format(result.newMonthly, fx.baseCurrency)} ${l10n.perMonth}', size: 22),
                   const SizedBox(height: 12),
-                  const SectionLabel('SAVE'),
-                  Text('${MoneyMath.format(result.savedMonthly, fx.baseCurrency)} / month'),
-                  Text('${MoneyMath.format(result.savedYearly, fx.baseCurrency)} / year'),
+                  SectionLabel(l10n.saveLabel),
+                  Text('${MoneyMath.format(result.savedMonthly, fx.baseCurrency)} ${l10n.perMonth}'),
+                  Text('${MoneyMath.format(result.savedYearly, fx.baseCurrency)} ${l10n.perYear}'),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            const SectionLabel('CANCEL'),
+            SectionLabel(l10n.simCancel),
             for (final s in subs)
               CheckboxListTile(
                 value: selected.contains(s.id),
