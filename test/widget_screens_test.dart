@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:subctrl/app/theme/app_theme.dart';
@@ -12,6 +13,7 @@ import 'package:subctrl/features/calendar/calendar_screen.dart';
 import 'package:subctrl/features/home/home_screen.dart';
 import 'package:subctrl/features/subscriptions/detail_screen.dart';
 import 'package:subctrl/features/subscriptions/subscriptions_screen.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
 Future<ProviderContainer> boot() async {
@@ -25,6 +27,14 @@ Widget wrap(ProviderContainer c, Widget child) {
     container: c,
     child: MaterialApp(
       theme: AppTheme.fromTokens(ThemePresets.voidTheme),
+      locale: const Locale('en'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: Scaffold(body: child),
     ),
   );
@@ -36,8 +46,8 @@ void main() {
     addTearDown(c.dispose);
     await tester.pumpWidget(wrap(c, const HomeScreen()));
     await tester.pumpAndSettle();
-    expect(find.text('CONTROL CENTER'), findsOneWidget);
     expect(find.text('MONTHLY LOAD'), findsOneWidget);
+    expect(find.text('ACTION REQUIRED'), findsOneWidget);
   });
 
   testWidgets('Subscriptions empty state', (tester) async {

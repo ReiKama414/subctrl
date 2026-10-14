@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,6 +14,7 @@ import 'package:subctrl/data/models/views.dart';
 import 'package:subctrl/data/repositories/catalog_repository.dart';
 import 'package:subctrl/data/repositories/subscription_repository.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 class ExportService {
@@ -494,6 +498,63 @@ class RestoreFormatError implements Exception {
   String toString() => message;
 }
 
+class SyncException implements Exception {
+  SyncException(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
 class SyncService {
-  Future<String> status() async => 'Local-only. Cloud sync is not configured.';
+  SyncService(this.export);
+  final ExportService export;
+
+  /// Spark（免費用量）可用；不需 Blaze／Storage。
+  DocumentReference<Map<String, dynamic>> _doc(String uid) =>
+      FirebaseFirestore.instance.collection('users').doc(uid).collection('meta').doc('backup');
+
+  Future<String> status(AppLocalizations l10n) async {
+    if (_firebaseUid == null) return l10n.syncLocalOnly;
+    return l10n.syncReady;
+  }
+
+  String? get _firebaseUid {
+    if (Firebase.apps.isEmpty) return null;
+    try {
+      return firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> upload(AppLocalizations l10n) async {
+    final uid = _firebaseUid;
+    if (uid == null) throw SyncException(l10n.syncNeedLogin);
+    final map = await export.toJsonMap();
+    final json = jsonEncode(map);
+    // Firestore doc ~1MB limit; subscription ledger JSON is normally far smaller.
+    if (json.length > 900 * 1024) {
+      throw SyncException('Backup too large for free Firestore document (~1MB). Export JSON locally instead.');
+    }
+    await _doc(uid).set({
+      'payload': json,
+      'updatedAt': FieldValue.serverTimestamp(),
+      'version': 1,
+    });
+  }
+
+  /// Returns backup JSON string, or null if document does not exist.
+  Future<String?> download(AppLocalizations l10n) async {
+    final uid = _firebaseUid;
+    if (uid == null) throw SyncException(l10n.syncNeedLogin);
+    try {
+      final snap = await _doc(uid).get();
+      if (!snap.exists) return null;
+      final payload = snap.data()?['payload'];
+      if (payload is! String || payload.isEmpty) return null;
+      return payload;
+    } on FirebaseException catch (e) {
+      throw SyncException(e.message ?? e.code);
+    }
+  }
 }

@@ -34,218 +34,350 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.settings)),
       body: AppPage(
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 48),
           children: [
-            SectionLabel(l10n.language),
-            Wrap(
-              spacing: 6,
+            SettingsBlock(
+              label: l10n.language,
+              top: 8,
               children: [
-                for (final opt in [
-                  ('system', l10n.languageSystem),
-                  ('en', l10n.languageEn),
-                  ('zh_TW', l10n.languageZh),
-                  ('ja', l10n.languageJa),
-                ])
-                  ChoiceChip(
-                    label: Text(opt.$2),
-                    selected: localeCode == opt.$1,
-                    onSelected: (_) => ref.read(settingsRepoProvider).patch(
-                          UserPreferencesCompanion(localeCode: Value(opt.$1)),
-                        ),
-                  ),
-              ],
-            ),
-            SectionLabel(l10n.profiles),
-            const ProfileSwitcher(),
-            ListTile(
-              title: Text(l10n.addCustomProfile),
-              trailing: const Icon(Icons.add),
-              onTap: () => _addProfile(context, ref),
-            ),
-            SectionLabel(l10n.appearance),
-            Wrap(
-              spacing: 6,
-              children: [
-                for (final p in ThemePreset.values)
-                  ChoiceChip(
-                    label: Text(p.label),
-                    selected: prefs.themePreset == p.name,
-                    onSelected: (_) => ref.read(settingsRepoProvider).patch(
-                          UserPreferencesCompanion(themePreset: Value(p.name)),
-                        ),
-                  ),
-              ],
-            ),
-            SwitchListTile(
-              title: Text(l10n.reduceMotion),
-              value: prefs.reduceMotion,
-              onChanged: (v) => ref.read(settingsRepoProvider).patch(
-                    UserPreferencesCompanion(reduceMotion: Value(v)),
-                  ),
-            ),
-            if (prefs.themePreset == ThemePreset.custom.name) const _CustomThemeEditor(),
-            SectionLabel(l10n.currency),
-            DropdownButton<String>(
-              value: prefs.baseCurrency,
-              items: [
-                for (final c in AppCurrencies.featured)
-                  DropdownMenuItem(value: c.code, child: Text('${c.code}  ${c.symbol}')),
-              ],
-              onChanged: (v) {
-                if (v != null) {
-                  ref.read(settingsRepoProvider).patch(UserPreferencesCompanion(baseCurrency: Value(v)));
-                }
-              },
-            ),
-            DropdownButton<double>(
-              value: [0.0, 1.0, 1.5, 2.0].contains(prefs.foreignFeePercent) ? prefs.foreignFeePercent : 0,
-              items: [
-                DropdownMenuItem(value: 0.0, child: Text(l10n.foreignFeeOption('0'))),
-                DropdownMenuItem(value: 1.0, child: Text(l10n.foreignFeeOption('1'))),
-                DropdownMenuItem(value: 1.5, child: Text(l10n.foreignFeeOption('1.5'))),
-                DropdownMenuItem(value: 2.0, child: Text(l10n.foreignFeeOption('2'))),
-              ],
-              onChanged: (v) {
-                if (v != null) {
-                  ref.read(settingsRepoProvider).patch(UserPreferencesCompanion(foreignFeePercent: Value(v)));
-                }
-              },
-            ),
-            ListTile(
-              title: Text(l10n.updateRates),
-              subtitle: Text([
-                if (fx.updatedAt != null) '${l10n.lastUpdated}: ${fx.updatedAt}',
-                if (fx.lastError != null) fx.lastError!,
-                if (fx.lastError != null && fx.updatedAt != null) l10n.usingLastKnownRate,
-              ].join('\n')),
-              onTap: () async {
-                final r = await ref.read(fxServiceProvider).refresh();
-                ref.invalidate(ratesProvider);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        r.ok ? l10n.ratesUpdated : '${r.message}\n${l10n.usingLastKnownRate}',
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final opt in [
+                      ('system', l10n.languageSystem),
+                      ('en', l10n.languageEn),
+                      ('zh_TW', l10n.languageZh),
+                      ('ja', l10n.languageJa),
+                    ])
+                      ChoiceChip(
+                        label: Text(opt.$2),
+                        selected: localeCode == opt.$1,
+                        onSelected: (_) => ref.read(settingsRepoProvider).patch(
+                              UserPreferencesCompanion(localeCode: Value(opt.$1)),
+                            ),
                       ),
-                    ),
-                  );
-                }
-              },
-            ),
-            ListTile(
-              title: Text(l10n.manualFx),
-              subtitle: Text(l10n.manualFxSubtitle),
-              onTap: () => _manualFx(context, ref, rates),
-            ),
-            if (rates.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'USD→TWD ${(rates['TWD'] ?? AppCurrencies.usdFallbacks['TWD']!).toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  ],
                 ),
-              ),
-            SectionLabel(l10n.notifications),
-            ListTile(title: Text(l10n.notificationsBody)),
-            SectionLabel(l10n.security),
-            SwitchListTile(
-              title: Text(l10n.biometricLock),
-              value: prefs.biometricLock,
-              onChanged: (v) => ref.read(settingsRepoProvider).patch(
-                    UserPreferencesCompanion(biometricLock: Value(v)),
-                  ),
+              ],
             ),
-            SwitchListTile(
-              title: Text(l10n.hideAmounts),
-              value: prefs.hideAmounts,
-              onChanged: (v) => ref.read(settingsRepoProvider).patch(
-                    UserPreferencesCompanion(hideAmounts: Value(v)),
-                  ),
+            SettingsBlock(
+              label: l10n.profiles,
+              children: [
+                const ProfileSwitcher(),
+                const SizedBox(height: 4),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.addCustomProfile),
+                  trailing: const Icon(Icons.add),
+                  onTap: () => _addProfile(context, ref),
+                ),
+              ],
             ),
-            SectionLabel(l10n.account),
-            ListTile(title: Text(l10n.accountOptionalNote)),
-            ...['google', 'line', 'guest'].map((p) {
-              final linked = identities.any((i) => i.provider == p);
-              return ListTile(
-                title: Text(p.toUpperCase()),
-                subtitle: Text(linked ? l10n.connected : l10n.notConnected),
-                trailing: linked ? null : Text(l10n.link),
-                onTap: linked
-                    ? null
-                    : () async {
-                        try {
-                          final id = await ref.read(authServiceProvider).byId(p).signIn();
-                          await ref.read(settingsRepoProvider).linkIdentity(
-                                provider: id.provider,
-                                providerUserId: id.providerUserId,
-                                email: id.email,
-                                displayName: id.displayName,
-                              );
-                          ref.invalidate(identitiesProvider);
-                        } on AuthException catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-                          }
-                        }
-                      },
-              );
-            }),
-            ListTile(
-              title: Text(l10n.sync),
-              subtitle: FutureBuilder(
-                future: ref.read(syncServiceProvider).status(),
-                builder: (_, s) => Text(s.data ?? '…'),
-              ),
+            SettingsBlock(
+              label: l10n.appearance,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final p in ThemePreset.values)
+                      ChoiceChip(
+                        label: Text(l10n.themePresetLabel(p.name)),
+                        selected: prefs.themePreset == p.name,
+                        onSelected: (_) => ref.read(settingsRepoProvider).patch(
+                              UserPreferencesCompanion(themePreset: Value(p.name)),
+                            ),
+                      ),
+                  ],
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.reduceMotion),
+                  value: prefs.reduceMotion,
+                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                        UserPreferencesCompanion(reduceMotion: Value(v)),
+                      ),
+                ),
+                if (prefs.themePreset == ThemePreset.custom.name) const _CustomThemeEditor(),
+              ],
             ),
-            SectionLabel(l10n.data),
-            ListTile(title: Text(l10n.exportJson), onTap: () => ref.read(exportServiceProvider).shareJson()),
-            ListTile(title: Text(l10n.exportCsv), onTap: () => ref.read(exportServiceProvider).shareCsv()),
-            ListTile(
-              title: Text(l10n.backup),
-              onTap: () async {
-                final path = await ref.read(exportServiceProvider).backupFile();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.backupWritten(path))));
-                }
-              },
-            ),
-            ListTile(
-              title: Text(l10n.restoreBackup),
-              onTap: () => _restoreFromBackup(context, ref),
-            ),
-            ListTile(
-              title: Text(l10n.restorePaste),
-              onTap: () => _restoreFromPaste(context, ref),
-            ),
-            ListTile(
-              title: Text(prefs.demoSeedEnabled ? l10n.clearDemo : l10n.loadDemo),
-              onTap: () async {
-                final repo = ref.read(subscriptionRepoProvider);
-                if (prefs.demoSeedEnabled) {
-                  await repo.deleteDemo();
-                  await ref.read(settingsRepoProvider).patch(
-                        const UserPreferencesCompanion(demoSeedEnabled: Value(false)),
+            SettingsBlock(
+              label: l10n.currency,
+              children: [
+                DropdownButtonFormField<String>(
+                  key: ValueKey('currency-${prefs.baseCurrency}'),
+                  initialValue: prefs.baseCurrency,
+                  decoration: const InputDecoration(border: UnderlineInputBorder()),
+                  items: [
+                    for (final c in AppCurrencies.featured)
+                      DropdownMenuItem(value: c.code, child: Text('${c.code}  ${c.symbol}')),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) {
+                      ref.read(settingsRepoProvider).patch(UserPreferencesCompanion(baseCurrency: Value(v)));
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<double>(
+                  key: ValueKey('fee-${prefs.foreignFeePercent}'),
+                  initialValue: [0.0, 1.0, 1.5, 2.0].contains(prefs.foreignFeePercent) ? prefs.foreignFeePercent : 0,
+                  decoration: const InputDecoration(border: UnderlineInputBorder()),
+                  items: [
+                    DropdownMenuItem(value: 0.0, child: Text(l10n.foreignFeeOption('0'))),
+                    DropdownMenuItem(value: 1.0, child: Text(l10n.foreignFeeOption('1'))),
+                    DropdownMenuItem(value: 1.5, child: Text(l10n.foreignFeeOption('1.5'))),
+                    DropdownMenuItem(value: 2.0, child: Text(l10n.foreignFeeOption('2'))),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) {
+                      ref.read(settingsRepoProvider).patch(UserPreferencesCompanion(foreignFeePercent: Value(v)));
+                    }
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.updateRates),
+                  subtitle: Text([
+                    if (fx.updatedAt != null) '${l10n.lastUpdated}: ${fx.updatedAt}',
+                    if (fx.lastError != null) fx.lastError!,
+                    if (fx.lastError != null && fx.updatedAt != null) l10n.usingLastKnownRate,
+                  ].join('\n')),
+                  onTap: () async {
+                    final r = await ref.read(fxServiceProvider).refresh();
+                    ref.invalidate(ratesProvider);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            r.ok ? l10n.ratesUpdated : '${r.message}\n${l10n.usingLastKnownRate}',
+                          ),
+                        ),
                       );
-                } else {
-                  await DemoSeed(ref.read(databaseProvider), repo).load();
-                }
-              },
+                    }
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.manualFx),
+                  subtitle: Text(l10n.manualFxSubtitle),
+                  onTap: () => _manualFx(context, ref, rates),
+                ),
+                if (rates.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      'USD → TWD ${(rates['TWD'] ?? AppCurrencies.usdFallbacks['TWD']!).toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+              ],
             ),
-            ListTile(title: Text(l10n.paymentMethods), onTap: () => context.push('/methods')),
-            ListTile(title: Text(l10n.budget), onTap: () => context.push('/budget')),
-            SectionLabel(l10n.about),
-            ListTile(title: Text(l10n.version), subtitle: Text(AppInfo.version)),
-            ListTile(
-              title: Text(l10n.privacy),
-              subtitle: Text(l10n.privacyBody),
+            SettingsBlock(
+              label: l10n.notifications,
+              children: [
+                Text(l10n.notificationsBody, style: Theme.of(context).textTheme.bodyMedium),
+              ],
             ),
-            ListTile(
-              title: Text(l10n.terms),
-              subtitle: Text(l10n.termsBody),
+            SettingsBlock(
+              label: l10n.security,
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.biometricLock),
+                  value: prefs.biometricLock,
+                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                        UserPreferencesCompanion(biometricLock: Value(v)),
+                      ),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.hideAmounts),
+                  value: prefs.hideAmounts,
+                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                        UserPreferencesCompanion(hideAmounts: Value(v)),
+                      ),
+                ),
+              ],
+            ),
+            SettingsBlock(
+              label: l10n.account,
+              children: [
+                Text(l10n.accountOptionalNote, style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 8),
+                ...['google', 'line', 'guest'].map((p) {
+                  final linked = identities.any((i) => i.provider == p);
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.providerLabel(p)),
+                    subtitle: Text(linked ? l10n.connected : l10n.notConnected),
+                    trailing: linked ? null : Text(l10n.link),
+                    onTap: linked
+                        ? null
+                        : () async {
+                            try {
+                              final id = await ref.read(authServiceProvider).byId(p).signIn();
+                              await ref.read(settingsRepoProvider).linkIdentity(
+                                    provider: id.provider,
+                                    providerUserId: id.providerUserId,
+                                    email: id.email,
+                                    displayName: id.displayName,
+                                  );
+                              ref.invalidate(identitiesProvider);
+                            } on AuthException catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                              }
+                            }
+                          },
+                  );
+                }),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.sync),
+                  subtitle: FutureBuilder(
+                    future: ref.read(syncServiceProvider).status(l10n),
+                    builder: (_, s) => Text(s.data ?? '…'),
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.cloudUpload),
+                  onTap: () => _cloudUpload(context, ref),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.cloudDownload),
+                  onTap: () => _cloudDownload(context, ref),
+                ),
+              ],
+            ),
+            SettingsBlock(
+              label: l10n.data,
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.exportJson),
+                  onTap: () => ref.read(exportServiceProvider).shareJson(),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.exportCsv),
+                  onTap: () => ref.read(exportServiceProvider).shareCsv(),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.backup),
+                  onTap: () async {
+                    final path = await ref.read(exportServiceProvider).backupFile();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.backupWritten(path))));
+                    }
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.restoreBackup),
+                  onTap: () => _restoreFromBackup(context, ref),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.restorePaste),
+                  onTap: () => _restoreFromPaste(context, ref),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(prefs.demoSeedEnabled ? l10n.clearDemo : l10n.loadDemo),
+                  onTap: () async {
+                    final repo = ref.read(subscriptionRepoProvider);
+                    if (prefs.demoSeedEnabled) {
+                      await repo.deleteDemo();
+                      await ref.read(settingsRepoProvider).patch(
+                            const UserPreferencesCompanion(demoSeedEnabled: Value(false)),
+                          );
+                    } else {
+                      await DemoSeed(ref.read(databaseProvider), repo).load();
+                    }
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.paymentMethods),
+                  onTap: () => context.push('/methods'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.budget),
+                  onTap: () => context.push('/budget'),
+                ),
+              ],
+            ),
+            SettingsBlock(
+              label: l10n.about,
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.version),
+                  subtitle: Text(AppInfo.version),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.privacy),
+                  subtitle: Text(l10n.privacyBody),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.terms),
+                  subtitle: Text(l10n.termsBody),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _cloudUpload(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      await ref.read(syncServiceProvider).upload(l10n);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.syncUploaded)));
+      }
+    } on SyncException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
+  }
+
+  Future<void> _cloudDownload(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      final raw = await ref.read(syncServiceProvider).download(l10n);
+      if (raw == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.syncNoCloudBackup)));
+        }
+        return;
+      }
+      if (!context.mounted) return;
+      await _confirmAndRestore(context, ref, raw);
+    } on SyncException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
   }
 
   Future<void> _addProfile(BuildContext context, WidgetRef ref) async {
@@ -412,11 +544,13 @@ class _CustomThemeEditor extends ConsumerWidget {
     final prefs = ref.watch(preferencesProvider).valueOrNull;
     return Column(
       children: [
-        const ListTile(
-          title: Text('CUSTOM uses VOID as the base. Accent/background/surface/border persist as JSON.'),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(context.l10n.customThemeHelp),
         ),
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: [
             _swatch(ref, prefs, 'accent', const Color(0xFF5EEAD4)),
             _swatch(ref, prefs, 'background', const Color(0xFF0B0C0E)),

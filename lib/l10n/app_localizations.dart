@@ -173,6 +173,35 @@ class AppLocalizations {
     'biggestIncrease': 'BIGGEST LOAD',
     'cancelledCount': 'CANCELLED',
     'foreignSpend': 'FOREIGN SPEND',
+    'allProfilesShort': 'ALL',
+    'profilePersonal': 'Personal',
+    'profileWork': 'Work',
+    'profileFamily': 'Family',
+    'providerGoogle': 'Google',
+    'providerLine': 'LINE',
+    'providerGuest': 'Guest',
+    'customThemeHelp': 'CUSTOM uses VOID as the base. Accent / background / surface / border persist as JSON.',
+    'weekdaySun': 'S',
+    'weekdayMon': 'M',
+    'weekdayTue': 'T',
+    'weekdayWed': 'W',
+    'weekdayThu': 'T',
+    'weekdayFri': 'F',
+    'weekdaySat': 'S',
+    'syncLocalOnly': 'Local-only. Sign in with Google to enable cloud backup.',
+    'syncReady': 'Cloud backup ready.',
+    'cloudUpload': 'Upload backup to cloud',
+    'cloudDownload': 'Restore from cloud backup',
+    'syncNeedLogin': 'Sign in with Google first to use cloud backup.',
+    'syncUploaded': 'Cloud backup uploaded.',
+    'syncDownloaded': 'Cloud backup downloaded.',
+    'syncNoCloudBackup': 'No cloud backup found for this account.',
+    'themeVoid': 'Void',
+    'themeTerminal': 'Terminal',
+    'themeAkira': 'Akira',
+    'themeIce': 'Ice',
+    'themeLight': 'Light',
+    'themeCustom': 'Custom',
   };
 
   static const _zh = <String, String>{
@@ -327,6 +356,35 @@ class AppLocalizations {
     'biggestIncrease': '最高月額',
     'cancelledCount': '已取消',
     'foreignSpend': '外幣支出',
+    'allProfilesShort': '全部',
+    'profilePersonal': '個人',
+    'profileWork': '工作',
+    'profileFamily': '家庭',
+    'providerGoogle': 'Google',
+    'providerLine': 'LINE',
+    'providerGuest': '訪客',
+    'customThemeHelp': '自訂主題以 VOID 為底。強調色／背景／表面／邊框會以 JSON 保存。',
+    'weekdaySun': '日',
+    'weekdayMon': '一',
+    'weekdayTue': '二',
+    'weekdayWed': '三',
+    'weekdayThu': '四',
+    'weekdayFri': '五',
+    'weekdaySat': '六',
+    'syncLocalOnly': '僅本機。以 Google 登入後可使用雲端備份。',
+    'syncReady': '雲端備份已就緒。',
+    'cloudUpload': '上傳備份到雲端',
+    'cloudDownload': '從雲端備份還原',
+    'syncNeedLogin': '請先以 Google 登入才能使用雲端備份。',
+    'syncUploaded': '雲端備份已上傳。',
+    'syncDownloaded': '已下載雲端備份。',
+    'syncNoCloudBackup': '此帳號尚無雲端備份。',
+    'themeVoid': '虛空',
+    'themeTerminal': '終端',
+    'themeAkira': 'Akira',
+    'themeIce': '冰晶',
+    'themeLight': '明亮',
+    'themeCustom': '自訂',
   };
 
   static const _ja = <String, String>{
@@ -481,6 +539,35 @@ class AppLocalizations {
     'biggestIncrease': '最大月額',
     'cancelledCount': '解約済み',
     'foreignSpend': '外貨支出',
+    'allProfilesShort': 'すべて',
+    'profilePersonal': '個人',
+    'profileWork': '仕事',
+    'profileFamily': '家族',
+    'providerGoogle': 'Google',
+    'providerLine': 'LINE',
+    'providerGuest': 'ゲスト',
+    'customThemeHelp': 'CUSTOM は VOID をベースにします。アクセント／背景／サーフェス／枠線は JSON で保持されます。',
+    'weekdaySun': '日',
+    'weekdayMon': '月',
+    'weekdayTue': '火',
+    'weekdayWed': '水',
+    'weekdayThu': '木',
+    'weekdayFri': '金',
+    'weekdaySat': '土',
+    'syncLocalOnly': 'ローカルのみ。Google でサインインするとクラウドバックアップが使えます。',
+    'syncReady': 'クラウドバックアップの準備完了。',
+    'cloudUpload': 'クラウドにバックアップをアップロード',
+    'cloudDownload': 'クラウドバックアップから復元',
+    'syncNeedLogin': 'クラウドバックアップには先に Google サインインが必要です。',
+    'syncUploaded': 'クラウドバックアップをアップロードしました。',
+    'syncDownloaded': 'クラウドバックアップをダウンロードしました。',
+    'syncNoCloudBackup': 'このアカウントのクラウドバックアップはありません。',
+    'themeVoid': 'Void',
+    'themeTerminal': 'Terminal',
+    'themeAkira': 'Akira',
+    'themeIce': 'Ice',
+    'themeLight': 'Light',
+    'themeCustom': 'Custom',
   };
 
   String t(String key) {
@@ -652,6 +739,62 @@ class AppLocalizations {
   String get biggestIncrease => t('biggestIncrease');
   String get cancelledCount => t('cancelledCount');
   String get foreignSpend => t('foreignSpend');
+  String get allProfilesShort => t('allProfilesShort');
+  String get profilePersonal => t('profilePersonal');
+  String get profileWork => t('profileWork');
+  String get profileFamily => t('profileFamily');
+  String get providerGoogle => t('providerGoogle');
+  String get providerLine => t('providerLine');
+  String get providerGuest => t('providerGuest');
+  String get customThemeHelp => t('customThemeHelp');
+  String get weekdaySun => t('weekdaySun');
+  String get weekdayMon => t('weekdayMon');
+  String get weekdayTue => t('weekdayTue');
+  String get weekdayWed => t('weekdayWed');
+  String get weekdayThu => t('weekdayThu');
+  String get weekdayFri => t('weekdayFri');
+  String get weekdaySat => t('weekdaySat');
+  List<String> get weekdayLabels => [
+        weekdaySun,
+        weekdayMon,
+        weekdayTue,
+        weekdayWed,
+        weekdayThu,
+        weekdayFri,
+        weekdaySat,
+      ];
+  String get syncLocalOnly => t('syncLocalOnly');
+  String get syncReady => t('syncReady');
+  String get cloudUpload => t('cloudUpload');
+  String get cloudDownload => t('cloudDownload');
+  String get syncNeedLogin => t('syncNeedLogin');
+  String get syncUploaded => t('syncUploaded');
+  String get syncDownloaded => t('syncDownloaded');
+  String get syncNoCloudBackup => t('syncNoCloudBackup');
+
+  String profileDisplayName(String type, String fallbackName) => switch (type) {
+        'personal' => profilePersonal,
+        'work' => profileWork,
+        'family' => profileFamily,
+        _ => fallbackName,
+      };
+
+  String providerLabel(String id) => switch (id) {
+        'google' => providerGoogle,
+        'line' => providerLine,
+        'guest' => providerGuest,
+        _ => id,
+      };
+
+  String themePresetLabel(String name) => switch (name) {
+        'voidTheme' => t('themeVoid'),
+        'terminal' => t('themeTerminal'),
+        'akira' => t('themeAkira'),
+        'ice' => t('themeIce'),
+        'light' => t('themeLight'),
+        'custom' => t('themeCustom'),
+        _ => name,
+      };
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

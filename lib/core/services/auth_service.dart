@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthConfig {
@@ -230,15 +232,52 @@ class GoogleAuthProvider implements AuthProvider {
 }
 
 class LineAuthProvider implements AuthProvider {
+  bool _ready = false;
+
   @override
   String get id => 'line';
+
+  Future<void> _ensureSetup() async {
+    if (_ready) return;
+    await LineSDK.instance.setup(AuthConfig.lineChannelId);
+    _ready = true;
+  }
 
   @override
   Future<AuthIdentity> signIn() async {
     if (!AuthConfig.lineConfigured) {
-      throw AuthException('需要 LINE Login 設定（LINE_CHANNEL_ID）。');
+      throw AuthException(
+        '需要 LINE Login 設定（LINE_CHANNEL_ID）。\n'
+        '請用：flutter run --dart-define=LINE_CHANNEL_ID=YOUR_CHANNEL_ID',
+      );
     }
-    throw AuthException('LINE Login SDK 尚未接線。');
+    if (kIsWeb) {
+      throw AuthException('LINE Login 目前不支援瀏覽器，請用 Android／iOS。');
+    }
+    try {
+      await _ensureSetup();
+      final result = await LineSDK.instance.login(
+        scopes: ['profile', 'openid'],
+      );
+      final profile = result.userProfile;
+      if (profile == null || profile.userId.isEmpty) {
+        throw AuthException('LINE 未回傳使用者資料。');
+      }
+      return AuthIdentity(
+        provider: 'line',
+        providerUserId: profile.userId,
+        displayName: profile.displayName,
+      );
+    } on AuthException {
+      rethrow;
+    } on PlatformException catch (e) {
+      if (e.code == 'CANCEL' || e.code == '3003') {
+        throw AuthException('已取消 LINE 登入。');
+      }
+      throw AuthException(e.message ?? e.code);
+    } catch (e) {
+      throw AuthException(e.toString());
+    }
   }
 }
 

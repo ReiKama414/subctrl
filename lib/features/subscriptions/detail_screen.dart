@@ -117,7 +117,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   children: [
                     for (final p in profiles)
                       ChoiceChip(
-                        label: Text(p.name),
+                        label: Text(context.l10n.profileDisplayName(p.type, p.name)),
                         selected: sub.profileId == p.id,
                         onSelected: (_) => ref.read(subscriptionRepoProvider).setProfile(sub.id, p.id),
                       ),

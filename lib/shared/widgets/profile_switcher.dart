@@ -17,34 +17,48 @@ class ProfileSwitcher extends ConsumerWidget {
     final activeId = ref.watch(activeProfileIdProvider);
     final l10n = context.l10n;
     if (profiles.isEmpty) return const SizedBox.shrink();
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          ChoiceChip(
-            label: Text(compact ? 'ALL' : l10n.allProfiles),
-            selected: activeId == null,
-            onSelected: (_) async {
-              await ref.read(settingsRepoProvider).patch(
-                    const UserPreferencesCompanion(activeProfileId: Value(null)),
-                  );
-            },
-          ),
-          const SizedBox(width: 6),
-          for (final p in profiles) ...[
-            ChoiceChip(
-              label: Text(p.name),
-              selected: activeId == p.id,
-              onSelected: (_) async {
-                await ref.read(settingsRepoProvider).patch(
-                      UserPreferencesCompanion(activeProfileId: Value(p.id)),
-                    );
-              },
-            ),
-            const SizedBox(width: 6),
-          ],
-        ],
+
+    final chips = <Widget>[
+      ChoiceChip(
+        label: Text(compact ? l10n.allProfilesShort : l10n.allProfiles),
+        selected: activeId == null,
+        onSelected: (_) async {
+          await ref.read(settingsRepoProvider).patch(
+                const UserPreferencesCompanion(activeProfileId: Value(null)),
+              );
+        },
       ),
+      for (final p in profiles)
+        ChoiceChip(
+          label: Text(l10n.profileDisplayName(p.type, p.name)),
+          selected: activeId == p.id,
+          onSelected: (_) async {
+            await ref.read(settingsRepoProvider).patch(
+                  UserPreferencesCompanion(activeProfileId: Value(p.id)),
+                );
+          },
+        ),
+    ];
+
+    if (compact) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          children: [
+            for (var i = 0; i < chips.length; i++) ...[
+              if (i > 0) const SizedBox(width: 8),
+              chips[i],
+            ],
+          ],
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: chips,
     );
   }
 }
@@ -59,7 +73,11 @@ class ProfileSectionLabel extends ConsumerWidget {
     final l10n = context.l10n;
     final name = id == null
         ? l10n.allProfiles
-        : profiles.where((p) => p.id == id).map((p) => p.name).firstOrNull ?? l10n.profile;
+        : profiles
+                .where((p) => p.id == id)
+                .map((p) => l10n.profileDisplayName(p.type, p.name))
+                .firstOrNull ??
+            l10n.profile;
     return Text(name, style: AppTypography.label(context.colors.textMuted));
   }
 }

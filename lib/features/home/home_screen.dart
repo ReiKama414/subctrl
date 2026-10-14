@@ -33,66 +33,63 @@ class HomeScreen extends ConsumerWidget {
         final actions = ActionEngine.build(subs, methods);
         final totalBudget = budgets.where((b) => b.scope == 'total').firstOrNull;
         final overBudget = totalBudget != null && monthly > totalBudget.monthlyAmount;
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 24),
-          children: [
-            AppPage(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ProfileSwitcher(compact: true),
-                  const SizedBox(height: 20),
-                  SectionLabel(l10n.monthlyLoad),
-                  const SizedBox(height: 8),
-                  TerminalAmount(hide ? '••••' : MoneyMath.format(monthly, fx.baseCurrency), size: 36),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${l10n.yearForecast}  ${hide ? '••••' : MoneyMath.format(year, fx.baseCurrency)}',
-                    style: AppTypography.body(c.textMuted),
-                  ),
-                  if (overBudget) ...[
-                    const SizedBox(height: 10),
-                    StatusMark(l10n.overBudget, tone: c.warning),
-                  ],
-                  const SizedBox(height: 28),
-                  SectionLabel(l10n.actionRequired),
-                  const SizedBox(height: 8),
-                  if (actions.isEmpty)
-                    Text(l10n.noUrgentDeadlines, style: AppTypography.body(c.textMuted))
-                  else
-                    ...actions.take(3).map(
-                          (a) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: SurfaceCard(
-                              onTap: a.subscriptionId.isEmpty ? null : () => context.push('/subs/${a.subscriptionId}'),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(a.title, style: AppTypography.label(c.textPrimary)),
-                                  const SizedBox(height: 4),
-                                  Text(a.headline, style: AppTypography.label(c.accent)),
-                                ],
-                              ),
-                            ),
+        // AppPage must be the root (same as other tabs). Nesting it inside
+        // ListView lets the column shrink below maxContentWidth on wide web.
+        return AppPage(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              const ProfileSwitcher(compact: true),
+              const SizedBox(height: 20),
+              SectionLabel(l10n.monthlyLoad),
+              const SizedBox(height: 8),
+              TerminalAmount(hide ? '••••' : MoneyMath.format(monthly, fx.baseCurrency), size: 36),
+              const SizedBox(height: 6),
+              Text(
+                '${l10n.yearForecast}  ${hide ? '••••' : MoneyMath.format(year, fx.baseCurrency)}',
+                style: AppTypography.body(c.textMuted),
+              ),
+              if (overBudget) ...[
+                const SizedBox(height: 10),
+                StatusMark(l10n.overBudget, tone: c.warning),
+              ],
+              const SizedBox(height: 28),
+              SectionLabel(l10n.actionRequired),
+              const SizedBox(height: 8),
+              if (actions.isEmpty)
+                Text(l10n.noUrgentDeadlines, style: AppTypography.body(c.textMuted))
+              else
+                ...actions.take(3).map(
+                      (a) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: SurfaceCard(
+                          onTap: a.subscriptionId.isEmpty ? null : () => context.push('/subs/${a.subscriptionId}'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(a.title, style: AppTypography.label(c.textPrimary)),
+                              const SizedBox(height: 4),
+                              Text(a.headline, style: AppTypography.label(c.accent)),
+                            ],
                           ),
                         ),
-                  const SizedBox(height: 20),
-                  SectionLabel(l10n.upcomingPayments),
-                  const SizedBox(height: 4),
-                  ..._upcoming(subs).map(
-                    (s) => ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: Text(s.serviceName),
-                      subtitle: Text(s.nextBillingDate?.toIso8601String().substring(0, 10) ?? '—'),
-                      trailing: Text(hide ? '••••' : MoneyMath.format(s.currentPrice, s.currency)),
-                      onTap: () => context.push('/subs/${s.id}'),
+                      ),
                     ),
-                  ),
-                ],
+              const SizedBox(height: 20),
+              SectionLabel(l10n.upcomingPayments),
+              const SizedBox(height: 4),
+              ..._upcoming(subs).map(
+                (s) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: Text(s.serviceName),
+                  subtitle: Text(s.nextBillingDate?.toIso8601String().substring(0, 10) ?? '—'),
+                  trailing: Text(hide ? '••••' : MoneyMath.format(s.currentPrice, s.currency)),
+                  onTap: () => context.push('/subs/${s.id}'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

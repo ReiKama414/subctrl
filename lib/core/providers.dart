@@ -29,7 +29,7 @@ final fxServiceProvider = Provider((ref) => FxService(ref.watch(financeRepoProvi
 final exportServiceProvider = Provider(
   (ref) => ExportService(ref.watch(databaseProvider), ref.watch(subscriptionRepoProvider), ref.watch(financeRepoProvider)),
 );
-final syncServiceProvider = Provider((ref) => SyncService());
+final syncServiceProvider = Provider((ref) => SyncService(ref.watch(exportServiceProvider)));
 final logoResolverProvider = Provider((ref) => const ServiceLogoResolver());
 
 final preferencesProvider = StreamProvider<PreferenceView>((ref) {

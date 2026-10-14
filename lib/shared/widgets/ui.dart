@@ -15,7 +15,14 @@ class AppPage extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: AppInfo.maxContentWidth),
-        child: Padding(padding: padding ?? const EdgeInsets.symmetric(horizontal: 16), child: child),
+        // Force full width up to the cap so pages don't shrink on wide web.
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -27,6 +34,29 @@ class SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text, style: AppTypography.label(context.colors.textMuted));
+  }
+}
+
+/// Settings / form block with consistent vertical rhythm.
+class SettingsBlock extends StatelessWidget {
+  const SettingsBlock({super.key, required this.label, required this.children, this.top = 28});
+  final String label;
+  final List<Widget> children;
+  final double top;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: top, bottom: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionLabel(label),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
   }
 }
 
