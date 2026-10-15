@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/models/finance_models.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 
 class PriceLineChart extends StatelessWidget {
   const PriceLineChart({
@@ -21,6 +22,7 @@ class PriceLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final chart = context.chartTheme;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -30,12 +32,7 @@ class PriceLineChart extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: ChoiceChip(
-                  label: Text(switch (r) {
-                    ChartRange.months3 => '3M',
-                    ChartRange.months6 => '6M',
-                    ChartRange.year1 => '1Y',
-                    ChartRange.all => 'ALL',
-                  }),
+                  label: Text(l10n.chartRangeLabel(r)),
                   selected: range == r,
                   onSelected: (_) => onRange(r),
                 ),
@@ -44,7 +41,7 @@ class PriceLineChart extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (points.length < 2)
-          Text('Not enough price history for a chart yet.', style: AppTypography.body(c.textMuted))
+          Text(l10n.chartNoHistory, style: AppTypography.body(c.textMuted))
         else
           SizedBox(
             height: 180,
@@ -129,7 +126,7 @@ class PriceLineChart extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 8),
-        Text('Official / Regular  ·  My actual cost', style: AppTypography.label(c.textMuted)),
+        Text(l10n.chartLegend, style: AppTypography.label(c.textMuted)),
       ],
     );
   }

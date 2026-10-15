@@ -205,7 +205,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                               Text(e.title, style: AppTypography.body(c.textPrimary)),
                               const SizedBox(height: 2),
                               Text(
-                                e.kind.replaceAll('_', ' ').toUpperCase(),
+                                l10n.calendarEventKindLabel(e.kind),
                                 style: AppTypography.label(c.textMuted).copyWith(fontSize: 10),
                               ),
                             ],

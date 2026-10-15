@@ -7,30 +7,33 @@ Subscription Control Center — a local-first ledger for digital subscriptions, 
 ```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter run \
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
-  --dart-define=LINE_CHANNEL_ID=REDACTED_LINE_CHANNEL
+flutter run
 ```
 
-Guest mode works without an account. Google and LINE sign-in require the dart-defines above.
+Google / LINE / Web Firebase credentials are **built in as defaults**.  
+You can just `flutter run` or `flutter run -d chrome` — no extra `--dart-define` needed.
 
-Demo sample data is **off** by default. Enable it from Settings → Load demo data.
+Optional overrides:
+
+- `dart_defines.json` (used by VS Code / Cursor launch configs and `scripts/run.ps1`)
+- or `--dart-define-from-file=dart_defines.json`
+
+```powershell
+.\scripts\run.ps1 -Device chrome
+```
+
+Guest mode works without an account. Demo sample data is **off** by default (Settings → Load demo data).
 
 ## Configuration
 
-| Integration | Dart define / native files |
+| Integration | Notes |
 | --- | --- |
-| Google Sign-In | `--dart-define=GOOGLE_SERVER_CLIENT_ID=...` plus Android `google-services.json` / iOS `GoogleService-Info.plist` |
-| LINE Login | `--dart-define=LINE_CHANNEL_ID=REDACTED_LINE_CHANNEL` plus LINE Developers channel (LINE Login type) |
-| FX rates | Uses `https://open.er-api.com/v6/latest/USD` (no key). Manual override lives in Settings |
-| Cloud backup | **Cloud Firestore** (Spark free tier). Not Firebase Storage (Storage needs Blaze). Upload / restore from Settings → Account after Google sign-in |
+| Google Sign-In | Default Web client ID embedded; Android needs `google-services.json` |
+| LINE Login | Default Channel ID `REDACTED_LINE_CHANNEL` (native only; not Web) |
+| FX rates | `https://open.er-api.com/v6/latest/USD` (no key) |
+| Cloud backup | **Cloud Firestore** (Spark free). Settings → Account after Google sign-in |
 
-For Web Google sign-in, also pass `--dart-define=FIREBASE_WEB_APP_ID=1:REDACTED_PROJECT_NUMBER:web:xxxxxxxxxxxxxxxx`.
-
-### Firestore (free) — enable + rules
-
-1. Firebase Console → **Build → Firestore Database** → Create database (production mode is fine)
-2. Rules:
+### Firestore rules (free Spark)
 
 ```
 rules_version = '2';
@@ -43,9 +46,7 @@ service cloud.firestore {
 }
 ```
 
-Do **not** enable Storage unless you upgrade to Blaze. This app no longer uses Storage.
-
-Payment methods store brand, last 4 digits, and expiry. Full card numbers and CVV are never stored.
+Do **not** enable Storage (needs Blaze). This app uses Firestore only.
 
 ## Tests
 

@@ -6,10 +6,16 @@ import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthConfig {
-  /// Web OAuth client ID from Firebase / Google Cloud Console.
-  /// Pass via `--dart-define=GOOGLE_SERVER_CLIENT_ID=...`
-  static const googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
-  static const lineChannelId = String.fromEnvironment('LINE_CHANNEL_ID');
+  /// Client IDs are public (already in google-services.json / LINE console).
+  /// Override with `--dart-define=...` or `dart_defines.json` if needed.
+  static const googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue: 'your-web-client-id.apps.googleusercontent.com',
+  );
+  static const lineChannelId = String.fromEnvironment(
+    'LINE_CHANNEL_ID',
+    defaultValue: 'REDACTED_LINE_CHANNEL',
+  );
 
   static bool get googleConfigured => googleServerClientId.isNotEmpty;
   static bool get lineConfigured => lineChannelId.isNotEmpty;

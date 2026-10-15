@@ -1,14 +1,20 @@
-﻿// Generated from android/app/google-services.json (+ optional Web dart-defines).
-// Do not commit service-account keys. Client config only.
+﻿// Client config only. Do not commit service-account keys.
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 class DefaultFirebaseOptions {
-  /// Firebase Console → Project settings → Your apps → Web appId
-  /// Example: 1:REDACTED_PROJECT_NUMBER:web:xxxxxxxx
-  static const webAppId = String.fromEnvironment('FIREBASE_WEB_APP_ID');
+  /// Override with `--dart-define=FIREBASE_WEB_APP_ID=...` if needed.
+  static const webAppId = String.fromEnvironment(
+    'FIREBASE_WEB_APP_ID',
+    defaultValue: '1:REDACTED_PROJECT_NUMBER:web:xxxxxxxxxxxxxxxx',
+  );
+
+  static const webApiKey = String.fromEnvironment(
+    'FIREBASE_WEB_API_KEY',
+    defaultValue: 'REDACTED',
+  );
 
   static bool get hasWebConfig => webAppId.isNotEmpty;
 
@@ -49,9 +55,8 @@ class DefaultFirebaseOptions {
     storageBucket: 'sub-ctrl.firebasestorage.app',
   );
 
-  /// Same project client API key; appId must be the Web app from Firebase Console.
   static FirebaseOptions get web => FirebaseOptions(
-        apiKey: android.apiKey,
+        apiKey: webApiKey,
         appId: webAppId,
         messagingSenderId: android.messagingSenderId,
         projectId: android.projectId,

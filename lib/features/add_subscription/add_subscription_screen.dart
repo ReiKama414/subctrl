@@ -155,7 +155,10 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         DropdownButton<String>(
           value: cycle,
           isExpanded: true,
-          items: [for (final c in BillingCycle.values) DropdownMenuItem(value: c.name, child: Text(c.label))],
+          items: [
+            for (final c in BillingCycle.values)
+              DropdownMenuItem(value: c.name, child: Text(context.l10n.billingCycleLabel(c))),
+          ],
           onChanged: (v) => setState(() => cycle = v ?? cycle),
         ),
         ListTile(

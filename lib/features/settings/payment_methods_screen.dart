@@ -45,18 +45,22 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
             const SizedBox(height: 16),
             DropdownButton<PaymentMethodType>(
               value: type,
-              items: [for (final t in PaymentMethodType.values) DropdownMenuItem(value: t, child: Text(t.label))],
+              items: [
+                for (final t in PaymentMethodType.values)
+                  DropdownMenuItem(value: t, child: Text(l10n.paymentMethodTypeLabel(t))),
+              ],
               onChanged: (v) => setState(() => type = v ?? type),
             ),
-            TextField(controller: last4, maxLength: 4, decoration: const InputDecoration(labelText: 'Last 4')),
+            TextField(controller: last4, maxLength: 4, decoration: InputDecoration(labelText: l10n.last4)),
             FilledButton(
               onPressed: () async {
+                final label = l10n.paymentMethodTypeLabel(type);
                 await ref.read(financeRepoProvider).addMethod(
                       PaymentMethodView(
                         id: '',
-                        label: type.label,
+                        label: label,
                         type: type,
-                        brand: type.label,
+                        brand: label,
                         last4: last4.text.isEmpty ? null : last4.text,
                       ),
                     );

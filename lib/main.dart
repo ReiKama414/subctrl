@@ -59,7 +59,14 @@ Future<void> _initFirebase() async {
   if (Firebase.apps.isNotEmpty) return;
   try {
     if (kIsWeb) {
-      if (!DefaultFirebaseOptions.hasWebConfig) return;
+      if (!DefaultFirebaseOptions.hasWebConfig) {
+        debugPrint(
+          'SUB//CTRL: Web Firebase skipped — pass '
+          '--dart-define=FIREBASE_WEB_APP_ID=1:…:web:… '
+          'or Google sign-in on Chrome will fail.',
+        );
+        return;
+      }
       await Firebase.initializeApp(options: DefaultFirebaseOptions.web)
           .timeout(const Duration(seconds: 10));
       return;

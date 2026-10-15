@@ -41,16 +41,19 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: GlassBar(
         child: SafeArea(
           top: false,
-          child: SizedBox(
-            height: 64,
-            child: Row(
-              children: [
-                _tab(context, 0, Icons.grid_view_outlined, l10n.navHome),
-                _tab(context, 1, Icons.view_list_outlined, l10n.navSubs),
-                _add(context),
-                _tab(context, 2, Icons.insights_outlined, l10n.navData),
-                _tab(context, 3, Icons.calendar_today_outlined, l10n.navCal),
-              ],
+          child: AppPage(
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                children: [
+                  _tab(context, 0, Icons.grid_view_outlined, l10n.navHome),
+                  _tab(context, 1, Icons.view_list_outlined, l10n.navSubs),
+                  _add(context),
+                  _tab(context, 2, Icons.insights_outlined, l10n.navData),
+                  _tab(context, 3, Icons.calendar_today_outlined, l10n.navCal),
+                ],
+              ),
             ),
           ),
         ),

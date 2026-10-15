@@ -40,7 +40,7 @@ class SubscriptionsScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: ChoiceChip(
-                      label: Text(f.name.toUpperCase()),
+                      label: Text(l10n.subFilterLabel(f)),
                       selected: query.filter == f,
                       onSelected: (_) => ref.read(subListQueryProvider.notifier).state = query.copyWith(filter: f),
                     ),
@@ -63,7 +63,7 @@ class SubscriptionsScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: ChoiceChip(
-                      label: Text(cat.label),
+                      label: Text(l10n.categoryLabel(cat)),
                       selected: query.category == cat.name,
                       onSelected: (_) =>
                           ref.read(subListQueryProvider.notifier).state = query.copyWith(category: cat.name),
@@ -78,7 +78,7 @@ class SubscriptionsScreen extends ConsumerWidget {
             isExpanded: true,
             items: [
               for (final s in SubscriptionSort.values)
-                DropdownMenuItem(value: s, child: Text(s.name.replaceAll(RegExp(r'([A-Z])'), ' \$1').toUpperCase())),
+                DropdownMenuItem(value: s, child: Text(l10n.subscriptionSortLabel(s))),
             ],
             onChanged: (v) {
               if (v != null) ref.read(subListQueryProvider.notifier).state = query.copyWith(sort: v);
@@ -114,7 +114,7 @@ class SubscriptionsScreen extends ConsumerWidget {
                               children: [
                                 Text(s.serviceName, style: AppTypography.title(context.colors.textPrimary).copyWith(fontSize: 16)),
                                 Text(
-                                  '${s.status.label} · ${s.categorySlug.toUpperCase()}',
+                                  '${l10n.subscriptionStatus(s.status)} · ${l10n.categorySlugLabel(s.categorySlug)}',
                                   style: AppTypography.label(context.colors.textMuted),
                                 ),
                               ],

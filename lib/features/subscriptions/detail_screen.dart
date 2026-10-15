@@ -80,9 +80,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               Text(sub.serviceName.toUpperCase(), style: AppTypography.title(c.textPrimary)),
               const SizedBox(height: 8),
               Wrap(spacing: 8, children: [
-                StatusMark(sub.status.label),
-                if (phase != null) StatusMark(phase.type.label),
-                StatusMark(sub.autoRenew ? 'AUTO RENEW' : 'MANUAL'),
+                StatusMark(context.l10n.subscriptionStatus(sub.status)),
+                if (phase != null) StatusMark(context.l10n.pricePhaseLabel(phase.type)),
+                StatusMark(sub.autoRenew ? context.l10n.autoRenew : context.l10n.manualRenew),
               ]),
               const SizedBox(height: 16),
               SurfaceCard(
@@ -98,15 +98,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              _kv('NEXT BILLING', sub.nextBillingDate),
-              _kv('TRIAL END', phase?.trialEndDate),
-              _kv('PROMO END', phase?.type == PricePhaseType.promo ? phase?.endDate : null),
-              _kv('CANCEL DEADLINE', phase?.cancelDeadline),
-              _kv('MY REMINDER', phase?.reminderDate),
-              _kv('FIRST CHARGE', phase?.firstChargeDate),
+              _kv(context.l10n.labelNextBilling, sub.nextBillingDate),
+              _kv(context.l10n.labelTrialEnd, phase?.trialEndDate),
+              _kv(context.l10n.labelPromoEnd, phase?.type == PricePhaseType.promo ? phase?.endDate : null),
+              _kv(context.l10n.labelCancelDeadline, phase?.cancelDeadline),
+              _kv(context.l10n.labelMyReminder, phase?.reminderDate),
+              _kv(context.l10n.labelFirstCharge, phase?.firstChargeDate),
               if (sub.status == SubscriptionStatus.cancelled) ...[
-                _kv('ACCESS UNTIL', sub.accessEndDate),
-                if (accessLeft != null && accessLeft >= 0) Text('$accessLeft DAYS REMAINING', style: AppTypography.label(c.warning)),
+                _kv(context.l10n.labelAccessUntil, sub.accessEndDate),
+                if (accessLeft != null && accessLeft >= 0)
+                  Text(context.l10n.daysRemaining(accessLeft), style: AppTypography.label(c.warning)),
               ],
               const SizedBox(height: 8),
               SectionLabel(context.l10n.profile),
@@ -131,7 +132,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 children: [
                   for (final intent in RenewalIntent.values)
                     ChoiceChip(
-                      label: Text(intent.label),
+                      label: Text(context.l10n.renewalIntentLabel(intent)),
                       selected: sub.renewalIntent == intent,
                       onSelected: (_) => ref.read(subscriptionRepoProvider).setRenewalIntent(sub.id, intent),
                     ),
@@ -144,7 +145,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 children: [
                   for (final u in UsageFrequency.values)
                     ChoiceChip(
-                      label: Text(u.label),
+                      label: Text(context.l10n.usageFrequencyLabel(u)),
                       selected: sub.usageFrequency == u,
                       onSelected: (_) => ref.read(subscriptionRepoProvider).setUsage(
                             id: sub.id,

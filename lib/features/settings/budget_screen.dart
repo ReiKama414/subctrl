@@ -122,8 +122,8 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                           children: [
                             Row(
                               children: [
-                                Expanded(child: Text(cat.label, style: AppTypography.label(context.colors.textPrimary))),
-                                if (over) StatusMark('OVER', tone: context.colors.warning),
+                                Expanded(child: Text(l10n.categoryLabel(cat), style: AppTypography.label(context.colors.textPrimary))),
+                                if (over) StatusMark(l10n.overBudget, tone: context.colors.warning),
                               ],
                             ),
                             const SizedBox(height: 6),
