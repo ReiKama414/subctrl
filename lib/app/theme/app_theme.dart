@@ -128,12 +128,23 @@ class AppTheme {
         backgroundColor: c.surfaceHigh,
         selectedColor: c.accent,
         secondarySelectedColor: c.accent,
+        disabledColor: c.surfaceHigh,
+        // Unselected chips sit on surface cards — lift them with a brighter fill + border.
+        color: WidgetStateProperty.resolveWith((s) {
+          if (s.contains(WidgetState.selected)) return c.accent;
+          if (s.contains(WidgetState.disabled)) return c.surfaceHigh.withValues(alpha: 0.5);
+          return Color.lerp(c.surfaceHigh, c.textPrimary, 0.08)!;
+        }),
         labelStyle: WidgetStateTextStyle.resolveWith(
-          (s) => AppTypography.label(s.contains(WidgetState.selected) ? c.onAccent : c.textSecondary)
-              .copyWith(fontSize: 13),
+          (s) => AppTypography.label(
+            s.contains(WidgetState.selected) ? c.onAccent : c.textPrimary,
+          ).copyWith(fontSize: 13, fontWeight: FontWeight.w600),
         ),
         secondaryLabelStyle: AppTypography.label(c.onAccent).copyWith(fontSize: 13),
-        side: BorderSide.none,
+        side: WidgetStateBorderSide.resolveWith((s) {
+          if (s.contains(WidgetState.selected)) return BorderSide.none;
+          return BorderSide(color: c.border);
+        }),
         showCheckmark: false,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         shape: const StadiumBorder(),

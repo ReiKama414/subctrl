@@ -94,7 +94,7 @@ class SectionLabel extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: AppTypography.label(context.colors.textMuted));
+    return Text(text, style: AppTypography.label(context.colors.textSecondary));
   }
 }
 
