@@ -16,6 +16,7 @@ import 'package:subctrl/data/seed/demo_seed.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -351,6 +352,34 @@ class SettingsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.info_outline_rounded),
                   title: Text(l10n.version),
                   subtitle: Text(AppInfo.version),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.person_outline_rounded),
+                  title: Text(l10n.author),
+                  subtitle: const Text(AppInfo.authorName),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.language_rounded),
+                  title: Text(l10n.authorSite),
+                  subtitle: const Text(AppInfo.authorSite),
+                  trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                  onTap: () => launchUrl(
+                    Uri.parse(AppInfo.authorSite),
+                    mode: LaunchMode.externalApplication,
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.code_rounded),
+                  title: Text(l10n.authorGithub),
+                  subtitle: const Text(AppInfo.authorGithub),
+                  trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                  onTap: () => launchUrl(
+                    Uri.parse(AppInfo.authorGithub),
+                    mode: LaunchMode.externalApplication,
+                  ),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,

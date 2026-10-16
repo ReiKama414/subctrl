@@ -33,6 +33,8 @@ class HomeScreen extends ConsumerWidget {
     final now = DateTime.now();
 
     return async.when(
+      skipLoadingOnReload: true,
+      skipLoadingOnRefresh: true,
       loading: () => const AppPage(child: Padding(padding: EdgeInsets.only(top: 24), child: SkeletonBlock(height: 180))),
       error: (e, _) => AppPage(child: Text('$e')),
       data: (_) {
@@ -398,7 +400,12 @@ class _UpcomingList extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Row(
                     children: [
-                      ServiceAvatar(s.serviceName, size: 42),
+                      ServiceAvatar(
+                        s.serviceName,
+                        size: 42,
+                        logoKey: s.logoKey ?? s.serviceId,
+                        website: s.officialWebsiteUrl,
+                      ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(

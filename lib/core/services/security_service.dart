@@ -35,17 +35,3 @@ class SecurityService {
     }
   }
 }
-
-class ServiceLogoResolver {
-  const ServiceLogoResolver();
-
-  String initials(String name) {
-    final parts = name.replaceAll(RegExp(r'[^A-Za-z0-9 ]'), ' ').trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '??';
-    if (parts.length == 1) {
-      final s = parts.first.toUpperCase();
-      return s.length >= 2 ? s.substring(0, 2) : s.padRight(2);
-    }
-    return (parts[0].isNotEmpty ? parts[0][0] : '') + (parts[1].isNotEmpty ? parts[1][0] : '');
-  }
-}

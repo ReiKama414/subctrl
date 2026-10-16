@@ -30,7 +30,8 @@ class SubscriptionRepository {
 
   Future<SubscriptionView> hydrate(Subscription row) async {
     final service = await (db.select(db.services)..where((t) => t.id.equals(row.serviceId))).getSingle();
-    final category = await (db.select(db.categories)..where((t) => t.id.equals(row.categoryId))).getSingle();
+    final category =
+        await (db.select(db.categories)..where((t) => t.id.equals(row.categoryId))).getSingleOrNull();
     Plan? plan;
     if (row.planId != null) {
       plan = await (db.select(db.plans)..where((t) => t.id.equals(row.planId!))).getSingleOrNull();
@@ -46,7 +47,7 @@ class SubscriptionRepository {
       planId: row.planId,
       planName: plan?.name,
       categoryId: row.categoryId,
-      categorySlug: category.slug,
+      categorySlug: category?.slug ?? row.categoryId,
       profileId: row.profileId,
       status: SubscriptionStatus.values.byName(row.status),
       startDate: row.startDate,

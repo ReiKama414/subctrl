@@ -1,9 +1,10 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/app_info.dart';
-import 'package:subctrl/core/services/security_service.dart';
+import 'package:subctrl/core/services/service_logo.dart';
 
 class AppPage extends StatelessWidget {
   const AppPage({super.key, required this.child, this.padding});
@@ -374,15 +375,27 @@ class IconBadge extends StatelessWidget {
   }
 }
 
-/// Colored rounded tile with service initials, stable color per name.
+/// Service mark: fixed-size tile. Initials stay put; logo fades in on top
+/// so layout never jumps when the image arrives (or fails).
 class ServiceAvatar extends StatelessWidget {
-  const ServiceAvatar(this.name, {super.key, this.size = 44, this.dimmed = false});
+  const ServiceAvatar(
+    this.name, {
+    super.key,
+    this.size = 44,
+    this.dimmed = false,
+    this.website,
+    this.logoKey,
+  });
   final String name;
   final double size;
   final bool dimmed;
+  final String? website;
+  final String? logoKey;
+
+  static const _resolver = ServiceLogoResolver();
 
   static String initialsOf(String name) {
-    final latin = const ServiceLogoResolver().initials(name).trim();
+    final latin = _resolver.initials(name).trim();
     if (latin.isNotEmpty) return latin.toUpperCase();
     final trimmed = name.trim();
     return trimmed.isEmpty ? '?' : trimmed.characters.first;
@@ -391,11 +404,133 @@ class ServiceAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = AppPalette.forKey(name);
+    final asset = _resolver.assetPath(logoKey: logoKey, name: name);
+    final urls = _resolver.imageUrls(website: website, logoKey: logoKey, name: name);
+    final radius = BorderRadius.circular(size * 0.3);
     return Opacity(
       opacity: dimmed ? 0.45 : 1,
-      child: Container(
+      child: SizedBox(
         width: size,
         height: size,
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _InitialsGlyph(name: name, size: size, color: color),
+              if (asset != null || urls.isNotEmpty)
+                _LogoLayer(asset: asset, urls: urls, size: size),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoLayer extends StatefulWidget {
+  const _LogoLayer({required this.urls, required this.size, this.asset});
+  final String? asset;
+  final List<String> urls;
+  final double size;
+
+  @override
+  State<_LogoLayer> createState() => _LogoLayerState();
+}
+
+class _LogoLayerState extends State<_LogoLayer> {
+  /// Sources: optional asset first, then network urls.
+  late List<String> _sources;
+  int _index = 0;
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sources = _buildSources();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LogoLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.asset != widget.asset || !listEquals(oldWidget.urls, widget.urls)) {
+      _sources = _buildSources();
+      _index = 0;
+      _failed = false;
+    }
+  }
+
+  List<String> _buildSources() {
+    final out = <String>[];
+    if (widget.asset != null) out.add('asset:${widget.asset}');
+    out.addAll(widget.urls);
+    return out;
+  }
+
+  void _tryNext() {
+    if (!mounted) return;
+    if (_index + 1 < _sources.length) {
+      setState(() => _index += 1);
+    } else {
+      setState(() => _failed = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_failed || _sources.isEmpty) return const SizedBox.shrink();
+    final src = _sources[_index];
+    final pad = widget.size * 0.12;
+    final inner = widget.size - pad * 2;
+    final isAsset = src.startsWith('asset:');
+    final path = isAsset ? src.substring(6) : src;
+
+    final image = isAsset
+        ? Image.asset(
+            path,
+            key: ValueKey(src),
+            width: inner,
+            height: inner,
+            fit: BoxFit.contain,
+            alignment: Alignment.center,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: (_, _, _) {
+              WidgetsBinding.instance.addPostFrameCallback((_) => _tryNext());
+              return const SizedBox.shrink();
+            },
+          )
+        : Image.network(
+            path,
+            key: ValueKey(src),
+            width: inner,
+            height: inner,
+            fit: BoxFit.contain,
+            alignment: Alignment.center,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: (_, _, _) {
+              WidgetsBinding.instance.addPostFrameCallback((_) => _tryNext());
+              return const SizedBox.shrink();
+            },
+          );
+
+    return ColoredBox(
+      color: Colors.white,
+      child: Padding(padding: EdgeInsets.all(pad), child: image),
+    );
+  }
+}
+
+class _InitialsGlyph extends StatelessWidget {
+  const _InitialsGlyph({required this.name, required this.size, required this.color});
+  final String name;
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: color,
+      child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -403,10 +538,9 @@ class ServiceAvatar extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [color, Color.lerp(color, Colors.black, 0.18)!],
           ),
-          borderRadius: BorderRadius.circular(size * 0.3),
         ),
         child: Text(
-          initialsOf(name),
+          ServiceAvatar.initialsOf(name),
           style: AppTypography.sans.copyWith(
             fontSize: size * 0.36,
             fontWeight: FontWeight.w800,

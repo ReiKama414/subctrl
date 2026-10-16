@@ -33,6 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: identity.email,
             displayName: identity.displayName,
           );
+      ref.invalidate(identitiesProvider);
       final ids = await ref.read(settingsRepoProvider).identities();
       ref.read(sessionProvider.notifier).setProviders(
             ids.map((e) => e.provider).toSet(),
@@ -42,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
       final prefs = await ref.read(settingsRepoProvider).get();
       if (!mounted) return;
+      // Router redirect also handles this once identities reload.
       context.go(prefs.onboardingComplete ? '/home' : '/onboarding');
     } on AuthException catch (e) {
       setState(() => _error = e.message);

@@ -36,6 +36,7 @@ dependencies:
   google_sign_in: ^7.2.0
   flutter_line_sdk: ^3.0.0
   cloud_firestore: ^6.10.0
+  google_fonts: ^8.2.1
 
 dev_dependencies:
   flutter_test:
@@ -52,3 +53,4 @@ flutter:
     - assets/branding/
     - assets/backgrounds/
     - assets/illustrations/
+    - assets/logos/

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/data/seed/catalog.dart';
 import 'package:uuid/uuid.dart';
 
 class CatalogRepository {
@@ -40,20 +41,42 @@ class CatalogRepository {
     }).toList();
   }
 
+  Future<void> ensureCategory(String categoryId) async {
+    final existing =
+        await (db.select(db.categories)..where((t) => t.id.equals(categoryId))).getSingleOrNull();
+    if (existing != null) return;
+    final seed = catalogCategories.where((c) => c.$1 == categoryId).firstOrNull;
+    await db.into(db.categories).insert(
+          CategoriesCompanion.insert(
+            id: categoryId,
+            slug: seed?.$1 ?? categoryId,
+            name: seed?.$2 ?? categoryId.toUpperCase(),
+            sortOrder: seed?.$3 ?? 99,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+  }
+
   Future<ServiceView> createCustomService({
     required String name,
     required String categoryId,
     String? site,
     String? manage,
   }) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('Custom service name is required');
+    }
+    await ensureCategory(categoryId);
     final id = _uuid.v4();
     await db.into(db.services).insert(
           ServicesCompanion.insert(
             id: id,
-            name: name,
+            name: trimmed,
             categoryId: categoryId,
-            officialWebsiteUrl: Value(site),
-            manageSubscriptionUrl: Value(manage),
+            logoKey: Value(id),
+            officialWebsiteUrl: Value(site?.trim().isEmpty == true ? null : site?.trim()),
+            manageSubscriptionUrl: Value(manage?.trim().isEmpty == true ? null : manage?.trim()),
             isCustom: const Value(true),
             isBuiltin: const Value(false),
           ),
@@ -68,6 +91,37 @@ class CatalogRepository {
           ),
         );
     return (await services()).firstWhere((s) => s.id == id);
+  }
+
+  /// Deletes a user-created service. Built-in catalog rows are never removed.
+  Future<void> deleteCustomService(String id) async {
+    final row = await (db.select(db.services)..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+    if (!row.isCustom || row.isBuiltin) {
+      throw StateError('Built-in services cannot be deleted');
+    }
+    final used = await (db.select(db.subscriptions)..where((t) => t.serviceId.equals(id))).get();
+    if (used.isNotEmpty) {
+      throw StateError('Service is still used by a subscription');
+    }
+    await (db.delete(db.plans)..where((t) => t.serviceId.equals(id))).go();
+    await (db.delete(db.services)..where((t) => t.id.equals(id))).go();
+  }
+
+  /// Removes unused custom services (e.g. accidental "Custom" rows with no subs).
+  Future<int> purgeUnusedCustomServices() async {
+    final customs = await (db.select(db.services)
+          ..where((t) => t.isCustom.equals(true) & t.isBuiltin.equals(false)))
+        .get();
+    var removed = 0;
+    for (final s in customs) {
+      final used = await (db.select(db.subscriptions)..where((t) => t.serviceId.equals(s.id))).get();
+      if (used.isNotEmpty) continue;
+      await (db.delete(db.plans)..where((t) => t.serviceId.equals(s.id))).go();
+      await (db.delete(db.services)..where((t) => t.id.equals(s.id))).go();
+      removed++;
+    }
+    return removed;
   }
 
   Future<List<Category>> categories() =>

@@ -80,6 +80,8 @@ class SubscriptionsScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           Expanded(
             child: async.when(
+              skipLoadingOnReload: true,
+              skipLoadingOnRefresh: true,
               loading: () => const SkeletonBlock(height: 72),
               error: (e, _) => Text('$e'),
               data: (_) {
@@ -180,7 +182,13 @@ class _SubscriptionTile extends StatelessWidget {
       onTap: () => context.push('/subs/${s.id}'),
       child: Row(
         children: [
-          ServiceAvatar(s.serviceName, size: 46, dimmed: inactive),
+          ServiceAvatar(
+            s.serviceName,
+            size: 46,
+            dimmed: inactive,
+            logoKey: s.logoKey ?? s.serviceId,
+            website: s.officialWebsiteUrl,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

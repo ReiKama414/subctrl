@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/database/app_database.dart';
+import 'package:subctrl/data/repositories/catalog_repository.dart';
 import 'package:subctrl/data/seed/catalog.dart';
 import 'package:uuid/uuid.dart';
 
@@ -116,6 +117,12 @@ class BootstrapService {
   }
 
   Future<void> ensureCatalogFresh() async {
+    for (final c in catalogCategories) {
+      await db.into(db.categories).insert(
+            CategoriesCompanion.insert(id: c.$1, slug: c.$1, name: c.$2, sortOrder: c.$3),
+            mode: InsertMode.insertOrIgnore,
+          );
+    }
     for (final s in catalogServices) {
       await db.into(db.services).insert(
             ServicesCompanion.insert(
@@ -125,10 +132,27 @@ class BootstrapService {
               logoKey: Value(s.id),
               officialWebsiteUrl: Value(s.site),
               manageSubscriptionUrl: Value(s.manage),
+              isBuiltin: const Value(true),
+              isCustom: const Value(false),
             ),
             mode: InsertMode.insertOrIgnore,
           );
+      for (final p in s.plans) {
+        await db.into(db.plans).insert(
+              PlansCompanion.insert(
+                id: '${s.id}-${p.name.toLowerCase().replaceAll(' ', '-')}',
+                serviceId: s.id,
+                name: p.name,
+                billingCycle: p.cycle,
+                suggestedPrice: Value(p.price),
+                suggestedCurrency: Value(p.currency),
+              ),
+              mode: InsertMode.insertOrIgnore,
+            );
+      }
     }
+    // Drop accidental empty custom rows left from earlier add-flow bugs.
+    await CatalogRepository(db).purgeUnusedCustomServices();
   }
 
   String newId() => _uuid.v4();

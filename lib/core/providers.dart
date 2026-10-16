@@ -6,6 +6,7 @@ import 'package:subctrl/core/services/export_service.dart';
 import 'package:subctrl/core/services/fx_service.dart';
 import 'package:subctrl/core/services/notification_service.dart';
 import 'package:subctrl/core/services/security_service.dart';
+import 'package:subctrl/core/services/service_logo.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';

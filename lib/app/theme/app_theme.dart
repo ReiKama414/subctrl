@@ -136,17 +136,36 @@ class AppTheme {
           return Color.lerp(c.surfaceHigh, c.textPrimary, 0.08)!;
         }),
         labelStyle: WidgetStateTextStyle.resolveWith(
-          (s) => AppTypography.label(
-            s.contains(WidgetState.selected) ? c.onAccent : c.textPrimary,
-          ).copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+          (s) => AppTypography.sans.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0,
+            height: 1.1,
+            color: s.contains(WidgetState.selected) ? c.onAccent : c.textPrimary,
+          ),
         ),
-        secondaryLabelStyle: AppTypography.label(c.onAccent).copyWith(fontSize: 13),
+        secondaryLabelStyle: AppTypography.sans.copyWith(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+          height: 1.1,
+          color: c.onAccent,
+        ),
+        // Keep border width identical in both states — BorderSide.none was
+        // shrinking selected chips by 2px and making the Wrap jump.
         side: WidgetStateBorderSide.resolveWith((s) {
-          if (s.contains(WidgetState.selected)) return BorderSide.none;
-          return BorderSide(color: c.border);
+          if (s.contains(WidgetState.selected)) {
+            return BorderSide(color: c.accent, width: 1);
+          }
+          return BorderSide(color: c.border, width: 1);
         }),
         showCheckmark: false,
+        elevation: 0,
+        pressElevation: 0,
+        selectedShadowColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
         shape: const StadiumBorder(),
       ),
       switchTheme: SwitchThemeData(

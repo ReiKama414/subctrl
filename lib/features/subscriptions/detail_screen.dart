@@ -93,7 +93,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              ServiceAvatar(sub.serviceName, size: 64),
+              ServiceAvatar(
+                sub.serviceName,
+                size: 64,
+                logoKey: sub.logoKey ?? sub.serviceId,
+                website: sub.officialWebsiteUrl,
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(

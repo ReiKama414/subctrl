@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:subctrl/app/app.dart';
+import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/services/notification_service.dart';
 import 'package:subctrl/data/database/app_database.dart';
@@ -37,6 +38,12 @@ Future<void> main() async {
     final notifications = NotificationService();
     await notifications.initialize().timeout(const Duration(seconds: 8));
     final prefs = await SettingsRepository(db).get().timeout(const Duration(seconds: 8));
+    try {
+      await AppTypography.preload().timeout(const Duration(seconds: 12));
+      debugPrint('SUB//CTRL boot: fonts ready');
+    } catch (e) {
+      debugPrint('SUB//CTRL boot: font preload skipped ($e)');
+    }
     debugPrint('SUB//CTRL boot: launching app');
 
     runApp(

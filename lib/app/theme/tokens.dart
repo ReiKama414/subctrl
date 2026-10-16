@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppSpacing {
   static const xxs = 2.0;
@@ -55,8 +56,10 @@ class AppPalette {
         'software' => swatches[5],
         'cloud' => const Color(0xFF9FC3FF),
         'social' => const Color(0xFFFFB37A),
+        'dating' => const Color(0xFFFF8FA8),
         'shopping' => swatches[3],
         'education' => swatches[6],
+        'fitness' => const Color(0xFF5FD9B4),
         'vpn' => const Color(0xFF7FE0D0),
         'news' => const Color(0xFFD1C4A8),
         'developer' => const Color(0xFFC3A6FF),
@@ -72,8 +75,10 @@ class AppPalette {
         'software' => Icons.apps_rounded,
         'cloud' => Icons.cloud_rounded,
         'social' => Icons.forum_rounded,
+        'dating' => Icons.favorite_rounded,
         'shopping' => Icons.shopping_bag_rounded,
         'education' => Icons.school_rounded,
+        'fitness' => Icons.fitness_center_rounded,
         'vpn' => Icons.vpn_lock_rounded,
         'news' => Icons.newspaper_rounded,
         'developer' => Icons.code_rounded,
@@ -100,22 +105,17 @@ class AppElevation {
 }
 
 class AppTypography {
-  static const sans = TextStyle(
-    fontFamily: 'Roboto',
-    fontFamilyFallback: ['SF Pro Text', 'Segoe UI', 'Noto Sans', 'sans-serif'],
-    height: 1.35,
-  );
+  /// Noto Sans TC covers CJK on Flutter web (CanvasKit can't use system fonts).
+  static TextStyle get sans => GoogleFonts.notoSansTc(height: 1.35);
 
-  static const mono = TextStyle(
-    fontFamily: 'Consolas',
-    fontFamilyFallback: ['Menlo', 'Courier New', 'monospace'],
-    fontFeatures: [FontFeature.tabularFigures()],
-    height: 1.2,
-  );
+  static TextStyle get mono => GoogleFonts.robotoMono(
+        height: 1.2,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      );
 
   static TextStyle label([Color? color]) => sans.copyWith(
         fontSize: 12,
-        letterSpacing: 0.6,
+        letterSpacing: 0.2,
         fontWeight: FontWeight.w600,
         color: color,
       );
@@ -149,6 +149,14 @@ class AppTypography {
       );
 
   static TextStyle display(Color color, {double size = 32}) => amount(color, size: size, weight: FontWeight.w800);
+
+  /// Warm the font cache before the first locale-heavy screen paints.
+  static Future<void> preload() => GoogleFonts.pendingFonts([
+        GoogleFonts.notoSansTc(),
+        GoogleFonts.notoSansTc(fontWeight: FontWeight.w600),
+        GoogleFonts.notoSansTc(fontWeight: FontWeight.w700),
+        GoogleFonts.notoSansTc(fontWeight: FontWeight.w800),
+      ]);
 }
 
 @immutable

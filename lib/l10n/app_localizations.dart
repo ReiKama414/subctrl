@@ -119,6 +119,11 @@ class AppLocalizations {
     'whatIf': 'WHAT-IF',
     'selectService': 'SELECT SERVICE',
     'customSubscription': '+ CUSTOM SUBSCRIPTION',
+    'deleteCustomService': 'Delete custom service',
+    'deleteCustomServiceBody': 'Remove this custom service from the list? Built-in services cannot be deleted.',
+    'customServiceInUse': 'This service is used by a subscription and cannot be deleted.',
+    'customNameRequired': 'Enter a service name',
+    'purgeCustomDone': 'Removed {0} unused custom services',
     'selectPlan': 'SELECT PLAN',
     'billing': 'BILLING',
     'reminder': 'REMINDER',
@@ -127,6 +132,9 @@ class AppLocalizations {
     'notConnected': 'Not connected',
     'link': 'Link',
     'version': 'Version',
+    'author': 'Author',
+    'authorSite': 'Website',
+    'authorGithub': 'GitHub',
     'privacy': 'Privacy',
     'terms': 'Terms',
     'total': 'TOTAL',
@@ -250,8 +258,10 @@ class AppLocalizations {
     'catSoftware': 'Software',
     'catCloud': 'Cloud',
     'catSocial': 'Social',
+    'catDating': 'Dating',
     'catShopping': 'Shopping',
     'catEducation': 'Education',
+    'catFitness': 'Fitness',
     'catVpn': 'VPN',
     'catNews': 'News',
     'catDeveloper': 'Developer',
@@ -497,6 +507,11 @@ class AppLocalizations {
     'whatIf': '假設模擬',
     'selectService': '選擇服務',
     'customSubscription': '+ 自訂訂閱',
+    'deleteCustomService': '刪除自訂服務',
+    'deleteCustomServiceBody': '要從清單移除此自訂服務嗎？系統預設服務無法刪除。',
+    'customServiceInUse': '此服務仍有訂閱使用中，無法刪除。',
+    'customNameRequired': '請輸入服務名稱',
+    'purgeCustomDone': '已清除 {0} 個未使用的自訂服務',
     'selectPlan': '選擇方案',
     'billing': '計費',
     'reminder': '提醒',
@@ -505,6 +520,9 @@ class AppLocalizations {
     'notConnected': '未連結',
     'link': '連結',
     'version': '版本',
+    'author': '作者',
+    'authorSite': '個人網站',
+    'authorGithub': 'GitHub',
     'privacy': '隱私',
     'terms': '條款',
     'total': '合計',
@@ -626,8 +644,10 @@ class AppLocalizations {
     'catSoftware': '軟體',
     'catCloud': '雲端',
     'catSocial': '社群',
+    'catDating': '交友',
     'catShopping': '購物',
     'catEducation': '教育',
+    'catFitness': '健身／健康',
     'catVpn': 'VPN',
     'catNews': '新聞',
     'catDeveloper': '開發',
@@ -873,6 +893,11 @@ class AppLocalizations {
     'whatIf': 'What-If シミュレータ',
     'selectService': 'サービスを選択',
     'customSubscription': '+ カスタム契約',
+    'deleteCustomService': 'カスタムサービスを削除',
+    'deleteCustomServiceBody': 'このカスタムサービスを一覧から削除しますか？組み込みサービスは削除できません。',
+    'customServiceInUse': 'このサービスは契約で使用中のため削除できません。',
+    'customNameRequired': 'サービス名を入力してください',
+    'purgeCustomDone': '未使用のカスタムサービスを {0} 件削除しました',
     'selectPlan': 'プランを選択',
     'billing': '請求',
     'reminder': 'リマインダー',
@@ -881,6 +906,9 @@ class AppLocalizations {
     'notConnected': '未連携',
     'link': '連携',
     'version': 'バージョン',
+    'author': '作者',
+    'authorSite': 'ウェブサイト',
+    'authorGithub': 'GitHub',
     'privacy': 'プライバシー',
     'terms': '利用規約',
     'total': '合計',
@@ -1002,8 +1030,10 @@ class AppLocalizations {
     'catSoftware': 'ソフト',
     'catCloud': 'クラウド',
     'catSocial': 'ソーシャル',
+    'catDating': '出会い',
     'catShopping': 'ショッピング',
     'catEducation': '教育',
+    'catFitness': 'フィットネス',
     'catVpn': 'VPN',
     'catNews': 'ニュース',
     'catDeveloper': '開発',
@@ -1266,6 +1296,11 @@ class AppLocalizations {
   String get whatIf => t('whatIf');
   String get selectService => t('selectService');
   String get customSubscription => t('customSubscription');
+  String get deleteCustomService => t('deleteCustomService');
+  String get deleteCustomServiceBody => t('deleteCustomServiceBody');
+  String get customServiceInUse => t('customServiceInUse');
+  String get customNameRequired => t('customNameRequired');
+  String purgeCustomDone(int n) => _fmt('purgeCustomDone', ['$n']);
   String get selectPlan => t('selectPlan');
   String get billing => t('billing');
   String get reminder => t('reminder');
@@ -1274,6 +1309,9 @@ class AppLocalizations {
   String get notConnected => t('notConnected');
   String get link => t('link');
   String get version => t('version');
+  String get author => t('author');
+  String get authorSite => t('authorSite');
+  String get authorGithub => t('authorGithub');
   String get privacy => t('privacy');
   String get terms => t('terms');
   String get total => t('total');
