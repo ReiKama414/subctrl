@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 export 'enum_l10n.dart';
 
@@ -372,6 +373,31 @@ class AppLocalizations {
     'purchaseShipped': 'Shipped',
     'purchaseDelivered': 'Delivered',
     'purchaseCancelled': 'Cancelled',
+    'greetingMorning': 'Good morning',
+    'greetingAfternoon': 'Good afternoon',
+    'greetingEvening': 'Good evening',
+    'quickOrders': 'Orders',
+    'activeSubsCount': '{0} active',
+    'budgetUsage': '{0} of budget used',
+    'dueToday': 'Today',
+    'dueTomorrow': 'Tomorrow',
+    'dueInDays': 'In {0} days',
+    'spendingBreakdown': 'Spending breakdown',
+    'quickAdd': 'Add',
+    'quickSimulate': 'What-if',
+    'quickReview': 'Review',
+    'noUpcoming': 'No upcoming payments.',
+    'allCaughtUp': 'All caught up — nothing needs attention.',
+    'filterSort': 'Filter & sort',
+    'sortBy': 'Sort by',
+    'categoryTitle': 'Category',
+    'monthTotal': 'Month total',
+    'eventsCount': '{0} events',
+    'tools': 'Tools',
+    'createNew': 'Create',
+    'insights': 'Insights',
+    'resetFilters': 'Reset',
+    'subsSummary': '{0} subscriptions',
   };
 
   static const _zh = <String, String>{
@@ -723,6 +749,31 @@ class AppLocalizations {
     'purchaseShipped': '已出貨',
     'purchaseDelivered': '已到貨',
     'purchaseCancelled': '已取消',
+    'greetingMorning': '早安',
+    'greetingAfternoon': '午安',
+    'greetingEvening': '晚安',
+    'quickOrders': '訂單',
+    'activeSubsCount': '{0} 個訂閱中',
+    'budgetUsage': '已使用預算 {0}',
+    'dueToday': '今天',
+    'dueTomorrow': '明天',
+    'dueInDays': '{0} 天後',
+    'spendingBreakdown': '支出分布',
+    'quickAdd': '新增',
+    'quickSimulate': '試算',
+    'quickReview': '回顧',
+    'noUpcoming': '近期沒有扣款。',
+    'allCaughtUp': '一切都在掌控中，目前沒有待處理事項。',
+    'filterSort': '篩選與排序',
+    'sortBy': '排序方式',
+    'categoryTitle': '分類',
+    'monthTotal': '本月合計',
+    'eventsCount': '{0} 筆事件',
+    'tools': '工具',
+    'createNew': '新增',
+    'insights': '洞察',
+    'resetFilters': '重設',
+    'subsSummary': '共 {0} 個訂閱',
   };
 
   static const _ja = <String, String>{
@@ -1074,6 +1125,31 @@ class AppLocalizations {
     'purchaseShipped': '発送済み',
     'purchaseDelivered': '到着済み',
     'purchaseCancelled': 'キャンセル',
+    'greetingMorning': 'おはようございます',
+    'greetingAfternoon': 'こんにちは',
+    'greetingEvening': 'こんばんは',
+    'quickOrders': '注文',
+    'activeSubsCount': '{0} 件契約中',
+    'budgetUsage': '予算の {0} を使用',
+    'dueToday': '今日',
+    'dueTomorrow': '明日',
+    'dueInDays': '{0} 日後',
+    'spendingBreakdown': '支出の内訳',
+    'quickAdd': '追加',
+    'quickSimulate': '試算',
+    'quickReview': '振り返り',
+    'noUpcoming': '今後の支払いはありません。',
+    'allCaughtUp': 'すべて対応済みです。',
+    'filterSort': '絞り込みと並べ替え',
+    'sortBy': '並べ替え',
+    'categoryTitle': 'カテゴリ',
+    'monthTotal': '今月の合計',
+    'eventsCount': '{0} 件',
+    'tools': 'ツール',
+    'createNew': '新規作成',
+    'insights': 'インサイト',
+    'resetFilters': 'リセット',
+    'subsSummary': '{0} 件のサブスク',
   };
 
   String t(String key) {
@@ -1309,6 +1385,57 @@ class AppLocalizations {
   String get noPendingOrders => t('noPendingOrders');
   String get subscriptionsTracked => t('subscriptionsTracked');
   String get pendingPreorders => t('pendingPreorders');
+  String get quickOrders => t('quickOrders');
+  String activeSubsCount(int n) => _fmt('activeSubsCount', ['$n']);
+  String budgetUsage(String pct) => _fmt('budgetUsage', [pct]);
+  String get spendingBreakdown => t('spendingBreakdown');
+  String get quickAdd => t('quickAdd');
+  String get quickSimulate => t('quickSimulate');
+  String get quickReview => t('quickReview');
+  String get noUpcoming => t('noUpcoming');
+  String get allCaughtUp => t('allCaughtUp');
+  String get filterSort => t('filterSort');
+  String get sortBy => t('sortBy');
+  String get categoryTitle => t('categoryTitle');
+  String get monthTotal => t('monthTotal');
+  String eventsCount(int n) => _fmt('eventsCount', ['$n']);
+  String get tools => t('tools');
+  String get createNew => t('createNew');
+  String get insights => t('insights');
+  String get resetFilters => t('resetFilters');
+  String subsSummary(int n) => _fmt('subsSummary', ['$n']);
+
+  String greeting(DateTime now) => switch (now.hour) {
+        < 5 => t('greetingEvening'),
+        < 12 => t('greetingMorning'),
+        < 18 => t('greetingAfternoon'),
+        _ => t('greetingEvening'),
+      };
+
+  String get dueToday => t('dueToday');
+
+  String dueIn(int days) => switch (days) {
+        <= 0 => t('dueToday'),
+        1 => t('dueTomorrow'),
+        _ => _fmt('dueInDays', ['$days']),
+      };
+
+  String longDate(DateTime d) {
+    return switch (locale.languageCode) {
+      'zh' || 'ja' => '${d.month}月${d.day}日（${weekdayLabels[d.weekday % 7]}）',
+      _ => DateFormat.MMMEd('en').format(d),
+    };
+  }
+
+  String monthTitle(int year, int month) => switch (locale.languageCode) {
+        'zh' || 'ja' => '$year年$month月',
+        _ => '$year-${month.toString().padLeft(2, '0')}',
+      };
+
+  String shortDate(DateTime d) => switch (locale.languageCode) {
+        'zh' || 'ja' => '${d.month}/${d.day}',
+        _ => '${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}',
+      };
 
   String profileDisplayName(String type, String fallbackName) => switch (type) {
         'personal' => profilePersonal,

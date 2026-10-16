@@ -56,8 +56,11 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       body: AppPage(
         child: ListView(
           children: [
+            const SizedBox(height: 4),
             Text(l10n.stepOf(step + 1, 5), style: AppTypography.label(context.colors.textMuted)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            ProgressPill(value: (step + 1) / 5, color: context.colors.accent, height: 6),
+            const SizedBox(height: 20),
             if (step == 0) _stepService(services),
             if (step == 1) _stepPlan(),
             if (step == 2) _stepBilling(fx),
@@ -88,7 +91,10 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       children: [
         SectionLabel(context.l10n.selectService),
         const SizedBox(height: 8),
-        TextField(decoration: InputDecoration(hintText: context.l10n.search), onChanged: (v) => setState(() => search = v)),
+        TextField(
+          decoration: InputDecoration(hintText: context.l10n.search, prefixIcon: const Icon(Icons.search_rounded)),
+          onChanged: (v) => setState(() => search = v),
+        ),
         const SizedBox(height: 8),
         OutlinedButton(
           onPressed: () async {
@@ -101,6 +107,9 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         for (final s in filtered.take(40))
           ListTile(
             selected: service?.id == s.id,
+            selectedTileColor: context.colors.accent.withValues(alpha: 0.12),
+            leading: ServiceAvatar(s.name, size: 38),
+            trailing: service?.id == s.id ? Icon(Icons.check_circle_rounded, color: context.colors.accent) : null,
             title: Text(s.name),
             subtitle: Text(context.l10n.categorySlugLabel(s.categorySlug)),
             onTap: () => setState(() => service = s),

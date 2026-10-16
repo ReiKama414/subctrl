@@ -22,6 +22,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   void initState() {
     super.initState();
+    _goToday();
+  }
+
+  void _goToday() {
     final n = DateTime.now();
     month = DateTime(n.year, n.month);
     selected = DateTime(n.year, n.month, n.day);
@@ -33,6 +37,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget build(BuildContext context) {
     final subs = ref.watch(scopedSubscriptionsProvider);
     final fx = ref.watch(currencyEngineProvider);
+    final hide = ref.watch(preferencesProvider).valueOrNull?.hideAmounts == true;
+    String money(double v) => hide ? '••••' : MoneyMath.format(v, fx.baseCurrency);
     final events = CalendarEngine.events(subs, fx, month: month);
     final c = context.colors;
     final l10n = context.l10n;
@@ -40,6 +46,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final startWeekday = first.weekday % 7; // Sunday = 0
     final days = DateTime(month.year, month.month + 1, 0).day;
     final today = DateTime.now();
+    final monthTotal = events.fold<double>(0, (p, e) => p + e.amountBase);
     final selectedEvents = selected == null
         ? const <CalendarDayEvent>[]
         : events.where((e) => _sameDay(e.date, selected!)).toList();
@@ -49,90 +56,108 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       child: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
-          const SizedBox(height: 8),
-          SectionLabel(l10n.calendar),
-          const SizedBox(height: 12),
+          PageHeader(
+            title: l10n.calendar,
+            subtitle: l10n.eventsCount(events.length),
+            actions: [
+              HeaderIconButton(
+                tooltip: l10n.dueToday,
+                icon: Icons.today_rounded,
+                onPressed: () => setState(_goToday),
+              ),
+              HeaderIconButton(
+                tooltip: l10n.settings,
+                icon: Icons.settings_rounded,
+                onPressed: () => context.push('/settings'),
+              ),
+            ],
+          ),
           const ProfileSwitcher(compact: true),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => setState(() => month = DateTime(month.year, month.month - 1)),
-                icon: const Icon(Icons.chevron_left),
-              ),
-              Expanded(
-                child: Text(
-                  '${month.year}-${month.month.toString().padLeft(2, '0')}',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.title(c.textPrimary),
-                ),
-              ),
-              IconButton(
-                onPressed: () => setState(() => month = DateTime(month.year, month.month + 1)),
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              for (final label in l10n.weekdayLabels)
-                Expanded(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.label(c.textMuted).copyWith(fontSize: 10, letterSpacing: 0.8),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: startWeekday + days,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              mainAxisExtent: 52,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
-            ),
-            itemBuilder: (_, i) {
-              if (i < startWeekday) return const SizedBox.shrink();
-              final day = i - startWeekday + 1;
-              final date = DateTime(month.year, month.month, day);
-              final dayEvents = events.where((e) => e.date.day == day).toList();
-              final sel = selected != null && _sameDay(selected!, date);
-              final isToday = _sameDay(today, date);
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(AppRadius.r6),
-                  onTap: () => setState(() => selected = date),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: sel ? c.accent.withValues(alpha: 0.12) : c.surface,
-                      border: Border.all(
-                        color: sel ? c.accent : (isToday ? c.textSecondary : c.border),
-                        width: sel || isToday ? 1.5 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(AppRadius.r6),
+          SurfaceCard(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => setState(() => month = DateTime(month.year, month.month - 1)),
+                      icon: const Icon(Icons.chevron_left_rounded),
                     ),
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Column(
-                      children: [
-                        Text(
-                          '$day',
-                          style: AppTypography.mono.copyWith(
-                            fontSize: 12,
-                            fontWeight: isToday || sel ? FontWeight.w700 : FontWeight.w500,
-                            color: sel ? c.accent : c.textPrimary,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(l10n.monthTitle(month.year, month.month), style: AppTypography.title(c.textPrimary)),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${l10n.monthTotal}  ${money(monthTotal)}',
+                            style: AppTypography.caption(c.textMuted),
                           ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => setState(() => month = DateTime(month.year, month.month + 1)),
+                      icon: const Icon(Icons.chevron_right_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    for (var i = 0; i < 7; i++)
+                      Expanded(
+                        child: Text(
+                          l10n.weekdayLabels[i],
+                          textAlign: TextAlign.center,
+                          style: AppTypography.caption(i == 0 || i == 6 ? c.textMuted.withValues(alpha: 0.7) : c.textMuted)
+                              .copyWith(fontSize: 11, fontWeight: FontWeight.w600),
                         ),
-                        const Spacer(),
-                        if (dayEvents.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 5),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: startWeekday + days,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisExtent: 50,
+                  ),
+                  itemBuilder: (_, i) {
+                    if (i < startWeekday) return const SizedBox.shrink();
+                    final day = i - startWeekday + 1;
+                    final date = DateTime(month.year, month.month, day);
+                    final dayEvents = events.where((e) => e.date.day == day).toList();
+                    final sel = selected != null && _sameDay(selected!, date);
+                    final isToday = _sameDay(today, date);
+                    return InkResponse(
+                      radius: 24,
+                      onTap: () => setState(() => selected = date),
+                      child: Column(
+                        children: [
+                          AnimatedContainer(
+                            duration: AppMotion.fast,
+                            width: 36,
+                            height: 36,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: sel ? c.accent : (isToday ? c.accent.withValues(alpha: 0.14) : Colors.transparent),
+                            ),
+                            child: Text(
+                              '$day',
+                              style: AppTypography.amount(
+                                sel ? c.onAccent : (isToday ? c.accent : c.textPrimary),
+                                size: 14,
+                                weight: sel || isToday ? FontWeight.w800 : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            height: 6,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -141,82 +166,70 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                     width: 5,
                                     height: 5,
                                     margin: const EdgeInsets.symmetric(horizontal: 1),
-                                    decoration: BoxDecoration(
-                                      color: _color(e.kind, c),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                if (dayEvents.length > 3)
-                                  Text(
-                                    '+${dayEvents.length - 3}',
-                                    style: AppTypography.mono.copyWith(fontSize: 8, color: c.textMuted),
+                                    decoration: BoxDecoration(color: _color(e.kind, c), shape: BoxShape.circle),
                                   ),
                               ],
                             ),
                           ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           if (selected != null) ...[
-            Text(
-              selected!.toIso8601String().substring(0, 10),
-              style: AppTypography.label(c.textPrimary),
+            SectionHeader(
+              l10n.longDate(selected!),
+              trailing: Text(money(dayTotal), style: AppTypography.amount(c.textPrimary, size: 16)),
             ),
-            const SizedBox(height: 8),
-            SurfaceCard(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
-                children: [
-                  Text(l10n.total, style: AppTypography.body(c.textSecondary)),
-                  const Spacer(),
-                  Text(
-                    MoneyMath.format(dayTotal, fx.baseCurrency),
-                    style: AppTypography.mono.copyWith(fontSize: 16, color: c.textPrimary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
             if (selectedEvents.isEmpty)
-              EmptyNote(title: l10n.noEvents, body: l10n.noEventsBody)
+              SurfaceCard(
+                child: Row(
+                  children: [
+                    IconBadge(icon: Icons.event_available_rounded, color: c.textMuted, size: 36, iconSize: 18),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.noEvents, style: AppTypography.label(c.textPrimary)),
+                          const SizedBox(height: 2),
+                          Text(l10n.noEventsBody, style: AppTypography.caption(c.textMuted)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
             else
               ...selectedEvents.map(
                 (e) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 10),
                   child: SurfaceCard(
+                    padding: const EdgeInsets.all(14),
                     onTap: () => context.push('/subs/${e.subscriptionId}'),
                     child: Row(
                       children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(color: _color(e.kind, c), shape: BoxShape.circle),
-                        ),
+                        ServiceAvatar(e.title, size: 42),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(e.title, style: AppTypography.body(c.textPrimary)),
-                              const SizedBox(height: 2),
                               Text(
-                                l10n.calendarEventKindLabel(e.kind),
-                                style: AppTypography.label(c.textMuted).copyWith(fontSize: 10),
+                                e.title,
+                                style: AppTypography.body(c.textPrimary).copyWith(fontWeight: FontWeight.w600, fontSize: 15),
                               ),
+                              const SizedBox(height: 4),
+                              StatusMark(l10n.calendarEventKindLabel(e.kind), tone: _color(e.kind, c)),
                             ],
                           ),
                         ),
-                        Text(
-                          e.amountBase == 0
-                              ? e.currencyLabel
-                              : MoneyMath.format(e.amountBase, fx.baseCurrency),
-                          style: AppTypography.mono.copyWith(fontSize: 13, color: c.textPrimary),
-                        ),
+                        if (e.amountBase != 0)
+                          Text(money(e.amountBase), style: AppTypography.amount(c.textPrimary, size: 15)),
                       ],
                     ),
                   ),
@@ -233,7 +246,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       'payment' => c.accent,
       'cancelDeadline' => c.danger,
       'trialEnd' => c.warning,
-      'promoEnd' => c.warning,
+      'promoEnd' => AppPalette.swatches[4],
+      'priceChange' => AppPalette.swatches[5],
       'expiry' => c.textMuted,
       _ => c.textSecondary,
     };

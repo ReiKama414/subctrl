@@ -49,6 +49,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('MONTHLY LOAD'), findsOneWidget);
     expect(find.text('ACTION REQUIRED'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('PENDING ORDERS'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('PENDING ORDERS'), findsOneWidget);
   });
 

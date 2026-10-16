@@ -2,12 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subctrl/app/theme/tokens.dart';
+import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/repositories/purchase_repository.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
+
+Color purchaseTone(PurchaseStatus s, AppColors c) => switch (s) {
+      PurchaseStatus.preorder || PurchaseStatus.awaitingShipment => c.warning,
+      PurchaseStatus.shipped => AppPalette.swatches[5],
+      PurchaseStatus.ordered => AppPalette.swatches[0],
+      PurchaseStatus.delivered => c.success,
+      PurchaseStatus.cancelled => c.textMuted,
+    };
+
+IconData purchaseIcon(PurchaseStatus s) => switch (s) {
+      PurchaseStatus.preorder => Icons.schedule_rounded,
+      PurchaseStatus.awaitingShipment => Icons.inventory_2_rounded,
+      PurchaseStatus.shipped => Icons.local_shipping_rounded,
+      PurchaseStatus.ordered => Icons.shopping_bag_rounded,
+      PurchaseStatus.delivered => Icons.check_circle_rounded,
+      PurchaseStatus.cancelled => Icons.block_rounded,
+    };
 
 class OrdersScreen extends ConsumerWidget {
   const OrdersScreen({super.key});
@@ -19,62 +37,68 @@ class OrdersScreen extends ConsumerWidget {
     final c = context.colors;
     final hide = ref.watch(preferencesProvider).valueOrNull?.hideAmounts == true;
 
-    return AppPage(
-      child: async.when(
-        loading: () => const Padding(padding: EdgeInsets.all(24), child: SkeletonBlock(height: 80)),
-        error: (e, _) => Text('$e'),
-        data: (_) {
-          final orders = ref.watch(scopedPurchaseOrdersProvider);
-          final pending = orders.where((o) => o.isPending).toList();
-          final done = orders.where((o) => !o.isPending).toList();
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 24),
-            children: [
-              Row(
-                children: [
-                  Expanded(child: SectionLabel(l10n.orders)),
-                  TextButton(
-                    onPressed: () => context.push('/orders/add'),
-                    child: Text(l10n.addOrder),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.orders),
+        actions: [
+          IconButton(
+            tooltip: l10n.addOrderTitle,
+            onPressed: () => context.push('/orders/add'),
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
+      ),
+      body: AppPage(
+        child: async.when(
+          loading: () => const Padding(padding: EdgeInsets.only(top: 24), child: SkeletonBlock(height: 80)),
+          error: (e, _) => Text('$e'),
+          data: (_) {
+            final orders = ref.watch(scopedPurchaseOrdersProvider);
+            final pending = orders.where((o) => o.isPending).toList();
+            final done = orders.where((o) => !o.isPending).toList();
+            return ListView(
+              padding: const EdgeInsets.only(top: 8, bottom: 32),
+              children: [
+                const ProfileSwitcher(compact: true),
+                const SizedBox(height: 16),
+                if (orders.isEmpty)
+                  EmptyNote(
+                    icon: Icons.local_shipping_rounded,
+                    title: l10n.noOrders,
+                    body: l10n.noOrdersBody,
+                    action: () => context.push('/orders/add'),
+                    actionLabel: l10n.addOrderTitle,
+                  )
+                else ...[
+                  SurfaceCard(
+                    child: Row(
+                      children: [
+                        IconBadge(icon: Icons.pending_actions_rounded, color: c.warning, size: 44),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            l10n.pendingOrdersCount(pending.length),
+                            style: AppTypography.title(c.textPrimary),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const ProfileSwitcher(compact: true),
-              const SizedBox(height: 16),
-              Text(
-                l10n.pendingOrdersCount(pending.length),
-                style: AppTypography.label(c.accent),
-              ),
-              const SizedBox(height: 12),
-              if (orders.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.noOrders, style: AppTypography.label(c.textPrimary)),
-                      const SizedBox(height: 8),
-                      Text(l10n.noOrdersBody, style: AppTypography.body(c.textMuted)),
-                    ],
-                  ),
-                )
-              else ...[
-                if (pending.isNotEmpty) ...[
-                  SectionLabel(l10n.pendingOrders),
-                  const SizedBox(height: 8),
-                  ...pending.map((o) => _OrderTile(order: o, hide: hide, onTap: () => context.push('/orders/${o.id}'))),
-                  const SizedBox(height: 20),
-                ],
-                if (done.isNotEmpty) ...[
-                  SectionLabel(l10n.completedOrders),
-                  const SizedBox(height: 8),
-                  ...done.map((o) => _OrderTile(order: o, hide: hide, onTap: () => context.push('/orders/${o.id}'))),
+                  if (pending.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    SectionHeader(l10n.pendingOrders),
+                    ...pending.map((o) => _OrderTile(order: o, hide: hide, onTap: () => context.push('/orders/${o.id}'))),
+                  ],
+                  if (done.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    SectionHeader(l10n.completedOrders),
+                    ...done.map((o) => _OrderTile(order: o, hide: hide, onTap: () => context.push('/orders/${o.id}'))),
+                  ],
                 ],
               ],
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -90,40 +114,55 @@ class _OrderTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final c = context.colors;
-    final expected = order.expectedAt?.toIso8601String().substring(0, 10);
+    final tone = purchaseTone(order.status, c);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: SurfaceCard(
+        padding: const EdgeInsets.all(14),
         onTap: onTap,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            IconBadge(icon: purchaseIcon(order.status), color: tone, size: 44),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(order.title, style: AppTypography.label(c.textPrimary)),
-                  const SizedBox(height: 4),
                   Text(
-                    '${order.platform} · ${l10n.purchaseStatusLabel(order.status)}'
-                    '${order.quantity > 1 ? ' · ×${order.quantity}' : ''}',
-                    style: AppTypography.body(c.textMuted),
+                    order.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.body(order.isPending ? c.textPrimary : c.textMuted)
+                        .copyWith(fontWeight: FontWeight.w600, fontSize: 15),
                   ),
-                  if (expected != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      '${l10n.expectedAt}: $expected',
-                      style: AppTypography.body(order.status.isPreorderLike ? c.warning : c.textMuted),
-                    ),
-                  ],
+                  const SizedBox(height: 3),
+                  Text(
+                    [
+                      order.platform,
+                      if (order.quantity > 1) '×${order.quantity}',
+                      if (order.expectedAt != null) '${l10n.expectedAt} ${l10n.shortDate(order.expectedAt!)}',
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.caption(c.textMuted),
+                  ),
                 ],
               ),
             ),
-            if (order.price != null)
-              Text(
-                hide ? '••••' : MoneyMath.format(order.price!, order.currency ?? 'TWD'),
-                style: AppTypography.label(c.textSecondary),
-              ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (order.price != null) ...[
+                  Text(
+                    hide ? '••••' : MoneyMath.format(order.price!, order.currency ?? 'TWD'),
+                    style: AppTypography.amount(c.textPrimary, size: 14),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                StatusMark(l10n.purchaseStatusLabel(order.status), tone: tone),
+              ],
+            ),
           ],
         ),
       ),

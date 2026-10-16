@@ -69,6 +69,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 4),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.person_add_alt_rounded),
                   title: Text(l10n.addCustomProfile),
                   trailing: const Icon(Icons.add),
                   onTap: () => _addProfile(context, ref),
@@ -94,6 +95,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
+                  secondary: const Icon(Icons.motion_photos_off_rounded),
                   title: Text(l10n.reduceMotion),
                   value: prefs.reduceMotion,
                   onChanged: (v) => ref.read(settingsRepoProvider).patch(
@@ -139,6 +141,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.currency_exchange_rounded),
                   title: Text(l10n.updateRates),
                   subtitle: Text([
                     if (fx.updatedAt != null) '${l10n.lastUpdated}: ${fx.updatedAt}',
@@ -161,6 +164,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.tune_rounded),
                   title: Text(l10n.manualFx),
                   subtitle: Text(l10n.manualFxSubtitle),
                   onTap: () => _manualFx(context, ref, rates),
@@ -186,6 +190,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
+                  secondary: const Icon(Icons.fingerprint_rounded),
                   title: Text(l10n.biometricLock),
                   value: prefs.biometricLock,
                   onChanged: (v) => ref.read(settingsRepoProvider).patch(
@@ -194,6 +199,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
+                  secondary: const Icon(Icons.visibility_off_rounded),
                   title: Text(l10n.hideAmounts),
                   value: prefs.hideAmounts,
                   onChanged: (v) => ref.read(settingsRepoProvider).patch(
@@ -217,6 +223,7 @@ class SettingsScreen extends ConsumerWidget {
                   final linked = identities.any((i) => i.provider == p);
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
+                    leading: Icon(p == 'guest' ? Icons.person_outline_rounded : Icons.account_circle_rounded),
                     title: Text(l10n.providerLabel(p)),
                     subtitle: Text(linked ? l10n.connected : l10n.notConnected),
                     trailing: linked ? null : Text(l10n.link),
@@ -247,6 +254,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.cloud_sync_rounded),
                   title: Text(l10n.sync),
                   subtitle: FutureBuilder(
                     future: ref.read(syncServiceProvider).status(l10n),
@@ -255,11 +263,13 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.cloud_upload_rounded),
                   title: Text(l10n.cloudUpload),
                   onTap: () => _cloudUpload(context, ref),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.cloud_download_rounded),
                   title: Text(l10n.cloudDownload),
                   onTap: () => _cloudDownload(context, ref),
                 ),
@@ -270,16 +280,19 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.data_object_rounded),
                   title: Text(l10n.exportJson),
                   onTap: () => ref.read(exportServiceProvider).shareJson(),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.table_chart_rounded),
                   title: Text(l10n.exportCsv),
                   onTap: () => ref.read(exportServiceProvider).shareCsv(),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.save_rounded),
                   title: Text(l10n.backup),
                   onTap: () async {
                     final path = await ref.read(exportServiceProvider).backupFile();
@@ -290,16 +303,19 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.settings_backup_restore_rounded),
                   title: Text(l10n.restoreBackup),
                   onTap: () => _restoreFromBackup(context, ref),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.content_paste_rounded),
                   title: Text(l10n.restorePaste),
                   onTap: () => _restoreFromPaste(context, ref),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.science_rounded),
                   title: Text(prefs.demoSeedEnabled ? l10n.clearDemo : l10n.loadDemo),
                   onTap: () async {
                     final repo = ref.read(subscriptionRepoProvider);
@@ -315,11 +331,13 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.credit_card_rounded),
                   title: Text(l10n.paymentMethods),
                   onTap: () => context.push('/methods'),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.savings_rounded),
                   title: Text(l10n.budget),
                   onTap: () => context.push('/budget'),
                 ),
@@ -330,16 +348,19 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.info_outline_rounded),
                   title: Text(l10n.version),
                   subtitle: Text(AppInfo.version),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.privacy_tip_outlined),
                   title: Text(l10n.privacy),
                   subtitle: Text(l10n.privacyBody),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.description_outlined),
                   title: Text(l10n.terms),
                   subtitle: Text(l10n.termsBody),
                 ),

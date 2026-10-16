@@ -23,9 +23,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final c = context.colors;
     final l10n = context.l10n;
     final pages = [
-      (l10n.onboard1a, l10n.onboard1b),
-      (l10n.onboard2a, l10n.onboard2b),
-      (l10n.onboard3a, l10n.onboard3b),
+      (l10n.onboard1a, l10n.onboard1b, Icons.layers_rounded, c.accent),
+      (l10n.onboard2a, l10n.onboard2b, Icons.insights_rounded, AppPalette.swatches[0]),
+      (l10n.onboard3a, l10n.onboard3b, Icons.notifications_active_rounded, AppPalette.swatches[1]),
     ];
     return Scaffold(
       body: SafeArea(
@@ -41,12 +41,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   itemBuilder: (_, i) => Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(pages[i].$1, style: AppTypography.label(c.textMuted)),
-                      const SizedBox(height: 12),
+                      Container(
+                        width: 160,
+                        height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: pages[i].$4.withValues(alpha: 0.12),
+                        ),
+                        child: Center(child: IconBadge(icon: pages[i].$3, color: pages[i].$4, size: 104, iconSize: 52)),
+                      ),
+                      const SizedBox(height: 40),
+                      Text(pages[i].$1, textAlign: TextAlign.center, style: AppTypography.label(c.textMuted).copyWith(fontSize: 14)),
+                      const SizedBox(height: 10),
                       Text(
                         pages[i].$2,
                         textAlign: TextAlign.center,
-                        style: AppTypography.title(c.textPrimary).copyWith(fontSize: 28),
+                        style: AppTypography.headline(c.textPrimary).copyWith(fontSize: 30),
                       ),
                     ],
                   ),

@@ -85,13 +85,13 @@ class ThemePresets {
     brightness: Brightness.dark,
     glowIntensity: 0.18,
     blur: AppBlur.low,
-    radius: AppRadius.r6,
+    radius: AppRadius.r16,
     chart: chart,
     colors: const AppColors(
-      background: Color(0xFF0B0C0E),
-      surface: Color(0xFF14161A),
-      surfaceHigh: Color(0xFF1C1F24),
-      border: Color(0xFF2A2E35),
+      background: Color(0xFF0D0E12),
+      surface: Color(0xFF17191F),
+      surfaceHigh: Color(0xFF21242C),
+      border: Color(0xFF2A2E37),
       accent: Color(0xFF5EEAD4),
       onAccent: Color(0xFF04110E),
       textPrimary: Color(0xFFE8E6E1),
@@ -105,7 +105,7 @@ class ThemePresets {
       chartPrimary: Color(0xFF5EEAD4),
       chartSecondary: Color(0xFFA7A9AD),
       chartWarning: Color(0xFFD4A017),
-      glassFill: Color(0xCC14161A),
+      glassFill: Color(0xE617191F),
     ),
   );
 
@@ -114,7 +114,7 @@ class ThemePresets {
     brightness: Brightness.dark,
     glowIntensity: 0.22,
     blur: AppBlur.low,
-    radius: AppRadius.r4,
+    radius: AppRadius.r16,
     chart: chart,
     colors: const AppColors(
       background: Color(0xFF050805),
@@ -143,7 +143,7 @@ class ThemePresets {
     brightness: Brightness.dark,
     glowIntensity: 0.16,
     blur: AppBlur.low,
-    radius: AppRadius.r6,
+    radius: AppRadius.r16,
     chart: chart,
     colors: const AppColors(
       background: Color(0xFF0A0A0A),
@@ -172,7 +172,7 @@ class ThemePresets {
     brightness: Brightness.dark,
     glowIntensity: 0.14,
     blur: AppBlur.low,
-    radius: AppRadius.r8,
+    radius: AppRadius.r16,
     chart: chart,
     colors: const AppColors(
       background: Color(0xFF081018),
@@ -201,7 +201,7 @@ class ThemePresets {
     brightness: Brightness.light,
     glowIntensity: 0.06,
     blur: AppBlur.low,
-    radius: AppRadius.r8,
+    radius: AppRadius.r16,
     chart: chart,
     colors: const AppColors(
       background: Color(0xFFF3EFEA),

@@ -70,9 +70,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(AppInfo.mark, style: AppTypography.display(c.accent, size: 28)),
-                        const SizedBox(height: 12),
-                        Text(AppInfo.name, style: AppTypography.label(c.textPrimary).copyWith(fontSize: 16)),
+                        Container(
+                          width: 72,
+                          height: 72,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [c.accent, Color.lerp(c.accent, c.background, 0.35)!],
+                            ),
+                            borderRadius: BorderRadius.circular(AppRadius.r20),
+                            boxShadow: [BoxShadow(color: c.accent.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10))],
+                          ),
+                          child: Text(AppInfo.mark, style: AppTypography.display(c.onAccent, size: 20)),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(AppInfo.name, style: AppTypography.headline(c.textPrimary).copyWith(fontSize: 24)),
                         const SizedBox(height: 6),
                         Text(l10n.appTagline, style: AppTypography.body(c.textSecondary)),
                         const SizedBox(height: 8),
@@ -146,12 +160,13 @@ class _AuthBgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final p = Paint()
-      ..color = line
+      ..color = line.withValues(alpha: 0.5)
       ..strokeWidth = 1;
     for (var i = 0; i < 8; i++) {
       canvas.drawLine(Offset(0, size.height * i / 8), Offset(size.width, size.height * (i / 8 + 0.08)), p);
     }
-    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.2), 80, Paint()..color = accent.withValues(alpha: 0.04));
+    canvas.drawCircle(Offset(size.width * 0.85, size.height * 0.12), 160, Paint()..color = accent.withValues(alpha: 0.10));
+    canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.9), 120, Paint()..color = accent.withValues(alpha: 0.06));
   }
 
   @override

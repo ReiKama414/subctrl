@@ -17,6 +17,68 @@ class AppRadius {
   static const r8 = 8.0;
   static const r12 = 12.0;
   static const r16 = 16.0;
+  static const r20 = 20.0;
+  static const r24 = 24.0;
+  static const pill = 999.0;
+}
+
+/// Vivid swatches for service avatars, categories and charts.
+/// Mid-light tones so dark foreground text stays readable on every preset.
+class AppPalette {
+  static const onSwatch = Color(0xFF111217);
+
+  static const swatches = [
+    Color(0xFF8B9CFF),
+    Color(0xFFFF9F7A),
+    Color(0xFF5FD9B4),
+    Color(0xFFFFD166),
+    Color(0xFFE79BE8),
+    Color(0xFF6CC8F0),
+    Color(0xFFB4E07F),
+    Color(0xFFFF8FA8),
+  ];
+
+  static Color forKey(String key) {
+    var h = 0;
+    for (final unit in key.toLowerCase().codeUnits) {
+      h = (h * 31 + unit) & 0x7fffffff;
+    }
+    return swatches[h % swatches.length];
+  }
+
+  static Color category(String slug) => switch (slug) {
+        'ai' => swatches[0],
+        'video' => swatches[7],
+        'music' => swatches[2],
+        'gaming' => swatches[4],
+        'delivery' => swatches[1],
+        'software' => swatches[5],
+        'cloud' => const Color(0xFF9FC3FF),
+        'social' => const Color(0xFFFFB37A),
+        'shopping' => swatches[3],
+        'education' => swatches[6],
+        'vpn' => const Color(0xFF7FE0D0),
+        'news' => const Color(0xFFD1C4A8),
+        'developer' => const Color(0xFFC3A6FF),
+        _ => const Color(0xFFB8BCC6),
+      };
+
+  static IconData categoryIcon(String slug) => switch (slug) {
+        'ai' => Icons.auto_awesome_rounded,
+        'video' => Icons.play_circle_rounded,
+        'music' => Icons.music_note_rounded,
+        'gaming' => Icons.sports_esports_rounded,
+        'delivery' => Icons.delivery_dining_rounded,
+        'software' => Icons.apps_rounded,
+        'cloud' => Icons.cloud_rounded,
+        'social' => Icons.forum_rounded,
+        'shopping' => Icons.shopping_bag_rounded,
+        'education' => Icons.school_rounded,
+        'vpn' => Icons.vpn_lock_rounded,
+        'news' => Icons.newspaper_rounded,
+        'developer' => Icons.code_rounded,
+        _ => Icons.category_rounded,
+      };
 }
 
 class AppBlur {
@@ -52,27 +114,41 @@ class AppTypography {
   );
 
   static TextStyle label([Color? color]) => sans.copyWith(
-        fontSize: 11,
-        letterSpacing: 1.8,
+        fontSize: 12,
+        letterSpacing: 0.6,
         fontWeight: FontWeight.w600,
         color: color,
       );
+
+  static TextStyle caption([Color? color]) => sans.copyWith(fontSize: 12, color: color);
 
   static TextStyle body([Color? color]) => sans.copyWith(fontSize: 14, color: color);
 
   static TextStyle title([Color? color]) => sans.copyWith(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.4,
+        fontSize: 17,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.1,
         color: color,
       );
 
-  static TextStyle display(Color color, {double size = 32}) => mono.copyWith(
-        fontSize: size,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 0.6,
+  static TextStyle headline([Color? color]) => sans.copyWith(
+        fontSize: 26,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.2,
+        height: 1.15,
         color: color,
       );
+
+  static TextStyle amount(Color color, {double size = 16, FontWeight weight = FontWeight.w700}) => sans.copyWith(
+        fontSize: size,
+        fontWeight: weight,
+        fontFeatures: const [FontFeature.tabularFigures()],
+        letterSpacing: -0.2,
+        height: 1.1,
+        color: color,
+      );
+
+  static TextStyle display(Color color, {double size = 32}) => amount(color, size: size, weight: FontWeight.w800);
 }
 
 @immutable
@@ -222,5 +298,6 @@ double? lerpDouble(double a, double b, double t) => a + (b - a) * t;
 
 extension ThemeX on BuildContext {
   AppColors get colors => Theme.of(this).extension<AppColors>()!;
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
   AppChartTheme get chartTheme => Theme.of(this).extension<AppChartTheme>()!;
 }
