@@ -113,4 +113,55 @@ extension EnumL10n on AppLocalizations {
       };
 
   String daysRemaining(int n) => t('daysRemaining').replaceAll('{0}', '$n');
+
+  String offerKindLabel(OfferKind v) => switch (v) {
+        OfferKind.none => offerNone,
+        OfferKind.freePeriod => offerFreePeriod,
+        OfferKind.discount => offerDiscount,
+        OfferKind.multiStage => offerMultiStage,
+        OfferKind.custom => offerCustom,
+      };
+
+  String reminderOffsetLabel(ReminderOffset v) => switch (v) {
+        ReminderOffset.days30 => t('reminderDays30'),
+        ReminderOffset.days14 => t('reminderDays14'),
+        ReminderOffset.days7 => t('reminderDays7'),
+        ReminderOffset.days3 => t('reminderDays3'),
+        ReminderOffset.days1 => t('reminderDays1'),
+        ReminderOffset.sameDay => t('reminderSameDay'),
+        ReminderOffset.custom => t('reminderCustom'),
+      };
+
+  String subscriptionEventTitle(SubscriptionEventType v) => switch (v) {
+        SubscriptionEventType.created => t('eventCreated'),
+        SubscriptionEventType.planChanged => t('eventPlanChanged'),
+        SubscriptionEventType.priceChanged => t('eventPriceChanged'),
+        SubscriptionEventType.promoStarted => t('eventPromoStarted'),
+        SubscriptionEventType.promoEnded => t('eventPromoEnded'),
+        SubscriptionEventType.trialStarted => t('eventTrialStarted'),
+        SubscriptionEventType.trialEnded => t('eventTrialEnded'),
+        SubscriptionEventType.payment => t('eventPayment'),
+        SubscriptionEventType.renewed => t('eventRenewed'),
+        SubscriptionEventType.paused => t('eventPaused'),
+        SubscriptionEventType.resumed => t('eventResumed'),
+        SubscriptionEventType.cancelRequested => t('eventCancelRequested'),
+        SubscriptionEventType.cancelled => t('eventCancelled'),
+        SubscriptionEventType.expired => t('eventExpired'),
+        SubscriptionEventType.reactivated => t('eventReactivated'),
+      };
+
+  String get actionFreePeriod => t('actionFreePeriod');
+  String get actionPromoEnds => t('actionPromoEnds');
+  String get actionCancelDeadline => t('actionCancelDeadline');
+  String get actionFirstCharge => t('actionFirstCharge');
+  String get actionCardExpiry => t('actionCardExpiry');
+
+  String purchaseStatusLabel(PurchaseStatus v) => switch (v) {
+        PurchaseStatus.ordered => t('purchaseOrdered'),
+        PurchaseStatus.preorder => t('purchasePreorder'),
+        PurchaseStatus.awaitingShipment => t('purchaseAwaitingShipment'),
+        PurchaseStatus.shipped => t('purchaseShipped'),
+        PurchaseStatus.delivered => t('purchaseDelivered'),
+        PurchaseStatus.cancelled => t('purchaseCancelled'),
+      };
 }

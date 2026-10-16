@@ -170,12 +170,12 @@ class SubscriptionRepository {
             ),
           );
     }
-    await addEvent(id, SubscriptionEventType.created, 'CREATED', detail: status.label);
+    await addEvent(id, SubscriptionEventType.created, SubscriptionEventType.created.name, detail: status.name);
     if (status == SubscriptionStatus.trial) {
-      await addEvent(id, SubscriptionEventType.trialStarted, 'TRIAL START');
+      await addEvent(id, SubscriptionEventType.trialStarted, SubscriptionEventType.trialStarted.name);
     }
     if (status == SubscriptionStatus.promo) {
-      await addEvent(id, SubscriptionEventType.promoStarted, 'PROMOTION START');
+      await addEvent(id, SubscriptionEventType.promoStarted, SubscriptionEventType.promoStarted.name);
     }
     return id;
   }
@@ -196,8 +196,13 @@ class SubscriptionRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
-    await addEvent(id, SubscriptionEventType.cancelRequested, 'CANCEL REQUESTED');
-    await addEvent(id, SubscriptionEventType.cancelled, 'CANCELLED', detail: 'Access until ${accessUntil.toIso8601String()}');
+    await addEvent(id, SubscriptionEventType.cancelRequested, SubscriptionEventType.cancelRequested.name);
+    await addEvent(
+      id,
+      SubscriptionEventType.cancelled,
+      SubscriptionEventType.cancelled.name,
+      detail: accessUntil.toIso8601String().substring(0, 10),
+    );
   }
 
   /// Returns true when status was advanced to expired.
@@ -211,7 +216,7 @@ class SubscriptionRepository {
           updatedAt: Value(now),
         ),
       );
-      await addEvent(sub.id, SubscriptionEventType.expired, 'EXPIRED');
+      await addEvent(sub.id, SubscriptionEventType.expired, SubscriptionEventType.expired.name);
       return true;
     }
     return false;
@@ -320,8 +325,12 @@ class SubscriptionRepository {
             reason: reason,
           ),
         );
-    await addEvent(subscriptionId, SubscriptionEventType.priceChanged, 'PRICE CHANGE',
-        detail: '$oldPrice → $newPrice $currency');
+    await addEvent(
+      subscriptionId,
+      SubscriptionEventType.priceChanged,
+      SubscriptionEventType.priceChanged.name,
+      detail: '$oldPrice → $newPrice $currency',
+    );
   }
 
   Future<List<ReminderView>> remindersFor(String subscriptionId) async {

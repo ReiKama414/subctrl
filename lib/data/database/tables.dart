@@ -226,3 +226,27 @@ class AppThemeRows extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Shop / marketplace purchase & preorder tracking (Taobao, PLUSHSHOP, etc.).
+class PurchaseOrders extends Table {
+  TextColumn get id => text()();
+  TextColumn get profileId => text()();
+  /// Shop / platform display name (e.g. Taobao, PLUSHSHOP).
+  TextColumn get platform => text()();
+  TextColumn get title => text()();
+  IntColumn get quantity => integer().withDefault(const Constant(1))();
+  /// ordered | preorder | awaitingShipment | shipped | delivered | cancelled
+  TextColumn get status => text()();
+  DateTimeColumn get orderedAt => dateTime()();
+  DateTimeColumn get expectedAt => dateTime().nullable()();
+  DateTimeColumn get deliveredAt => dateTime().nullable()();
+  DateTimeColumn get reminderAt => dateTime().nullable()();
+  RealColumn get price => real().nullable()();
+  TextColumn get currency => text().nullable()();
+  TextColumn get trackingUrl => text().nullable()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}

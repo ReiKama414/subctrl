@@ -244,6 +244,36 @@ enum CategorySlug {
 
 enum ChartRange { months3, months6, year1, all }
 
+/// Purchase / preorder progress for shops & marketplaces.
+enum PurchaseStatus {
+  ordered,
+  preorder,
+  awaitingShipment,
+  shipped,
+  delivered,
+  cancelled;
+
+  bool get isPending =>
+      this == PurchaseStatus.ordered ||
+      this == PurchaseStatus.preorder ||
+      this == PurchaseStatus.awaitingShipment ||
+      this == PurchaseStatus.shipped;
+
+  bool get isPreorderLike =>
+      this == PurchaseStatus.preorder || this == PurchaseStatus.awaitingShipment;
+}
+
+/// Suggested shop / platform names (user can still type custom).
+const purchasePlatformPresets = [
+  'Taobao',
+  'PLUSHSHOP',
+  'Mercari',
+  'Amazon',
+  'Shopee',
+  'Yahoo Auction',
+  'Other',
+];
+
 enum SubscriptionSort {
   nextBilling,
   price,

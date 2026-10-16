@@ -81,10 +81,47 @@ class AppShell extends StatelessWidget {
 
   Widget _add(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: InkWell(
-        onTap: () => context.push('/add'),
+        onTap: () async {
+          final choice = await showModalBottomSheet<String>(
+            context: context,
+            builder: (ctx) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.subscriptions_outlined),
+                    title: Text(l10n.addSubscriptionTitle),
+                    onTap: () => Navigator.pop(ctx, 'sub'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.inventory_2_outlined),
+                    title: Text(l10n.addOrderTitle),
+                    subtitle: Text(l10n.addOrderSubtitle),
+                    onTap: () => Navigator.pop(ctx, 'order'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.list_alt_outlined),
+                    title: Text(l10n.orders),
+                    onTap: () => Navigator.pop(ctx, 'orders'),
+                  ),
+                ],
+              ),
+            ),
+          );
+          if (!context.mounted || choice == null) return;
+          switch (choice) {
+            case 'sub':
+              context.push('/add');
+            case 'order':
+              context.push('/orders/add');
+            case 'orders':
+              context.push('/orders');
+          }
+        },
         child: Container(
           width: 40,
           height: 40,

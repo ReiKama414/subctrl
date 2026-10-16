@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -206,7 +207,13 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 Text(l10n.accountOptionalNote, style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 8),
-                ...['google', 'line', 'guest'].map((p) {
+                Text(l10n.firestoreSetupHint, style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 8),
+                ...[
+                  'google',
+                  if (!kIsWeb) 'line',
+                  'guest',
+                ].map((p) {
                   final linked = identities.any((i) => i.provider == p);
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
@@ -233,6 +240,11 @@ class SettingsScreen extends ConsumerWidget {
                           },
                   );
                 }),
+                if (kIsWeb)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(l10n.lineWebUnsupported, style: Theme.of(context).textTheme.bodySmall),
+                  ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.sync),

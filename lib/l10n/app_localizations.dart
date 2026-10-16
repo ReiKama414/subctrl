@@ -285,6 +285,93 @@ class AppLocalizations {
     'autoRenew': 'Auto renew',
     'manualRenew': 'Manual',
     'last4': 'Last 4 digits',
+    'offerNone': 'No offer',
+    'offerFreePeriod': 'Free period / trial',
+    'offerDiscount': 'Discount',
+    'offerMultiStage': 'Multi-stage price',
+    'offerCustom': 'Custom offer',
+    'freeDays7': '7 days free',
+    'freeDays14': '14 days free',
+    'freeDays30': '30 days free',
+    'freeDays60': '2 months free',
+    'freeDays90': '3 months free',
+    'promoPrice': 'Promotional price',
+    'reminderDays30': '30 days before',
+    'reminderDays14': '14 days before',
+    'reminderDays7': '7 days before',
+    'reminderDays3': '3 days before',
+    'reminderDays1': '1 day before',
+    'reminderSameDay': 'Same day',
+    'reminderCustom': 'Custom',
+    'actionFreePeriod': 'Free period ending',
+    'actionPromoEnds': 'Promo ending',
+    'actionCancelDeadline': 'Cancel deadline',
+    'actionRenews': 'Renews {0}',
+    'actionFirstCharge': 'First charge',
+    'actionCardExpiry': 'Payment method expiry',
+    'actionDaysLeft': '{0} days left',
+    'actionDays': '{0} days',
+    'actionAfterTrial': 'After trial: {0} / {1}',
+    'actionCancelBy': 'Cancel by: {0}',
+    'actionCurrent': 'Current: {0}',
+    'actionAfter': 'After: {0}',
+    'actionReminder': 'Reminder: {0}',
+    'eventCreated': 'Created',
+    'eventPlanChanged': 'Plan changed',
+    'eventPriceChanged': 'Price changed',
+    'eventPromoStarted': 'Promo started',
+    'eventPromoEnded': 'Promo ended',
+    'eventTrialStarted': 'Trial started',
+    'eventTrialEnded': 'Trial ended',
+    'eventRenewed': 'Renewed',
+    'eventPaused': 'Paused',
+    'eventResumed': 'Resumed',
+    'eventCancelRequested': 'Cancel requested',
+    'eventCancelled': 'Cancelled',
+    'eventExpired': 'Expired',
+    'eventReactivated': 'Reactivated',
+    'paymentLabel': 'Payment',
+    'accessUntilDetail': 'Access until {0}',
+    'lineWebUnsupported': 'LINE login is available on Android / iOS only. Use Google or Guest on the web.',
+    'firestoreSetupHint': 'Enable Firestore in Firebase Console and paste the rules from README / firestore.rules.',
+    'orders': 'ORDERS',
+    'addOrder': '+ ADD ORDER',
+    'addOrderTitle': 'ADD ORDER / PREORDER',
+    'addOrderSubtitle': 'Shop & marketplace purchases',
+    'noOrders': 'NO ORDERS',
+    'noOrdersBody': 'Track Taobao, PLUSHSHOP, and other shop orders here so you do not forget pending deliveries.',
+    'pendingOrders': 'PENDING / PREORDER',
+    'completedOrders': 'COMPLETED',
+    'pendingOrdersCount': '{0} pending',
+    'orderItem': 'ITEM',
+    'orderItemHint': 'e.g. Plush doll A',
+    'platform': 'PLATFORM / SHOP',
+    'platformCustomHint': 'Custom shop name',
+    'purchaseStatus': 'STATUS',
+    'orderedAt': 'Ordered',
+    'expectedAt': 'Expected',
+    'expectedAtOptional': 'Expected date (optional)',
+    'deliveredAt': 'Delivered',
+    'quantity': 'QUANTITY',
+    'priceOptional': 'Price (optional)',
+    'trackingUrlOptional': 'Tracking / order URL (optional)',
+    'notesOptional': 'Notes (optional)',
+    'orderDetail': 'ORDER',
+    'orderNotFound': 'Order not found.',
+    'openTracking': 'Open tracking / order page',
+    'updateStatus': 'UPDATE STATUS',
+    'deleteOrder': 'Delete order',
+    'deleteOrderBody': 'Remove this order from your list?',
+    'viewAll': 'VIEW ALL',
+    'noPendingOrders': 'No pending preorders or shipments.',
+    'subscriptionsTracked': 'SUBSCRIPTIONS',
+    'pendingPreorders': 'PENDING ORDERS',
+    'purchaseOrdered': 'Ordered',
+    'purchasePreorder': 'Preorder',
+    'purchaseAwaitingShipment': 'Awaiting shipment',
+    'purchaseShipped': 'Shipped',
+    'purchaseDelivered': 'Delivered',
+    'purchaseCancelled': 'Cancelled',
   };
 
   static const _zh = <String, String>{
@@ -549,6 +636,93 @@ class AppLocalizations {
     'autoRenew': '自動續訂',
     'manualRenew': '手動',
     'last4': '卡號末四碼',
+    'offerNone': '無優惠',
+    'offerFreePeriod': '免費試用期',
+    'offerDiscount': '折扣優惠',
+    'offerMultiStage': '多階段價格',
+    'offerCustom': '自訂優惠',
+    'freeDays7': '免費 7 天',
+    'freeDays14': '免費 14 天',
+    'freeDays30': '免費 30 天',
+    'freeDays60': '免費 2 個月',
+    'freeDays90': '免費 3 個月',
+    'promoPrice': '優惠價格',
+    'reminderDays30': '提前 30 天',
+    'reminderDays14': '提前 14 天',
+    'reminderDays7': '提前 7 天',
+    'reminderDays3': '提前 3 天',
+    'reminderDays1': '提前 1 天',
+    'reminderSameDay': '當天',
+    'reminderCustom': '自訂',
+    'actionFreePeriod': '免費期即將結束',
+    'actionPromoEnds': '優惠即將結束',
+    'actionCancelDeadline': '取消期限',
+    'actionRenews': '{0} 續訂',
+    'actionFirstCharge': '首次扣款',
+    'actionCardExpiry': '付款方式到期',
+    'actionDaysLeft': '剩 {0} 天',
+    'actionDays': '{0} 天',
+    'actionAfterTrial': '試用後：{0}／{1}',
+    'actionCancelBy': '請於 {0} 前取消',
+    'actionCurrent': '目前：{0}',
+    'actionAfter': '之後：{0}',
+    'actionReminder': '提醒：{0}',
+    'eventCreated': '已建立',
+    'eventPlanChanged': '方案變更',
+    'eventPriceChanged': '價格變更',
+    'eventPromoStarted': '優惠開始',
+    'eventPromoEnded': '優惠結束',
+    'eventTrialStarted': '試用開始',
+    'eventTrialEnded': '試用結束',
+    'eventRenewed': '已續訂',
+    'eventPaused': '已暫停',
+    'eventResumed': '已恢復',
+    'eventCancelRequested': '已申請取消',
+    'eventCancelled': '已取消',
+    'eventExpired': '已到期',
+    'eventReactivated': '已重新啟用',
+    'paymentLabel': '付款',
+    'accessUntilDetail': '可用至 {0}',
+    'lineWebUnsupported': 'LINE 登入僅支援 Android／iOS。網頁請用 Google 或訪客。',
+    'firestoreSetupHint': '請在 Firebase Console 啟用 Firestore，並套用 README／firestore.rules 中的規則。',
+    'orders': '訂單／預購',
+    'addOrder': '+ 新增訂單',
+    'addOrderTitle': '新增訂單／預購',
+    'addOrderSubtitle': '商店與平台購買進度',
+    'noOrders': '尚無訂單',
+    'noOrdersBody': '可追蹤淘寶、PLUSHSHOP 等商店訂單，避免忘記預購與出貨進度。',
+    'pendingOrders': '待收／預購中',
+    'completedOrders': '已完成',
+    'pendingOrdersCount': '待處理 {0} 筆',
+    'orderItem': '品項',
+    'orderItemHint': '例如：娃娃 A',
+    'platform': '平台／商店',
+    'platformCustomHint': '自訂商店名稱',
+    'purchaseStatus': '狀態',
+    'orderedAt': '下單日',
+    'expectedAt': '預計到貨',
+    'expectedAtOptional': '預計到貨（選填）',
+    'deliveredAt': '已到貨',
+    'quantity': '數量',
+    'priceOptional': '價格（選填）',
+    'trackingUrlOptional': '追蹤／訂單連結（選填）',
+    'notesOptional': '備註（選填）',
+    'orderDetail': '訂單明細',
+    'orderNotFound': '找不到此訂單。',
+    'openTracking': '開啟追蹤／訂單頁',
+    'updateStatus': '更新狀態',
+    'deleteOrder': '刪除訂單',
+    'deleteOrderBody': '要從清單移除此訂單嗎？',
+    'viewAll': '查看全部',
+    'noPendingOrders': '目前沒有待收或預購中的品項。',
+    'subscriptionsTracked': '訂閱中',
+    'pendingPreorders': '待收／預購',
+    'purchaseOrdered': '已下單',
+    'purchasePreorder': '預購中',
+    'purchaseAwaitingShipment': '待出貨',
+    'purchaseShipped': '已出貨',
+    'purchaseDelivered': '已到貨',
+    'purchaseCancelled': '已取消',
   };
 
   static const _ja = <String, String>{
@@ -813,6 +987,93 @@ class AppLocalizations {
     'autoRenew': '自動更新',
     'manualRenew': '手動',
     'last4': '下4桁',
+    'offerNone': 'オファーなし',
+    'offerFreePeriod': '無料トライアル',
+    'offerDiscount': '割引',
+    'offerMultiStage': '段階価格',
+    'offerCustom': 'カスタム',
+    'freeDays7': '7日間無料',
+    'freeDays14': '14日間無料',
+    'freeDays30': '30日間無料',
+    'freeDays60': '2か月無料',
+    'freeDays90': '3か月無料',
+    'promoPrice': 'プロモ価格',
+    'reminderDays30': '30日前',
+    'reminderDays14': '14日前',
+    'reminderDays7': '7日前',
+    'reminderDays3': '3日前',
+    'reminderDays1': '1日前',
+    'reminderSameDay': '当日',
+    'reminderCustom': 'カスタム',
+    'actionFreePeriod': '無料期間の終了',
+    'actionPromoEnds': 'プロモ終了',
+    'actionCancelDeadline': '解約期限',
+    'actionRenews': '{0} に更新',
+    'actionFirstCharge': '初回請求',
+    'actionCardExpiry': '支払い方法の期限',
+    'actionDaysLeft': '残り {0} 日',
+    'actionDays': '{0} 日',
+    'actionAfterTrial': 'トライアル後: {0} / {1}',
+    'actionCancelBy': '{0} までに解約',
+    'actionCurrent': '現在: {0}',
+    'actionAfter': '以降: {0}',
+    'actionReminder': 'リマインダー: {0}',
+    'eventCreated': '作成',
+    'eventPlanChanged': 'プラン変更',
+    'eventPriceChanged': '価格変更',
+    'eventPromoStarted': 'プロモ開始',
+    'eventPromoEnded': 'プロモ終了',
+    'eventTrialStarted': 'トライアル開始',
+    'eventTrialEnded': 'トライアル終了',
+    'eventRenewed': '更新',
+    'eventPaused': '一時停止',
+    'eventResumed': '再開',
+    'eventCancelRequested': '解約申請',
+    'eventCancelled': '解約',
+    'eventExpired': '期限切れ',
+    'eventReactivated': '再有効化',
+    'paymentLabel': '支払い',
+    'accessUntilDetail': '{0} まで利用可',
+    'lineWebUnsupported': 'LINE ログインは Android / iOS のみ。Web では Google かゲストを使ってください。',
+    'firestoreSetupHint': 'Firebase Console で Firestore を有効にし、README / firestore.rules のルールを適用してください。',
+    'orders': '注文／予約',
+    'addOrder': '+ 注文を追加',
+    'addOrderTitle': '注文／予約を追加',
+    'addOrderSubtitle': 'ショップ・マーケットの購入進捗',
+    'noOrders': '注文なし',
+    'noOrdersBody': 'Taobao や PLUSHSHOP などの注文を追跡し、未着・予約を忘れないようにします。',
+    'pendingOrders': '未着／予約中',
+    'completedOrders': '完了',
+    'pendingOrdersCount': '未処理 {0} 件',
+    'orderItem': '商品',
+    'orderItemHint': '例：ぬいぐるみ A',
+    'platform': 'プラットフォーム／ショップ',
+    'platformCustomHint': 'ショップ名を入力',
+    'purchaseStatus': 'ステータス',
+    'orderedAt': '注文日',
+    'expectedAt': '到着予定',
+    'expectedAtOptional': '到着予定（任意）',
+    'deliveredAt': '到着済み',
+    'quantity': '数量',
+    'priceOptional': '価格（任意）',
+    'trackingUrlOptional': '追跡／注文 URL（任意）',
+    'notesOptional': 'メモ（任意）',
+    'orderDetail': '注文詳細',
+    'orderNotFound': '注文が見つかりません。',
+    'openTracking': '追跡／注文ページを開く',
+    'updateStatus': 'ステータス更新',
+    'deleteOrder': '注文を削除',
+    'deleteOrderBody': 'この注文を一覧から削除しますか？',
+    'viewAll': 'すべて見る',
+    'noPendingOrders': '未着・予約中の品はありません。',
+    'subscriptionsTracked': '契約中',
+    'pendingPreorders': '未着／予約',
+    'purchaseOrdered': '注文済み',
+    'purchasePreorder': '予約中',
+    'purchaseAwaitingShipment': '発送待ち',
+    'purchaseShipped': '発送済み',
+    'purchaseDelivered': '到着済み',
+    'purchaseCancelled': 'キャンセル',
   };
 
   String t(String key) {
@@ -1016,6 +1277,38 @@ class AppLocalizations {
   String get syncUploaded => t('syncUploaded');
   String get syncDownloaded => t('syncDownloaded');
   String get syncNoCloudBackup => t('syncNoCloudBackup');
+  String get orders => t('orders');
+  String get addOrder => t('addOrder');
+  String get addOrderTitle => t('addOrderTitle');
+  String get addOrderSubtitle => t('addOrderSubtitle');
+  String get noOrders => t('noOrders');
+  String get noOrdersBody => t('noOrdersBody');
+  String get pendingOrders => t('pendingOrders');
+  String get completedOrders => t('completedOrders');
+  String pendingOrdersCount(int n) => _fmt('pendingOrdersCount', ['$n']);
+  String get orderItem => t('orderItem');
+  String get orderItemHint => t('orderItemHint');
+  String get platform => t('platform');
+  String get platformCustomHint => t('platformCustomHint');
+  String get purchaseStatus => t('purchaseStatus');
+  String get orderedAt => t('orderedAt');
+  String get expectedAt => t('expectedAt');
+  String get expectedAtOptional => t('expectedAtOptional');
+  String get deliveredAt => t('deliveredAt');
+  String get quantity => t('quantity');
+  String get priceOptional => t('priceOptional');
+  String get trackingUrlOptional => t('trackingUrlOptional');
+  String get notesOptional => t('notesOptional');
+  String get orderDetail => t('orderDetail');
+  String get orderNotFound => t('orderNotFound');
+  String get openTracking => t('openTracking');
+  String get updateStatus => t('updateStatus');
+  String get deleteOrder => t('deleteOrder');
+  String get deleteOrderBody => t('deleteOrderBody');
+  String get viewAll => t('viewAll');
+  String get noPendingOrders => t('noPendingOrders');
+  String get subscriptionsTracked => t('subscriptionsTracked');
+  String get pendingPreorders => t('pendingPreorders');
 
   String profileDisplayName(String type, String fallbackName) => switch (type) {
         'personal' => profilePersonal,
@@ -1053,6 +1346,32 @@ class AppLocalizations {
   String get autoRenew => t('autoRenew');
   String get manualRenew => t('manualRenew');
   String get last4 => t('last4');
+  String get offerNone => t('offerNone');
+  String get offerFreePeriod => t('offerFreePeriod');
+  String get offerDiscount => t('offerDiscount');
+  String get offerMultiStage => t('offerMultiStage');
+  String get offerCustom => t('offerCustom');
+  String get promoPrice => t('promoPrice');
+  String get paymentLabel => t('paymentLabel');
+  String get lineWebUnsupported => t('lineWebUnsupported');
+  String get firestoreSetupHint => t('firestoreSetupHint');
+  String actionRenews(String date) => _fmt('actionRenews', [date]);
+  String actionDaysLeft(int n) => _fmt('actionDaysLeft', ['$n']);
+  String actionDays(int n) => _fmt('actionDays', ['$n']);
+  String actionAfterTrial(String price, String cycle) => _fmt('actionAfterTrial', [price, cycle]);
+  String actionCancelBy(String date) => _fmt('actionCancelBy', [date]);
+  String actionCurrent(String price) => _fmt('actionCurrent', [price]);
+  String actionAfter(String price) => _fmt('actionAfter', [price]);
+  String actionReminder(String date) => _fmt('actionReminder', [date]);
+  String accessUntilDetail(String date) => _fmt('accessUntilDetail', [date]);
+  String freeDaysLabel(int days) => switch (days) {
+        7 => t('freeDays7'),
+        14 => t('freeDays14'),
+        30 => t('freeDays30'),
+        60 => t('freeDays60'),
+        90 => t('freeDays90'),
+        _ => t('freeDays14'),
+      };
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

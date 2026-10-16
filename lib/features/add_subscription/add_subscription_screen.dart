@@ -102,7 +102,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           ListTile(
             selected: service?.id == s.id,
             title: Text(s.name),
-            subtitle: Text(s.categorySlug.toUpperCase()),
+            subtitle: Text(context.l10n.categorySlugLabel(s.categorySlug)),
             onTap: () => setState(() => service = s),
           ),
       ],
@@ -188,29 +188,27 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   }
 
   Widget _stepOffer() {
+    final l10n = context.l10n;
     return Column(
       children: [
         for (final o in OfferKind.values)
           ListTile(
             selected: offer == o,
-            title: Text(o.name.replaceAllMapped(RegExp(r'[A-Z]'), (m) => ' ${m[0]}').toUpperCase()),
+            title: Text(l10n.offerKindLabel(o)),
             onTap: () => setState(() => offer = o),
           ),
         if (offer == OfferKind.freePeriod)
           DropdownButton<int>(
             value: freeDays,
-            items: const [
-              DropdownMenuItem(value: 7, child: Text('7 days free')),
-              DropdownMenuItem(value: 14, child: Text('14 days free')),
-              DropdownMenuItem(value: 30, child: Text('30 days free')),
-              DropdownMenuItem(value: 60, child: Text('2 months free')),
-              DropdownMenuItem(value: 90, child: Text('3 months free')),
+            items: [
+              for (final d in const [7, 14, 30, 60, 90])
+                DropdownMenuItem(value: d, child: Text(l10n.freeDaysLabel(d))),
             ],
             onChanged: (v) => setState(() => freeDays = v ?? freeDays),
           ),
         if (offer == OfferKind.discount || offer == OfferKind.multiStage || offer == OfferKind.custom)
           TextField(
-            decoration: const InputDecoration(labelText: 'Promotional price'),
+            decoration: InputDecoration(labelText: l10n.promoPrice),
             keyboardType: TextInputType.number,
             onChanged: (v) => promoPrice = double.tryParse(v) ?? 0,
           ),
@@ -219,13 +217,14 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   }
 
   Widget _stepReminder() {
+    final l10n = context.l10n;
     return Column(
       children: [
-        SectionLabel(context.l10n.reminder),
+        SectionLabel(l10n.reminder),
         for (final o in ReminderOffset.values)
           ListTile(
             selected: reminder == o,
-            title: Text(o.label),
+            title: Text(l10n.reminderOffsetLabel(o)),
             onTap: () => setState(() => reminder = o),
           ),
       ],

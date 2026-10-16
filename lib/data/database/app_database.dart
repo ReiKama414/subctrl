@@ -24,6 +24,7 @@ part 'app_database.g.dart';
     Budgets,
     UserPreferences,
     AppThemeRows,
+    PurchaseOrders,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -32,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.memory() => AppDatabase(connection.openMemoryExecutor());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -40,6 +41,9 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             await m.addColumn(userPreferences, userPreferences.localeCode);
+          }
+          if (from < 3) {
+            await m.createTable(purchaseOrders);
           }
         },
       );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: GlassPanel(
                   child: Padding(
@@ -102,14 +103,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Text(l10n.continueGoogle),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: _busy ? null : () => _go(AuthProviderId.line.name),
-                            child: Text(l10n.continueLine),
+                        if (!kIsWeb) ...[
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: _busy ? null : () => _go(AuthProviderId.line.name),
+                              child: Text(l10n.continueLine),
+                            ),
                           ),
-                        ),
+                        ] else ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.lineWebUnsupported,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.body(c.textMuted).copyWith(fontSize: 12),
+                          ),
+                        ],
                         if (_error != null) ...[
                           const SizedBox(height: 12),
                           Text(_error!, style: AppTypography.body(c.danger), textAlign: TextAlign.center),

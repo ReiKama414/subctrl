@@ -11,6 +11,7 @@ import 'package:subctrl/features/add_subscription/add_subscription_screen.dart';
 import 'package:subctrl/features/analytics/data_screen.dart';
 import 'package:subctrl/features/calendar/calendar_screen.dart';
 import 'package:subctrl/features/home/home_screen.dart';
+import 'package:subctrl/features/orders/orders_screen.dart';
 import 'package:subctrl/features/subscriptions/detail_screen.dart';
 import 'package:subctrl/features/subscriptions/subscriptions_screen.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
@@ -48,6 +49,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('MONTHLY LOAD'), findsOneWidget);
     expect(find.text('ACTION REQUIRED'), findsOneWidget);
+    expect(find.text('PENDING ORDERS'), findsOneWidget);
+  });
+
+  testWidgets('Orders empty state', (tester) async {
+    final c = await boot();
+    addTearDown(c.dispose);
+    await tester.pumpWidget(wrap(c, const OrdersScreen()));
+    await tester.pumpAndSettle();
+    expect(find.text('ORDERS'), findsOneWidget);
+    expect(find.text('NO ORDERS'), findsOneWidget);
   });
 
   testWidgets('Subscriptions empty state', (tester) async {

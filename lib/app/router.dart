@@ -8,6 +8,9 @@ import 'package:subctrl/features/auth/login_screen.dart';
 import 'package:subctrl/features/calendar/calendar_screen.dart';
 import 'package:subctrl/features/home/home_screen.dart';
 import 'package:subctrl/features/onboarding/onboarding_screen.dart';
+import 'package:subctrl/features/orders/add_order_screen.dart';
+import 'package:subctrl/features/orders/order_detail_screen.dart';
+import 'package:subctrl/features/orders/orders_screen.dart';
 import 'package:subctrl/features/settings/budget_screen.dart';
 import 'package:subctrl/features/settings/payment_methods_screen.dart';
 import 'package:subctrl/features/settings/settings_screen.dart';
@@ -31,6 +34,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: '/add', builder: (c, s) => const AddSubscriptionScreen()),
+      GoRoute(path: '/orders', builder: (c, s) => const OrdersScreen()),
+      GoRoute(path: '/orders/add', builder: (c, s) => const AddOrderScreen()),
+      GoRoute(
+        path: '/orders/:id',
+        builder: (c, s) => OrderDetailScreen(id: s.pathParameters['id']!),
+      ),
       GoRoute(
         path: '/subs/:id',
         builder: (c, s) => DetailScreen(id: s.pathParameters['id']!),

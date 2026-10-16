@@ -10,6 +10,7 @@ import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
 import 'package:subctrl/data/repositories/catalog_repository.dart';
+import 'package:subctrl/data/repositories/purchase_repository.dart';
 import 'package:subctrl/data/repositories/subscription_repository.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
 
@@ -19,6 +20,7 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 
 final bootstrapProvider = Provider((ref) => BootstrapService(ref.watch(databaseProvider)));
 final subscriptionRepoProvider = Provider((ref) => SubscriptionRepository(ref.watch(databaseProvider)));
+final purchaseRepoProvider = Provider((ref) => PurchaseRepository(ref.watch(databaseProvider)));
 final catalogRepoProvider = Provider((ref) => CatalogRepository(ref.watch(databaseProvider)));
 final financeRepoProvider = Provider((ref) => FinanceRepository(ref.watch(databaseProvider)));
 final settingsRepoProvider = Provider((ref) => SettingsRepository(ref.watch(databaseProvider)));
@@ -61,6 +63,21 @@ final scopedSubscriptionsProvider = Provider<List<SubscriptionView>>((ref) {
   final profileId = ref.watch(activeProfileIdProvider);
   if (profileId == null || profileId.isEmpty) return all;
   return all.where((s) => s.profileId == profileId).toList();
+});
+
+final purchaseOrdersProvider = StreamProvider<List<PurchaseOrderView>>((ref) {
+  return ref.watch(purchaseRepoProvider).watchAll();
+});
+
+final scopedPurchaseOrdersProvider = Provider<List<PurchaseOrderView>>((ref) {
+  final all = ref.watch(purchaseOrdersProvider).valueOrNull ?? [];
+  final profileId = ref.watch(activeProfileIdProvider);
+  if (profileId == null || profileId.isEmpty) return all;
+  return all.where((o) => o.profileId == profileId).toList();
+});
+
+final pendingPurchaseOrdersProvider = Provider<List<PurchaseOrderView>>((ref) {
+  return ref.watch(scopedPurchaseOrdersProvider).where((o) => o.isPending).toList();
 });
 
 final servicesProvider = FutureProvider<List<ServiceView>>((ref) {

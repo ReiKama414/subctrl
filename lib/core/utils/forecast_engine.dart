@@ -3,6 +3,7 @@ import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/models/finance_models.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 
 export 'package:subctrl/data/models/finance_models.dart';
 
@@ -191,7 +192,8 @@ class BudgetEngine {
 class ActionEngine {
   static List<ActionItem> build(
     List<SubscriptionView> subs,
-    List<PaymentMethodView> methods, {
+    List<PaymentMethodView> methods,
+    AppLocalizations l10n, {
     DateTime? now,
     int windowDays = 30,
   }) {
@@ -206,13 +208,18 @@ class ActionEngine {
           items.add(ActionItem(
             kind: 'trial',
             subscriptionId: sub.id,
-            title: sub.serviceName.toUpperCase(),
-            headline: 'FREE PERIOD',
+            title: sub.serviceName,
+            headline: l10n.actionFreePeriod,
             lines: [
-              '$left DAYS LEFT',
-              'After trial: ${MoneyMath.format(after, phase.regularCurrency ?? sub.currency)} / ${sub.billingCycle}',
+              l10n.actionDaysLeft(left),
+              l10n.actionAfterTrial(
+                MoneyMath.format(after, phase.regularCurrency ?? sub.currency),
+                l10n.billingCycleLabel(
+                  BillingCycle.values.where((c) => c.name == sub.billingCycle).firstOrNull ?? BillingCycle.monthly,
+                ),
+              ),
               if (phase.cancelDeadline != null)
-                'Cancel by: ${_fmt(phase.reminderDate ?? phase.cancelDeadline!)}',
+                l10n.actionCancelBy(_fmt(phase.reminderDate ?? phase.cancelDeadline!)),
             ],
           ));
         }
@@ -223,12 +230,14 @@ class ActionEngine {
           items.add(ActionItem(
             kind: 'promo',
             subscriptionId: sub.id,
-            title: sub.serviceName.toUpperCase(),
-            headline: 'PROMO ENDS',
+            title: sub.serviceName,
+            headline: l10n.actionPromoEnds,
             lines: [
-              '$left DAYS',
-              'Current: ${MoneyMath.format(phase.price, phase.currency)}',
-              'After: ${MoneyMath.format(phase.regularPrice ?? sub.currentPrice, phase.regularCurrency ?? sub.currency)}',
+              l10n.actionDays(left),
+              l10n.actionCurrent(MoneyMath.format(phase.price, phase.currency)),
+              l10n.actionAfter(
+                MoneyMath.format(phase.regularPrice ?? sub.currentPrice, phase.regularCurrency ?? sub.currency),
+              ),
             ],
           ));
         }
@@ -239,9 +248,12 @@ class ActionEngine {
           items.add(ActionItem(
             kind: 'deadline',
             subscriptionId: sub.id,
-            title: sub.serviceName.toUpperCase(),
-            headline: 'CANCEL DEADLINE',
-            lines: [_fmt(phase.cancelDeadline!), if (phase.reminderDate != null) 'Reminder: ${_fmt(phase.reminderDate!)}'],
+            title: sub.serviceName,
+            headline: l10n.actionCancelDeadline,
+            lines: [
+              _fmt(phase.cancelDeadline!),
+              if (phase.reminderDate != null) l10n.actionReminder(_fmt(phase.reminderDate!)),
+            ],
           ));
         }
       }
@@ -253,8 +265,8 @@ class ActionEngine {
           items.add(ActionItem(
             kind: 'renewal',
             subscriptionId: sub.id,
-            title: sub.serviceName.toUpperCase(),
-            headline: 'RENEWS ${_fmt(sub.nextBillingDate!)}',
+            title: sub.serviceName,
+            headline: l10n.actionRenews(_fmt(sub.nextBillingDate!)),
             lines: [MoneyMath.format(sub.currentPrice, sub.currency)],
           ));
         }
@@ -265,8 +277,8 @@ class ActionEngine {
           items.add(ActionItem(
             kind: 'first_charge',
             subscriptionId: sub.id,
-            title: sub.serviceName.toUpperCase(),
-            headline: 'FIRST CHARGE',
+            title: sub.serviceName,
+            headline: l10n.actionFirstCharge,
             lines: [_fmt(phase.firstChargeDate!), MoneyMath.format(sub.currentPrice, sub.currency)],
           ));
         }
@@ -279,19 +291,17 @@ class ActionEngine {
         items.add(ActionItem(
           kind: 'card_expiry',
           subscriptionId: '',
-          title: method.display.toUpperCase(),
-          headline: 'PAYMENT METHOD EXPIRY',
-          lines: [_fmt(method.expiry!), '$left DAYS'],
+          title: method.display,
+          headline: l10n.actionCardExpiry,
+          lines: [_fmt(method.expiry!), l10n.actionDays(left)],
         ));
       }
     }
     return items;
   }
 
-  static String _fmt(DateTime d) {
-    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    return '${months[d.month - 1]} ${d.day.toString().padLeft(2, '0')}';
-  }
+  static String _fmt(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
 class CalendarEngine {

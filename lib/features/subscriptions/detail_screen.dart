@@ -182,12 +182,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               for (final p in extras.payments)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text('${p.date.toIso8601String().substring(0, 10)}  PAYMENT'),
+                  title: Text('${p.date.toIso8601String().substring(0, 10)}  ${context.l10n.paymentLabel}'),
                   subtitle: Text(
                     '${MoneyMath.format(p.originalAmount, p.originalCurrency)} · FX ${p.exchangeRate.toStringAsFixed(2)}\n'
-                    'Base ${MoneyMath.format(p.convertedAmount, p.baseCurrency)}  '
-                    'Fee ${MoneyMath.format(p.foreignFee, p.baseCurrency)}  '
-                    'Actual ${MoneyMath.format(p.actualChargedAmount, p.baseCurrency)}',
+                    '${MoneyMath.format(p.convertedAmount, p.baseCurrency)}  '
+                    '${MoneyMath.format(p.foreignFee, p.baseCurrency)}  '
+                    '${MoneyMath.format(p.actualChargedAmount, p.baseCurrency)}',
                   ),
                 ),
               SectionLabel(context.l10n.eventHistory),
@@ -195,7 +195,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Text(_glyph(e.type), style: TextStyle(color: c.accent)),
-                  title: Text(e.title),
+                  title: Text(context.l10n.subscriptionEventTitle(e.type)),
                   subtitle: Text('${e.at.toIso8601String().substring(0, 10)}  ${e.detail ?? ''}'),
                 ),
               if (sub.officialWebsiteUrl != null)
@@ -292,7 +292,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     await ref.read(subscriptionRepoProvider).addEvent(
           sub.id,
           SubscriptionEventType.payment,
-          'PAYMENT',
+          SubscriptionEventType.payment.name,
           detail: '${MoneyMath.format(amount, sub.currency)} · ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}',
         );
     if (mounted) setState(() {});

@@ -368,7 +368,7 @@ class DemoSeed {
             actualChargedAmount: currency == 'TWD' ? converted : converted * 1.015,
           ),
         );
-    await subs.addEvent(subId, SubscriptionEventType.payment, 'PAYMENT',
+    await subs.addEvent(subId, SubscriptionEventType.payment, SubscriptionEventType.payment.name,
         detail: '$amount $currency');
   }
 }

@@ -1,8 +1,10 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/l10n/app_localizations.dart';
 
 import 'support.dart';
 
@@ -127,6 +129,7 @@ void main() {
         ),
       ],
       const [],
+      AppLocalizations(const Locale('en')),
     );
     expect(items.any((e) => e.kind == 'trial'), isTrue);
   });
