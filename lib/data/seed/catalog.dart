@@ -172,9 +172,11 @@ final catalogServices = <CatalogSeedItem>[
   ]),
   CatalogSeedItem(id: 'foodpanda', name: 'foodpanda', category: 'delivery', site: 'https://www.foodpanda.com.tw', manage: 'https://www.foodpanda.com.tw', plans: const [
     CatalogPlanSeed('pro', 'monthly', 65, 'TWD'),
+    CatalogPlanSeed('pro Annual', 'yearly', 780, 'TWD'),
   ]),
   CatalogSeedItem(id: 'ubereats', name: 'Uber Eats Pass', category: 'delivery', site: 'https://www.ubereats.com', manage: 'https://www.ubereats.com', plans: const [
     CatalogPlanSeed('Pass', 'monthly', 99, 'TWD'),
+    CatalogPlanSeed('Pass Annual', 'yearly', 990, 'TWD'),
   ]),
   CatalogSeedItem(id: 'deliveroo', name: 'Deliveroo Plus', category: 'delivery', site: 'https://deliveroo.com', manage: 'https://deliveroo.com', plans: const [
     CatalogPlanSeed('Plus', 'monthly', 7.99, 'USD'),

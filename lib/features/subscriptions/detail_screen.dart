@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
@@ -21,39 +22,73 @@ class DetailScreen extends ConsumerStatefulWidget {
 
 class _DetailScreenState extends ConsumerState<DetailScreen> {
   ChartRange range = ChartRange.year1;
+  Future<_Extras>? _extrasFuture;
+  String? _extrasSubId;
+
+  void _goBack() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/home');
+    }
+  }
+
+  Future<_Extras> _extrasFor(SubscriptionView sub) {
+    if (_extrasFuture != null && _extrasSubId == sub.id) return _extrasFuture!;
+    _extrasSubId = sub.id;
+    _extrasFuture = _loadExtras(sub);
+    return _extrasFuture!;
+  }
+
+  void _invalidateExtras() {
+    _extrasFuture = null;
+    _extrasSubId = null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(subscriptionsProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.detail)),
-      body: async.when(
-        loading: () => const Center(child: SkeletonBlock(height: 40, width: 120)),
-        error: (e, _) => Text('$e'),
-        data: (list) {
-          SubscriptionView? sub;
-          for (final s in list) {
-            if (s.id == widget.id) {
-              sub = s;
-              break;
-            }
-          }
-          if (sub == null) return AppPage(child: Text(context.l10n.subscriptionNotFound));
-          return FutureBuilder(
-            future: _extras(sub),
-            builder: (context, snap) {
-              if (!snap.hasData) {
-                return const AppPage(child: Padding(padding: EdgeInsets.all(24), child: SkeletonBlock(height: 80)));
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goBack();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(context.l10n.detail),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: _goBack,
+          ),
+        ),
+        body: async.when(
+          loading: () => const Center(child: SkeletonBlock(height: 40, width: 120)),
+          error: (e, _) => Text('$e'),
+          data: (list) {
+            SubscriptionView? sub;
+            for (final s in list) {
+              if (s.id == widget.id) {
+                sub = s;
+                break;
               }
-              return _body(sub!, snap.data!);
-            },
-          );
-        },
+            }
+            if (sub == null) return AppPage(child: Text(context.l10n.subscriptionNotFound));
+            return FutureBuilder(
+              future: _extrasFor(sub),
+              builder: (context, snap) {
+                if (!snap.hasData) {
+                  return const AppPage(child: Padding(padding: EdgeInsets.all(24), child: SkeletonBlock(height: 80)));
+                }
+                return _body(sub!, snap.data!);
+              },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Future<_Extras> _extras(SubscriptionView sub) async {
+  Future<_Extras> _loadExtras(SubscriptionView sub) async {
     final repo = ref.read(subscriptionRepoProvider);
     final fin = ref.read(financeRepoProvider);
     return _Extras(
@@ -125,24 +160,39 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          SurfaceCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SectionLabel(l10n.currentPrice),
-                const SizedBox(height: 6),
-                TerminalAmount(MoneyMath.format(sub.currentPrice, sub.currency), size: 34),
-                if (sub.currency != q.baseCurrency) ...[
-                  const SizedBox(height: 12),
-                  _priceRow('≈ ${q.baseCurrency}', MoneyMath.format(q.convertedAmount, q.baseCurrency), 'FX ${q.exchangeRate.toStringAsFixed(2)}'),
-                  if (q.foreignFee > 0) _priceRow(l10n.foreignFee, MoneyMath.format(q.foreignFee, q.baseCurrency)),
-                  _priceRow(l10n.estimatedCharge, MoneyMath.format(q.estimatedCharge, q.baseCurrency)),
+          InkWell(
+            onTap: () => _editBilling(sub),
+            borderRadius: BorderRadius.circular(AppRadius.r16),
+            child: SurfaceCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: SectionLabel(l10n.currentPrice)),
+                      Icon(Icons.edit_rounded, size: 16, color: c.textMuted),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  TerminalAmount(MoneyMath.format(sub.currentPrice, sub.currency), size: 34),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${l10n.billingCycleLabel(BillingCycle.values.where((e) => e.name == sub.billingCycle).firstOrNull ?? BillingCycle.monthly)}'
+                    ' · ${l10n.monthlyLoad} ${MoneyMath.format(fx.monthlyBase(sub), fx.baseCurrency)}',
+                    style: AppTypography.caption(c.textMuted),
+                  ),
+                  if (sub.currency != q.baseCurrency) ...[
+                    const SizedBox(height: 12),
+                    _priceRow('≈ ${q.baseCurrency}', MoneyMath.format(q.convertedAmount, q.baseCurrency), 'FX ${q.exchangeRate.toStringAsFixed(2)}'),
+                    if (q.foreignFee > 0) _priceRow(l10n.foreignFee, MoneyMath.format(q.foreignFee, q.baseCurrency)),
+                    _priceRow(l10n.estimatedCharge, MoneyMath.format(q.estimatedCharge, q.baseCurrency)),
+                  ],
+                  if (sub.status == SubscriptionStatus.cancelled && accessLeft != null && accessLeft >= 0) ...[
+                    const SizedBox(height: 10),
+                    StatusMark(l10n.daysRemaining(accessLeft), tone: c.warning, icon: Icons.timelapse_rounded),
+                  ],
                 ],
-                if (sub.status == SubscriptionStatus.cancelled && accessLeft != null && accessLeft >= 0) ...[
-                  const SizedBox(height: 10),
-                  StatusMark(l10n.daysRemaining(accessLeft), tone: c.warning, icon: Icons.timelapse_rounded),
-                ],
-              ],
+              ),
             ),
           ),
           if (dates.isNotEmpty) ...[
@@ -393,6 +443,95 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     return StatusMark(context.l10n.dueIn(days), tone: days <= 3 ? c.warning : c.textSecondary);
   }
 
+  Future<void> _editBilling(SubscriptionView sub) async {
+    final l10n = context.l10n;
+    final priceCtrl = TextEditingController(text: sub.currentPrice.toString());
+    var currency = sub.currency;
+    var cycle = sub.billingCycle;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialog) {
+          final parsed = double.tryParse(priceCtrl.text) ?? 0;
+          final monthly = BillingMath.monthlyEquivalent(parsed, cycle);
+          return AlertDialog(
+            title: Text(l10n.currentPrice),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: priceCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: l10n.currentPrice),
+                    onChanged: (_) => setDialog(() {}),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    key: ValueKey('edit-currency-$currency'),
+                    initialValue: currency,
+                    decoration: InputDecoration(labelText: l10n.currency),
+                    items: [
+                      for (final code in {'TWD', 'USD', 'JPY', 'EUR', 'GBP', currency})
+                        DropdownMenuItem(value: code, child: Text(code)),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setDialog(() => currency = v);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Text(l10n.billing, style: AppTypography.caption(context.colors.textMuted)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final bc in BillingCycle.values)
+                        ChoiceChip(
+                          label: Text(l10n.billingCycleLabel(bc)),
+                          selected: cycle == bc.name,
+                          onSelected: (_) => setDialog(() => cycle = bc.name),
+                        ),
+                    ],
+                  ),
+                  if (parsed > 0) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '${l10n.monthlyLoad}: ${MoneyMath.format(monthly, currency)}',
+                      style: AppTypography.caption(context.colors.textSecondary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.save)),
+            ],
+          );
+        },
+      ),
+    );
+    final raw = priceCtrl.text;
+    priceCtrl.dispose();
+    if (ok != true || !mounted) return;
+    final parsed = double.tryParse(raw.trim());
+    if (parsed == null || parsed < 0) return;
+    final next = cycle != sub.billingCycle
+        ? BillingMath.addCycle(sub.startDate, cycle: cycle)
+        : sub.nextBillingDate;
+    await ref.read(subscriptionRepoProvider).updateBilling(
+          id: sub.id,
+          price: parsed,
+          currency: currency,
+          billingCycle: cycle,
+          nextBillingDate: next,
+        );
+    _invalidateExtras();
+    if (mounted) setState(() {});
+  }
+
   Future<void> _editUsageCount(SubscriptionView sub) async {
     final l10n = context.l10n;
     final controller = TextEditingController(text: '${sub.usageCountPerMonth ?? ''}');
@@ -448,7 +587,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           SubscriptionEventType.payment.name,
           detail: '${MoneyMath.format(amount, sub.currency)} · ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}',
         );
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    _invalidateExtras();
+    setState(() {});
   }
 
   IconData _glyph(SubscriptionEventType t) => switch (t) {

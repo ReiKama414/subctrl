@@ -142,7 +142,8 @@ class AppLocalizations {
     'yearInReview': 'Year in review',
     'allCats': 'ALL CATS',
     'stepOf': 'STEP {0} / {1}',
-    'noSuggestedPlans': 'No suggested plans. Set price on the next step.',
+    'noSuggestedPlans': 'No suggested plans. Enter your actual price below.',
+    'planPriceHint': 'Catalogue prices are suggestions — enter what you actually pay (promos OK).',
     'startDate': 'Start date',
     'nextBillingDate': 'Next billing date',
     'foreignFee': 'Foreign fee',
@@ -232,6 +233,7 @@ class AppLocalizations {
     'cycleWeekly': 'Weekly',
     'cycleMonthly': 'Monthly',
     'cycleQuarterly': 'Quarterly',
+    'cycleSemiannual': 'Every 6 months',
     'cycleYearly': 'Yearly',
     'cycleCustom': 'Custom',
     'phaseFree': 'Free',
@@ -530,7 +532,8 @@ class AppLocalizations {
     'yearInReview': '年度回顧',
     'allCats': '全部分類',
     'stepOf': '步驟 {0} / {1}',
-    'noSuggestedPlans': '沒有建議方案，請在下一步設定價格。',
+    'noSuggestedPlans': '沒有建議方案，請在下方輸入實際價格。',
+    'planPriceHint': '目錄價僅供參考，請輸入你實際支付的金額（優惠價也可）。',
     'startDate': '開始日期',
     'nextBillingDate': '下次扣款日',
     'foreignFee': '外幣手續費',
@@ -618,6 +621,7 @@ class AppLocalizations {
     'cycleWeekly': '週繳',
     'cycleMonthly': '月繳',
     'cycleQuarterly': '季繳',
+    'cycleSemiannual': '半年繳',
     'cycleYearly': '年繳',
     'cycleCustom': '自訂',
     'phaseFree': '免費',
@@ -916,7 +920,8 @@ class AppLocalizations {
     'yearInReview': '年間レビュー',
     'allCats': '全カテゴリ',
     'stepOf': 'ステップ {0} / {1}',
-    'noSuggestedPlans': '提案プランはありません。次の画面で価格を設定してください。',
+    'noSuggestedPlans': '提案プランはありません。下に実際の価格を入力してください。',
+    'planPriceHint': 'カタログ価格は参考です。実際に支払う金額を入力してください（割引可）。',
     'startDate': '開始日',
     'nextBillingDate': '次回請求日',
     'foreignFee': '外貨手数料',
@@ -1004,6 +1009,7 @@ class AppLocalizations {
     'cycleWeekly': '週額',
     'cycleMonthly': '月額',
     'cycleQuarterly': '四半期',
+    'cycleSemiannual': '半年',
     'cycleYearly': '年額',
     'cycleCustom': 'カスタム',
     'phaseFree': '無料',
@@ -1320,6 +1326,7 @@ class AppLocalizations {
   String get allCats => t('allCats');
   String stepOf(int step, int total) => _fmt('stepOf', ['$step', '$total']);
   String get noSuggestedPlans => t('noSuggestedPlans');
+  String get planPriceHint => t('planPriceHint');
   String get startDate => t('startDate');
   String get nextBillingDate => t('nextBillingDate');
   String get foreignFee => t('foreignFee');

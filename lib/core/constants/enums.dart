@@ -44,6 +44,7 @@ enum BillingCycle {
   weekly,
   monthly,
   quarterly,
+  semiannual,
   yearly,
   custom;
 
@@ -54,6 +55,7 @@ enum BillingCycle {
     BillingCycle.weekly => 0,
     BillingCycle.monthly => 1,
     BillingCycle.quarterly => 3,
+    BillingCycle.semiannual => 6,
     BillingCycle.yearly => 12,
     BillingCycle.custom => 1,
   };

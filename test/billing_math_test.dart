@@ -22,8 +22,14 @@ void main() {
 
   test('monthly equivalent', () {
     expect(BillingMath.monthlyEquivalent(240, 'yearly'), 20);
+    expect(BillingMath.monthlyEquivalent(120, 'semiannual'), 20);
+    expect(BillingMath.monthlyEquivalent(60, 'quarterly'), 20);
     expect(BillingMath.monthlyEquivalent(20, 'monthly'), 20);
     expect(BillingMath.yearlyEquivalent(20, 'monthly'), 240);
+  });
+
+  test('semiannual billing advances six months', () {
+    expect(BillingMath.addCycle(DateTime(2026, 1, 15), cycle: 'semiannual'), DateTime(2026, 7, 15));
   });
 
   test('cancel safety buffer is independent of trial end', () {

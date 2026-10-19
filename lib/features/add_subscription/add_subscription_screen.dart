@@ -74,23 +74,33 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
     final services = ref.watch(servicesProvider).valueOrNull ?? [];
     final fx = ref.watch(currencyEngineProvider);
     final l10n = context.l10n;
+    final c = context.colors;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.addSubscriptionTitle)),
       body: AppPage(
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 12),
           children: [
             const SizedBox(height: 4),
-            Text(l10n.stepOf(step + 1, 5), style: AppTypography.label(context.colors.textMuted)),
+            Text(l10n.stepOf(step + 1, 5), style: AppTypography.label(c.textMuted)),
             const SizedBox(height: 8),
-            ProgressPill(value: (step + 1) / 5, color: context.colors.accent, height: 6),
+            ProgressPill(value: (step + 1) / 5, color: c.accent, height: 6),
             const SizedBox(height: 20),
             if (step == 0) _stepService(services),
             if (step == 1) _stepPlan(),
             if (step == 2) _stepBilling(fx),
             if (step == 3) _stepOffer(),
             if (step == 4) _stepReminder(),
-            const SizedBox(height: 24),
-            Row(
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Material(
+          color: c.surface,
+          elevation: 8,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+            child: Row(
               children: [
                 if (step > 0) OutlinedButton(onPressed: () => setState(() => step--), child: Text(l10n.back)),
                 const Spacer(),
@@ -100,8 +110,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-          ],
+          ),
         ),
       ),
     );
@@ -141,6 +150,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           height: 38,
           child: ListView(
             scrollDirection: Axis.horizontal,
+            primary: false,
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -231,13 +241,37 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
             ),
             title: Text(s.name),
             subtitle: Text(l10n.categorySlugLabel(s.categorySlug)),
-            onTap: () => setState(() {
-              service = s;
-              plan = null;
-            }),
+            onTap: () => _selectService(s),
           ),
       ],
     );
+  }
+
+  String _amortizeHint(AppLocalizations l10n, String cycle) {
+    final months = BillingCycle.values.where((e) => e.name == cycle).firstOrNull?.monthsEquivalent ?? 0;
+    if (months <= 1) return '';
+    return '  (${l10n.billingCycleLabel(
+          BillingCycle.values.firstWhere((e) => e.name == cycle),
+        )} ÷ $months)';
+  }
+
+  void _selectService(ServiceView s) {
+    setState(() {
+      service = s;
+      plan = null;
+      // Catalogue price is only a suggestion — clear so user confirms on next step.
+      if (s.plans.isNotEmpty) {
+        final p = s.plans.first;
+        plan = p;
+        cycle = p.billingCycle;
+        if (p.suggestedPrice != null) price.text = p.suggestedPrice.toString();
+        if (p.suggestedCurrency != null) currency = p.suggestedCurrency!;
+      } else {
+        price.clear();
+        cycle = 'monthly';
+      }
+      step = 1;
+    });
   }
 
   Future<void> _deleteCustom(ServiceView s) async {
@@ -355,28 +389,80 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
 
   Widget _stepPlan() {
     final plans = service?.plans ?? [];
+    final l10n = context.l10n;
+    final c = context.colors;
+    final parsed = double.tryParse(price.text) ?? 0;
+    final monthly = BillingMath.monthlyEquivalent(parsed, cycle);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionLabel(context.l10n.selectPlan),
-        if (plans.isEmpty) Text(context.l10n.noSuggestedPlans),
-        for (final p in plans)
-          ListTile(
-            selected: plan?.id == p.id,
-            title: Text(p.name),
-            subtitle: Text(
-              [
-                p.billingCycle,
-                if (p.suggestedPrice != null) MoneyMath.format(p.suggestedPrice!, p.suggestedCurrency ?? 'USD'),
-              ].join(' · '),
+        SectionLabel(l10n.selectPlan),
+        if (plans.isEmpty)
+          Text(l10n.noSuggestedPlans, style: AppTypography.body(c.textMuted))
+        else ...[
+          Text(l10n.planPriceHint, style: AppTypography.caption(c.textMuted)),
+          const SizedBox(height: 8),
+          for (final p in plans)
+            ListTile(
+              selected: plan?.id == p.id,
+              title: Text(p.name),
+              subtitle: Text(
+                [
+                  l10n.billingCycleLabel(
+                    BillingCycle.values.where((e) => e.name == p.billingCycle).firstOrNull ?? BillingCycle.monthly,
+                  ),
+                  if (p.suggestedPrice != null) MoneyMath.format(p.suggestedPrice!, p.suggestedCurrency ?? 'USD'),
+                ].join(' · '),
+              ),
+              onTap: () => setState(() {
+                plan = p;
+                if (p.suggestedPrice != null) price.text = p.suggestedPrice.toString();
+                if (p.suggestedCurrency != null) currency = p.suggestedCurrency!;
+                cycle = p.billingCycle;
+              }),
             ),
-            onTap: () => setState(() {
-              plan = p;
-              if (p.suggestedPrice != null) price.text = p.suggestedPrice.toString();
-              if (p.suggestedCurrency != null) currency = p.suggestedCurrency!;
-              cycle = p.billingCycle;
-            }),
+        ],
+        const SizedBox(height: 16),
+        SectionLabel(l10n.currentPrice),
+        const SizedBox(height: 8),
+        TextField(
+          controller: price,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(labelText: l10n.currentPrice, hintText: l10n.planPriceHint),
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          key: ValueKey('plan-currency-$currency'),
+          initialValue: AppCurrencies.iso.contains(currency) ? currency : 'USD',
+          decoration: InputDecoration(labelText: l10n.currency),
+          items: [for (final code in AppCurrencies.iso) DropdownMenuItem(value: code, child: Text(code))],
+          onChanged: (v) => setState(() => currency = v ?? currency),
+        ),
+        const SizedBox(height: 16),
+        SectionLabel(l10n.billing),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final bc in BillingCycle.values)
+              _CategoryPill(
+                label: l10n.billingCycleLabel(bc),
+                selected: cycle == bc.name,
+                color: c.accent,
+                onTap: () => setState(() => cycle = bc.name),
+              ),
+          ],
+        ),
+        if (parsed > 0) ...[
+          const SizedBox(height: 12),
+          Text(
+            '${l10n.monthlyLoad}: ${MoneyMath.format(monthly, currency)}'
+            '${_amortizeHint(l10n, cycle)}',
+            style: AppTypography.caption(c.textSecondary),
           ),
+        ],
       ],
     );
   }
@@ -384,29 +470,43 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   Widget _stepBilling(CurrencyEngine engine) {
     final parsed = double.tryParse(price.text) ?? 0;
     final q = engine.quote(parsed, currency);
+    final monthly = BillingMath.monthlyEquivalent(q.estimatedCharge, cycle);
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionLabel(context.l10n.billing),
-        TextField(controller: price, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: context.l10n.currentPrice)),
+        SectionLabel(l10n.billing),
+        TextField(
+          controller: price,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(labelText: l10n.currentPrice),
+          onChanged: (_) => setState(() {}),
+        ),
         const SizedBox(height: 8),
-        DropdownButton<String>(
-          value: AppCurrencies.iso.contains(currency) ? currency : 'USD',
-          isExpanded: true,
-          items: [for (final c in AppCurrencies.iso) DropdownMenuItem(value: c, child: Text(c))],
+        DropdownButtonFormField<String>(
+          key: ValueKey('bill-currency-$currency'),
+          initialValue: AppCurrencies.iso.contains(currency) ? currency : 'USD',
+          decoration: InputDecoration(labelText: l10n.currency),
+          items: [for (final code in AppCurrencies.iso) DropdownMenuItem(value: code, child: Text(code))],
           onChanged: (v) => setState(() => currency = v ?? currency),
         ),
-        DropdownButton<String>(
-          value: cycle,
-          isExpanded: true,
-          items: [
-            for (final c in BillingCycle.values)
-              DropdownMenuItem(value: c.name, child: Text(context.l10n.billingCycleLabel(c))),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final bc in BillingCycle.values)
+              _CategoryPill(
+                label: l10n.billingCycleLabel(bc),
+                selected: cycle == bc.name,
+                color: context.colors.accent,
+                onTap: () => setState(() => cycle = bc.name),
+              ),
           ],
-          onChanged: (v) => setState(() => cycle = v ?? cycle),
         ),
         ListTile(
-          title: Text(context.l10n.startDate),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.startDate),
           trailing: Text(start.toIso8601String().substring(0, 10)),
           onTap: () async {
             final d = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2100), initialDate: start);
@@ -414,7 +514,8 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           },
         ),
         ListTile(
-          title: Text(context.l10n.nextBillingDate),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.nextBillingDate),
           trailing: Text((nextBilling ?? BillingMath.addCycle(start, cycle: cycle)).toIso8601String().substring(0, 10)),
           onTap: () async {
             final d = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2100), initialDate: nextBilling ?? start);
@@ -423,10 +524,11 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         ),
         const SizedBox(height: 8),
         Text('${MoneyMath.format(parsed, currency)}  FX ${q.exchangeRate.toStringAsFixed(2)}  ≈ ${MoneyMath.format(q.convertedAmount, q.baseCurrency)}'),
-        if (q.foreignFee > 0) Text('${context.l10n.foreignFee} ≈ ${MoneyMath.format(q.foreignFee, q.baseCurrency)}'),
-        Text('${context.l10n.estimatedCharge} ≈ ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}'),
-        if (q.rateUpdatedAt != null) Text('${context.l10n.lastUpdated}: ${q.rateUpdatedAt}'),
-        if (engine.lastError != null) Text('${engine.lastError}\n${context.l10n.usingLastKnownRate} ${q.exchangeRate.toStringAsFixed(2)}'),
+        if (q.foreignFee > 0) Text('${l10n.foreignFee} ≈ ${MoneyMath.format(q.foreignFee, q.baseCurrency)}'),
+        Text('${l10n.estimatedCharge} ≈ ${MoneyMath.format(q.estimatedCharge, q.baseCurrency)}'),
+        Text('${l10n.monthlyLoad} ≈ ${MoneyMath.format(monthly, q.baseCurrency)}'),
+        if (q.rateUpdatedAt != null) Text('${l10n.lastUpdated}: ${q.rateUpdatedAt}'),
+        if (engine.lastError != null) Text('${engine.lastError}\n${l10n.usingLastKnownRate} ${q.exchangeRate.toStringAsFixed(2)}'),
       ],
     );
   }
@@ -480,16 +582,12 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.selectService)));
       return;
     }
-    if (step == 1 && plan == null && (service?.plans.isNotEmpty ?? false)) {
-      // Auto-pick the only / first plan so custom subs aren't stuck here.
-      setState(() {
-        plan = service!.plans.first;
-        cycle = plan!.billingCycle;
-        if (plan!.suggestedPrice != null) price.text = plan!.suggestedPrice.toString();
-        if (plan!.suggestedCurrency != null) currency = plan!.suggestedCurrency!;
-        step++;
-      });
-      return;
+    if (step == 1) {
+      final parsed = double.tryParse(price.text.trim());
+      if (parsed == null || parsed <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.currentPrice)));
+        return;
+      }
     }
     if (step < 4) {
       setState(() => step++);
@@ -585,7 +683,12 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           ],
         );
     await ref.read(notificationServiceProvider).resync(await ref.read(subscriptionRepoProvider).allReminders());
-    if (mounted) context.go('/subs/$id');
+    if (!mounted) return;
+    // Land on home first so detail has a back target (go() alone clears the stack).
+    context.go('/home');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.push('/subs/$id');
+    });
   }
 }
 

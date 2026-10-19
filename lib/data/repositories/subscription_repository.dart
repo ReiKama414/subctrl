@@ -187,6 +187,56 @@ class SubscriptionRepository {
     );
   }
 
+  /// Updates list price / cycle and mirrors onto the active phase when present.
+  Future<void> updateBilling({
+    required String id,
+    required double price,
+    required String currency,
+    required String billingCycle,
+    DateTime? nextBillingDate,
+  }) async {
+    final now = DateTime.now();
+    await (db.update(db.subscriptions)..where((t) => t.id.equals(id))).write(
+      SubscriptionsCompanion(
+        currentPrice: Value(price),
+        currency: Value(currency),
+        billingCycle: Value(billingCycle),
+        nextBillingDate: Value(nextBillingDate),
+        updatedAt: Value(now),
+      ),
+    );
+    final phases = await (db.select(db.pricePhases)
+          ..where((t) => t.subscriptionId.equals(id))
+          ..orderBy([(t) => OrderingTerm.desc(t.startDate)]))
+        .get();
+    PricePhase? active;
+    for (final p in phases) {
+      final start = BillingMath.dateOnly(p.startDate);
+      final end = p.endDate == null ? null : BillingMath.dateOnly(p.endDate!);
+      final day = BillingMath.dateOnly(now);
+      if (!day.isBefore(start) && (end == null || !day.isAfter(end))) {
+        active = p;
+        break;
+      }
+    }
+    active ??= phases.isEmpty ? null : phases.first;
+    if (active != null) {
+      await (db.update(db.pricePhases)..where((t) => t.id.equals(active!.id))).write(
+        PricePhasesCompanion(
+          price: Value(price),
+          currency: Value(currency),
+          billingCycle: Value(billingCycle),
+        ),
+      );
+    }
+    await addEvent(
+      id,
+      SubscriptionEventType.priceChanged,
+      SubscriptionEventType.priceChanged.name,
+      detail: '$currency $price / $billingCycle',
+    );
+  }
+
   Future<void> cancel(String id, DateTime accessUntil) async {
     await (db.update(db.subscriptions)..where((t) => t.id.equals(id))).write(
       SubscriptionsCompanion(

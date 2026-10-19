@@ -34,6 +34,8 @@ class BillingMath {
         return addMonthsClamped(from, interval);
       case 'quarterly':
         return addMonthsClamped(from, 3 * interval);
+      case 'semiannual':
+        return addMonthsClamped(from, 6 * interval);
       case 'yearly':
         return addMonthsClamped(from, 12 * interval);
       case 'custom':
@@ -53,6 +55,8 @@ class BillingMath {
         return amount;
       case 'quarterly':
         return amount / 3;
+      case 'semiannual':
+        return amount / 6;
       case 'yearly':
         return amount / 12;
       case 'custom':

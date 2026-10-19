@@ -32,6 +32,7 @@ extension EnumL10n on AppLocalizations {
         BillingCycle.weekly => t('cycleWeekly'),
         BillingCycle.monthly => t('cycleMonthly'),
         BillingCycle.quarterly => t('cycleQuarterly'),
+        BillingCycle.semiannual => t('cycleSemiannual'),
         BillingCycle.yearly => t('cycleYearly'),
         BillingCycle.custom => t('cycleCustom'),
       };

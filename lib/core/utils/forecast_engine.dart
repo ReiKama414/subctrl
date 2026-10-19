@@ -147,6 +147,8 @@ class ForecastEngine {
         return date.subtract(const Duration(days: 1));
       case 'yearly':
         return BillingMath.addMonthsClamped(date, -12);
+      case 'semiannual':
+        return BillingMath.addMonthsClamped(date, -6);
       case 'quarterly':
         return BillingMath.addMonthsClamped(date, -3);
       default:
