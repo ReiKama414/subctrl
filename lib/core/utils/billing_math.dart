@@ -19,6 +19,24 @@ class BillingMath {
     );
   }
 
+  /// Preset keys used by the add-subscription offer step:
+  /// 7 / 14 / 30 = calendar days; 60 / 90 / 180 / 365 = 2 / 3 / 6 / 12 months.
+  static DateTime addFreePeriod(DateTime start, int presetDays) {
+    final from = dateOnly(start);
+    switch (presetDays) {
+      case 60:
+        return addMonthsClamped(from, 2);
+      case 90:
+        return addMonthsClamped(from, 3);
+      case 180:
+        return addMonthsClamped(from, 6);
+      case 365:
+        return addMonthsClamped(from, 12);
+      default:
+        return from.add(Duration(days: presetDays));
+    }
+  }
+
   static DateTime addCycle(
     DateTime from, {
     required String cycle,

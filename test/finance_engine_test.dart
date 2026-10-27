@@ -133,4 +133,46 @@ void main() {
     );
     expect(items.any((e) => e.kind == 'trial'), isTrue);
   });
+
+  test('action required asks to review price after free period ends', () {
+    final items = ActionEngine.build(
+      [
+        sampleSub(
+          status: SubscriptionStatus.trial,
+          price: 650,
+          currency: 'TWD',
+          start: DateTime(2025, 10, 21),
+          phases: [
+            PhaseView(
+              id: 'free',
+              subscriptionId: 's1',
+              type: PricePhaseType.free,
+              startDate: DateTime(2025, 10, 21),
+              endDate: DateTime(2026, 10, 21),
+              price: 0,
+              currency: 'TWD',
+              billingCycle: 'monthly',
+              trialEndDate: DateTime(2026, 10, 21),
+              regularPrice: 650,
+              regularCurrency: 'TWD',
+            ),
+            PhaseView(
+              id: 'regular',
+              subscriptionId: 's1',
+              type: PricePhaseType.regular,
+              startDate: DateTime(2026, 10, 22),
+              price: 650,
+              currency: 'TWD',
+              billingCycle: 'monthly',
+            ),
+          ],
+        ),
+      ],
+      const [],
+      AppLocalizations(const Locale('en')),
+      now: DateTime(2026, 10, 22),
+    );
+    expect(items.any((e) => e.kind == 'price_review'), isTrue);
+    expect(items.any((e) => e.kind == 'trial'), isFalse);
+  });
 }

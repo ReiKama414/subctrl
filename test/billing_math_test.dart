@@ -40,4 +40,12 @@ void main() {
   test('days until', () {
     expect(BillingMath.daysUntil(DateTime(2026, 11, 30), DateTime(2026, 11, 27)), 3);
   });
+
+  test('free period presets keep monthly billing independent', () {
+    final start = DateTime(2026, 10, 21);
+    expect(BillingMath.addFreePeriod(start, 14), DateTime(2026, 11, 4));
+    expect(BillingMath.addFreePeriod(start, 90), DateTime(2027, 1, 21));
+    expect(BillingMath.addFreePeriod(start, 180), DateTime(2027, 4, 21));
+    expect(BillingMath.addFreePeriod(start, 365), DateTime(2027, 10, 21));
+  });
 }

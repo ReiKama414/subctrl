@@ -128,6 +128,7 @@ enum SubscriptionEventType {
   created,
   planChanged,
   priceChanged,
+  priceReviewed,
   promoStarted,
   promoEnded,
   trialStarted,

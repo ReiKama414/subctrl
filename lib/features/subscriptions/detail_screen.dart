@@ -8,6 +8,7 @@ import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/features/subscriptions/price_review.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/charts/price_chart.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
@@ -101,7 +102,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   Widget _body(SubscriptionView sub, _Extras extras) {
     final fx = ref.watch(currencyEngineProvider);
     final phase = sub.currentPhase;
-    final q = fx.quote(sub.currentPrice, sub.currency);
+    final q = fx.quote(sub.displayedPrice, sub.currency);
     final c = context.colors;
     final points = ChartEngine.series(history: extras.history, payments: extras.payments, range: range, now: DateTime.now());
     final accessLeft = sub.accessEndDate == null ? null : BillingMath.daysUntil(sub.accessEndDate!, DateTime.now());
@@ -160,6 +161,45 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
             ],
           ),
           const SizedBox(height: 20),
+          if (sub.needsPriceReview()) ...[
+            SurfaceCard(
+              color: c.warning.withValues(alpha: 0.12),
+              onTap: () async {
+                final changed = await showPriceReviewDialog(
+                  context: context,
+                  repo: ref.read(subscriptionRepoProvider),
+                  sub: sub,
+                );
+                if (changed) _invalidateExtras();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.actionPriceReview, style: AppTypography.title(c.warning).copyWith(fontSize: 16)),
+                  const SizedBox(height: 6),
+                  Text(
+                    sub.status == SubscriptionStatus.promo
+                        ? l10n.priceReviewPromoBody(
+                            MoneyMath.format(sub.proposedResumePrice(), sub.currency),
+                            l10n.billingCycleLabel(
+                              BillingCycle.values.where((e) => e.name == sub.billingCycle).firstOrNull ??
+                                  BillingCycle.monthly,
+                            ),
+                          )
+                        : l10n.priceReviewFreeBody(
+                            MoneyMath.format(sub.proposedResumePrice(), sub.currency),
+                            l10n.billingCycleLabel(
+                              BillingCycle.values.where((e) => e.name == sub.billingCycle).firstOrNull ??
+                                  BillingCycle.monthly,
+                            ),
+                          ),
+                    style: AppTypography.body(c.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           InkWell(
             onTap: () => _editBilling(sub),
             borderRadius: BorderRadius.circular(AppRadius.r16),
@@ -174,13 +214,26 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  TerminalAmount(MoneyMath.format(sub.currentPrice, sub.currency), size: 34),
+                  TerminalAmount(MoneyMath.format(sub.displayedPrice, sub.currency), size: 34),
                   const SizedBox(height: 4),
                   Text(
                     '${l10n.billingCycleLabel(BillingCycle.values.where((e) => e.name == sub.billingCycle).firstOrNull ?? BillingCycle.monthly)}'
                     ' · ${l10n.monthlyLoad} ${MoneyMath.format(fx.monthlyBase(sub), fx.baseCurrency)}',
                     style: AppTypography.caption(c.textMuted),
                   ),
+                  if (phase?.type == PricePhaseType.free && (phase?.regularPrice ?? 0) > 0) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.actionAfterTrial(
+                        MoneyMath.format(phase!.regularPrice!, phase.regularCurrency ?? sub.currency),
+                        l10n.billingCycleLabel(
+                          BillingCycle.values.where((e) => e.name == sub.billingCycle).firstOrNull ??
+                              BillingCycle.monthly,
+                        ),
+                      ),
+                      style: AppTypography.caption(c.textSecondary),
+                    ),
+                  ],
                   if (sub.currency != q.baseCurrency) ...[
                     const SizedBox(height: 12),
                     _priceRow('≈ ${q.baseCurrency}', MoneyMath.format(q.convertedAmount, q.baseCurrency), 'FX ${q.exchangeRate.toStringAsFixed(2)}'),
@@ -595,6 +648,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   IconData _glyph(SubscriptionEventType t) => switch (t) {
         SubscriptionEventType.payment => Icons.receipt_rounded,
         SubscriptionEventType.priceChanged => Icons.trending_up_rounded,
+        SubscriptionEventType.priceReviewed => Icons.price_check_rounded,
+        SubscriptionEventType.trialEnded || SubscriptionEventType.promoEnded => Icons.hourglass_bottom_rounded,
         SubscriptionEventType.planChanged => Icons.swap_horiz_rounded,
         SubscriptionEventType.promoStarted || SubscriptionEventType.trialStarted => Icons.local_offer_rounded,
         SubscriptionEventType.cancelled || SubscriptionEventType.cancelRequested => Icons.cancel_rounded,

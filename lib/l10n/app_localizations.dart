@@ -308,6 +308,11 @@ class AppLocalizations {
     'freeDays30': '30 days free',
     'freeDays60': '2 months free',
     'freeDays90': '3 months free',
+    'freeDays180': '6 months free',
+    'freeDays365': '1 year free',
+    'freeDaysCustom': 'Free until a date',
+    'offerAfterFree': 'Free until {0}, then {1} / {2}',
+    'offerFreeKeepsRegular': 'The regular cycle stays the same. After the free period you can keep paying the original price.',
     'promoPrice': 'Promotional price',
     'reminderDays30': '30 days before',
     'reminderDays14': '14 days before',
@@ -317,6 +322,12 @@ class AppLocalizations {
     'reminderSameDay': 'Same day',
     'reminderCustom': 'Custom',
     'actionFreePeriod': 'Free period ending',
+    'actionPriceReview': 'Adjust the price?',
+    'priceReviewFreeBody': 'The free period has ended. Continue at {0} / {1}, or enter a new amount.',
+    'priceReviewPromoBody': 'The promotion has ended. Continue at {0} / {1}, or enter a new amount.',
+    'priceReviewLater': 'Later',
+    'priceReviewConfirm': 'Confirm',
+    'eventPriceReviewed': 'Price reviewed',
     'actionPromoEnds': 'Promo ending',
     'actionCancelDeadline': 'Cancel deadline',
     'actionRenews': 'Renews {0}',
@@ -696,6 +707,11 @@ class AppLocalizations {
     'freeDays30': '免費 30 天',
     'freeDays60': '免費 2 個月',
     'freeDays90': '免費 3 個月',
+    'freeDays180': '免費 6 個月',
+    'freeDays365': '免費 1 年',
+    'freeDaysCustom': '免費至指定日期',
+    'offerAfterFree': '免費至 {0}，之後 {1}／{2}',
+    'offerFreeKeepsRegular': '計費週期維持不變。免費期結束後可依原價繼續訂閱。',
     'promoPrice': '優惠價格',
     'reminderDays30': '提前 30 天',
     'reminderDays14': '提前 14 天',
@@ -705,6 +721,12 @@ class AppLocalizations {
     'reminderSameDay': '當天',
     'reminderCustom': '自訂',
     'actionFreePeriod': '免費期即將結束',
+    'actionPriceReview': '是否需要調整價格？',
+    'priceReviewFreeBody': '免費期已結束。將依 {0}／{1} 續訂，若實際價格不同請在下方修改。',
+    'priceReviewPromoBody': '優惠已結束。將依 {0}／{1} 續訂，若實際價格不同請在下方修改。',
+    'priceReviewLater': '稍後',
+    'priceReviewConfirm': '確認',
+    'eventPriceReviewed': '已確認價格',
     'actionPromoEnds': '優惠即將結束',
     'actionCancelDeadline': '取消期限',
     'actionRenews': '{0} 續訂',
@@ -1084,6 +1106,11 @@ class AppLocalizations {
     'freeDays30': '30日間無料',
     'freeDays60': '2か月無料',
     'freeDays90': '3か月無料',
+    'freeDays180': '6か月無料',
+    'freeDays365': '1年間無料',
+    'freeDaysCustom': '指定日まで無料',
+    'offerAfterFree': '{0}まで無料、その後 {1}／{2}',
+    'offerFreeKeepsRegular': '通常の請求周期はそのままです。無料期間の終了後も元の価格で継続できます。',
     'promoPrice': 'プロモ価格',
     'reminderDays30': '30日前',
     'reminderDays14': '14日前',
@@ -1093,6 +1120,12 @@ class AppLocalizations {
     'reminderSameDay': '当日',
     'reminderCustom': 'カスタム',
     'actionFreePeriod': '無料期間の終了',
+    'actionPriceReview': '価格を見直しますか？',
+    'priceReviewFreeBody': '無料期間が終了しました。{0}／{1} で継続するか、新しい金額を入力してください。',
+    'priceReviewPromoBody': 'プロモが終了しました。{0}／{1} で継続するか、新しい金額を入力してください。',
+    'priceReviewLater': 'あとで',
+    'priceReviewConfirm': '確認',
+    'eventPriceReviewed': '価格を確認',
     'actionPromoEnds': 'プロモ終了',
     'actionCancelDeadline': '解約期限',
     'actionRenews': '{0} に更新',
@@ -1542,8 +1575,20 @@ class AppLocalizations {
         30 => t('freeDays30'),
         60 => t('freeDays60'),
         90 => t('freeDays90'),
+        180 => t('freeDays180'),
+        365 => t('freeDays365'),
+        -1 => t('freeDaysCustom'),
         _ => t('freeDays14'),
       };
+  String offerAfterFree(String date, String price, String cycle) =>
+      _fmt('offerAfterFree', [date, price, cycle]);
+  String get offerFreeKeepsRegular => t('offerFreeKeepsRegular');
+  String priceReviewFreeBody(String price, String cycle) =>
+      _fmt('priceReviewFreeBody', [price, cycle]);
+  String priceReviewPromoBody(String price, String cycle) =>
+      _fmt('priceReviewPromoBody', [price, cycle]);
+  String get priceReviewLater => t('priceReviewLater');
+  String get priceReviewConfirm => t('priceReviewConfirm');
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

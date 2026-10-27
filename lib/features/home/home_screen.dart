@@ -11,6 +11,7 @@ import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
 import 'package:subctrl/data/repositories/purchase_repository.dart';
+import 'package:subctrl/features/subscriptions/price_review.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
@@ -313,15 +314,16 @@ class _QuickActions extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
+class _ActionCard extends ConsumerWidget {
   const _ActionCard({required this.item});
   final ActionItem item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final (icon, tone) = switch (item.kind) {
       'trial' => (Icons.hourglass_bottom_rounded, c.warning),
+      'price_review' => (Icons.price_change_rounded, c.warning),
       'promo' => (Icons.local_offer_rounded, AppPalette.swatches[4]),
       'deadline' => (Icons.event_busy_rounded, c.danger),
       'first_charge' => (Icons.payments_rounded, AppPalette.swatches[5]),
@@ -331,7 +333,29 @@ class _ActionCard extends StatelessWidget {
     return SizedBox(
       width: 196,
       child: SurfaceCard(
-        onTap: item.subscriptionId.isEmpty ? null : () => context.push('/subs/${item.subscriptionId}'),
+        onTap: item.subscriptionId.isEmpty
+            ? null
+            : () async {
+                if (item.kind == 'price_review') {
+                  final subs = ref.read(scopedSubscriptionsProvider);
+                  SubscriptionView? sub;
+                  for (final s in subs) {
+                    if (s.id == item.subscriptionId) {
+                      sub = s;
+                      break;
+                    }
+                  }
+                  if (sub != null && context.mounted) {
+                    await showPriceReviewDialog(
+                      context: context,
+                      repo: ref.read(subscriptionRepoProvider),
+                      sub: sub,
+                    );
+                    return;
+                  }
+                }
+                if (context.mounted) context.push('/subs/${item.subscriptionId}');
+              },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

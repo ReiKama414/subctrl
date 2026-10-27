@@ -33,7 +33,9 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   DateTime start = DateTime.now();
   DateTime? nextBilling;
   OfferKind offer = OfferKind.none;
+  /// Preset days, or -1 for a custom end date.
   int freeDays = 14;
+  DateTime? customFreeUntil;
   double promoPrice = 0;
   int promoMonths = 3;
   ReminderOffset reminder = ReminderOffset.days3;
@@ -533,9 +535,24 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
     );
   }
 
+  DateTime _freePeriodEnd() {
+    if (freeDays < 0) {
+      return BillingMath.dateOnly(
+        customFreeUntil ?? BillingMath.addMonthsClamped(start, 12),
+      );
+    }
+    return BillingMath.addFreePeriod(start, freeDays);
+  }
+
   Widget _stepOffer() {
     final l10n = context.l10n;
+    final c = context.colors;
+    final parsed = double.tryParse(price.text) ?? plan?.suggestedPrice ?? 0;
+    final cycleEnum =
+        BillingCycle.values.where((e) => e.name == cycle).firstOrNull ?? BillingCycle.monthly;
+    final trialEnd = _freePeriodEnd();
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final o in OfferKind.values)
           ListTile(
@@ -543,15 +560,67 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
             title: Text(l10n.offerKindLabel(o)),
             onTap: () => setState(() => offer = o),
           ),
-        if (offer == OfferKind.freePeriod)
-          DropdownButton<int>(
-            value: freeDays,
-            items: [
-              for (final d in const [7, 14, 30, 60, 90])
-                DropdownMenuItem(value: d, child: Text(l10n.freeDaysLabel(d))),
+        if (offer == OfferKind.freePeriod) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final d in const [7, 14, 30, 60, 90, 180, 365, -1])
+                _CategoryPill(
+                  label: l10n.freeDaysLabel(d),
+                  selected: freeDays == d,
+                  color: c.accent,
+                  onTap: () async {
+                    if (d < 0) {
+                      final picked = await showDatePicker(
+                        context: context,
+                        firstDate: start,
+                        lastDate: DateTime(start.year + 10, start.month, start.day),
+                        initialDate: customFreeUntil ?? BillingMath.addMonthsClamped(start, 12),
+                      );
+                      if (picked == null) return;
+                      setState(() {
+                        freeDays = -1;
+                        customFreeUntil = picked;
+                      });
+                      return;
+                    }
+                    setState(() {
+                      freeDays = d;
+                      customFreeUntil = null;
+                    });
+                  },
+                ),
             ],
-            onChanged: (v) => setState(() => freeDays = v ?? freeDays),
           ),
+          if (freeDays < 0)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.freeDaysLabel(-1)),
+              trailing: Text(trialEnd.toIso8601String().substring(0, 10)),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  firstDate: start,
+                  lastDate: DateTime(start.year + 10, start.month, start.day),
+                  initialDate: trialEnd,
+                );
+                if (picked != null) setState(() => customFreeUntil = picked);
+              },
+            ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.offerAfterFree(
+              trialEnd.toIso8601String().substring(0, 10),
+              MoneyMath.format(parsed, currency),
+              l10n.billingCycleLabel(cycleEnum),
+            ),
+            style: AppTypography.body(c.textSecondary),
+          ),
+          const SizedBox(height: 6),
+          Text(l10n.offerFreeKeepsRegular, style: AppTypography.caption(c.textMuted)),
+        ],
         if (offer == OfferKind.discount || offer == OfferKind.multiStage || offer == OfferKind.custom)
           TextField(
             decoration: InputDecoration(labelText: l10n.promoPrice),
@@ -599,7 +668,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
     var status = SubscriptionStatus.active;
     if (offer == OfferKind.freePeriod) {
       status = SubscriptionStatus.trial;
-      final trialEnd = start.add(Duration(days: freeDays));
+      final trialEnd = _freePeriodEnd();
       final deadline = trialEnd.subtract(const Duration(days: 1));
       final firstCharge = trialEnd.add(const Duration(days: 1));
       phases.add(PricePhasesCompanion.insert(
@@ -613,6 +682,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         billingCycle: cycle,
         regularPrice: Value(parsed),
         regularCurrency: Value(currency),
+        promotionName: const Value('Free period'),
         cancelDeadline: Value(deadline),
         firstChargeDate: Value(firstCharge),
         trialEndDate: Value(trialEnd),
@@ -654,7 +724,9 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         billingCycle: cycle,
       ));
     }
-    final fire = (next).subtract(Duration(days: reminder.days ?? 3));
+    final trialEnd = offer == OfferKind.freePeriod ? _freePeriodEnd() : null;
+    final firstCharge = trialEnd?.add(const Duration(days: 1));
+    final fire = (trialEnd ?? next).subtract(Duration(days: reminder.days ?? 3));
     final rid = const Uuid().v4();
     final id = await ref.read(subscriptionRepoProvider).create(
           serviceId: service!.id,
@@ -663,10 +735,14 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
           profileId: ref.read(activeProfileIdProvider) ?? personalProfileId,
           status: status,
           startDate: start,
-          nextBillingDate: offer == OfferKind.freePeriod ? start.add(Duration(days: freeDays + 1)) : next,
+          nextBillingDate: firstCharge ?? next,
           autoRenew: true,
           currency: currency,
-          currentPrice: offer == OfferKind.freePeriod ? 0 : (promoPrice == 0 ? parsed : promoPrice),
+          currentPrice: offer != OfferKind.none &&
+                  offer != OfferKind.freePeriod &&
+                  promoPrice > 0
+              ? promoPrice
+              : parsed,
           billingCycle: cycle,
           officialWebsiteUrl: service!.officialWebsiteUrl,
           manageSubscriptionUrl: service!.manageSubscriptionUrl,

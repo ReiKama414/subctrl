@@ -237,6 +237,83 @@ class SubscriptionRepository {
     );
   }
 
+  /// After a free / promo period ends: confirm the resume price (or a new one)
+  /// and move the subscription to active so the prompt is not shown again.
+  Future<void> confirmPostOfferPrice({
+    required String id,
+    required double price,
+    required String currency,
+    required String billingCycle,
+  }) async {
+    final view = await getById(id);
+    if (view == null) return;
+    final now = DateTime.now();
+    final previous = view.proposedResumePrice(now: now);
+    final wasTrial = view.status == SubscriptionStatus.trial;
+    final wasPromo = view.status == SubscriptionStatus.promo;
+
+    await (db.update(db.subscriptions)..where((t) => t.id.equals(id))).write(
+      SubscriptionsCompanion(
+        status: Value(SubscriptionStatus.active.name),
+        currentPrice: Value(price),
+        currency: Value(currency),
+        billingCycle: Value(billingCycle),
+        updatedAt: Value(now),
+      ),
+    );
+
+    final phases = await (db.select(db.pricePhases)
+          ..where((t) => t.subscriptionId.equals(id))
+          ..orderBy([(t) => OrderingTerm.asc(t.startDate)]))
+        .get();
+    final regular = phases.where((p) => p.type == PricePhaseType.regular.name).lastOrNull;
+    if (regular != null) {
+      await (db.update(db.pricePhases)..where((t) => t.id.equals(regular.id))).write(
+        PricePhasesCompanion(
+          price: Value(price),
+          currency: Value(currency),
+          billingCycle: Value(billingCycle),
+        ),
+      );
+    } else {
+      await db.into(db.pricePhases).insert(
+            PricePhasesCompanion.insert(
+              id: _uuid.v4(),
+              subscriptionId: id,
+              type: PricePhaseType.regular.name,
+              startDate: now,
+              price: price,
+              currency: currency,
+              billingCycle: billingCycle,
+              sortOrder: Value(phases.length),
+            ),
+          );
+    }
+
+    if (wasTrial) {
+      await addEvent(id, SubscriptionEventType.trialEnded, SubscriptionEventType.trialEnded.name);
+    }
+    if (wasPromo) {
+      await addEvent(id, SubscriptionEventType.promoEnded, SubscriptionEventType.promoEnded.name);
+    }
+    if (price != previous) {
+      await addPriceHistory(
+        subscriptionId: id,
+        oldPrice: previous,
+        newPrice: price,
+        currency: currency,
+        effectiveDate: now,
+        reason: wasTrial ? 'After free period' : 'After promo',
+      );
+    }
+    await addEvent(
+      id,
+      SubscriptionEventType.priceReviewed,
+      SubscriptionEventType.priceReviewed.name,
+      detail: '$currency $price / $billingCycle',
+    );
+  }
+
   Future<void> cancel(String id, DateTime accessUntil) async {
     await (db.update(db.subscriptions)..where((t) => t.id.equals(id))).write(
       SubscriptionsCompanion(

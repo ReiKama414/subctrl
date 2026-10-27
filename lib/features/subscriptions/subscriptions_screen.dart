@@ -228,7 +228,7 @@ class _SubscriptionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                hide ? '••••' : MoneyMath.format(s.currentPrice, s.currency),
+                hide ? '••••' : MoneyMath.format(s.displayedPrice, s.currency),
                 style: AppTypography.amount(inactive ? c.textMuted : c.textPrimary, size: 15),
               ),
               const SizedBox(height: 4),

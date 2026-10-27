@@ -107,6 +107,39 @@ class SubscriptionView {
           accessEndDate != null &&
           accessEndDate!.isAfter(DateTime.now()));
 
+  /// Price in effect today (0 during a free year, promo price during a discount).
+  double get displayedPrice => currentPhase?.price ?? currentPrice;
+
+  /// Free / promo phase whose end is today or already past.
+  PhaseView? endedOfferPhase({DateTime? now}) {
+    final n = now ?? DateTime.now();
+    final today = DateTime(n.year, n.month, n.day);
+    PhaseView? found;
+    for (final p in phases) {
+      if (p.type != PricePhaseType.free && p.type != PricePhaseType.promo) continue;
+      final end = p.trialEndDate ?? p.endDate;
+      if (end == null) continue;
+      final day = DateTime(end.year, end.month, end.day);
+      if (!day.isAfter(today)) found = p;
+    }
+    return found;
+  }
+
+  /// True until the user confirms the resume price after a free / promo period.
+  bool needsPriceReview({DateTime? now}) {
+    if (status != SubscriptionStatus.trial && status != SubscriptionStatus.promo) {
+      return false;
+    }
+    return endedOfferPhase(now: now) != null;
+  }
+
+  /// Regular price to resume at, falling back to the stored list price.
+  double proposedResumePrice({DateTime? now}) {
+    final offer = endedOfferPhase(now: now);
+    final listed = offer?.regularPrice ?? currentPrice;
+    return listed > 0 ? listed : currentPrice;
+  }
+
   PhaseView? phaseOn(DateTime date) {
     final day = DateTime(date.year, date.month, date.day);
     final matches = phases.where((p) {

@@ -203,9 +203,27 @@ class ActionEngine {
     final items = <ActionItem>[];
     for (final sub in subs) {
       final phase = sub.currentPhase;
+      if (sub.needsPriceReview(now: today)) {
+        final after = sub.proposedResumePrice(now: today);
+        final offer = sub.endedOfferPhase(now: today);
+        items.add(ActionItem(
+          kind: 'price_review',
+          subscriptionId: sub.id,
+          title: sub.serviceName,
+          headline: l10n.actionPriceReview,
+          lines: [
+            l10n.actionAfterTrial(
+              MoneyMath.format(after, offer?.regularCurrency ?? sub.currency),
+              l10n.billingCycleLabel(
+                BillingCycle.values.where((c) => c.name == sub.billingCycle).firstOrNull ?? BillingCycle.monthly,
+              ),
+            ),
+          ],
+        ));
+      }
       if (phase?.trialEndDate != null) {
         final left = BillingMath.daysUntil(phase!.trialEndDate!, today);
-        if (left >= 0 && left <= windowDays) {
+        if (left > 0 && left <= windowDays) {
           final after = phase.regularPrice ?? sub.currentPrice;
           items.add(ActionItem(
             kind: 'trial',
@@ -228,7 +246,7 @@ class ActionEngine {
       }
       if (phase?.type == PricePhaseType.promo && phase?.endDate != null) {
         final left = BillingMath.daysUntil(phase!.endDate!, today);
-        if (left >= 0 && left <= windowDays) {
+        if (left > 0 && left <= windowDays) {
           items.add(ActionItem(
             kind: 'promo',
             subscriptionId: sub.id,

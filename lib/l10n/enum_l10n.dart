@@ -139,6 +139,7 @@ extension EnumL10n on AppLocalizations {
         SubscriptionEventType.created => t('eventCreated'),
         SubscriptionEventType.planChanged => t('eventPlanChanged'),
         SubscriptionEventType.priceChanged => t('eventPriceChanged'),
+        SubscriptionEventType.priceReviewed => t('eventPriceReviewed'),
         SubscriptionEventType.promoStarted => t('eventPromoStarted'),
         SubscriptionEventType.promoEnded => t('eventPromoEnded'),
         SubscriptionEventType.trialStarted => t('eventTrialStarted'),
@@ -154,6 +155,7 @@ extension EnumL10n on AppLocalizations {
       };
 
   String get actionFreePeriod => t('actionFreePeriod');
+  String get actionPriceReview => t('actionPriceReview');
   String get actionPromoEnds => t('actionPromoEnds');
   String get actionCancelDeadline => t('actionCancelDeadline');
   String get actionFirstCharge => t('actionFirstCharge');
