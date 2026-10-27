@@ -17,6 +17,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _page = PageController();
   int _index = 0;
+  bool _agreed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +78,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                 ],
               ),
-              const SizedBox(height: 24),
+              if (_index == 2) ...[
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _agreed,
+                  onChanged: (v) => setState(() => _agreed = v == true),
+                  title: Text(l10n.agreeTermsLabel, style: Theme.of(context).textTheme.bodySmall),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                Row(
+                  children: [
+                    TextButton(onPressed: () => context.push('/legal/privacy'), child: Text(l10n.privacy)),
+                    TextButton(onPressed: () => context.push('/legal/terms'), child: Text(l10n.terms)),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: () async {
                     if (_index < 2) {
                       _page.nextPage(duration: AppMotion.normal, curve: Curves.easeOut);
+                      return;
+                    }
+                    if (!_agreed) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.agreeTermsRequired)),
+                      );
                       return;
                     }
                     await ref.read(settingsRepoProvider).patch(

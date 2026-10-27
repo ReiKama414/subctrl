@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:subctrl/core/config/app_env.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
@@ -201,11 +202,21 @@ class ExportService {
     return payload;
   }
 
-  String toCsv(List<SubscriptionView> list) {
-    final buf = StringBuffer('id,service,status,price,currency,cycle,next_billing,profile\n');
-    for (final s in list) {
+  String toCsv(List<SubscriptionView> subs, List<PurchaseOrderView> orders) {
+    final buf = StringBuffer();
+    buf.writeln('# subscriptions');
+    buf.writeln('id,service,status,price,currency,cycle,next_billing,profile');
+    for (final s in subs) {
       buf.writeln(
         '${s.id},${_csv(s.serviceName)},${s.status.name},${s.currentPrice},${s.currency},${s.billingCycle},${s.nextBillingDate?.toIso8601String() ?? ''},${s.profileId}',
+      );
+    }
+    buf.writeln();
+    buf.writeln('# purchase_orders');
+    buf.writeln('id,platform,item,status,price,currency,profile,expected_at');
+    for (final o in orders) {
+      buf.writeln(
+        '${o.id},${_csv(o.platform)},${_csv(o.title)},${o.status.name},${o.price ?? ''},${o.currency ?? ''},${o.profileId},${o.expectedAt?.toIso8601String() ?? ''}',
       );
     }
     return buf.toString();
@@ -219,7 +230,8 @@ class ExportService {
   }
 
   Future<void> shareCsv() async {
-    await _share('subctrl-export.csv', toCsv(await subs.listAll()));
+    final body = toCsv(await subs.listAll(), await purchases.listAll());
+    await _share('subctrl-export.csv', body);
   }
 
   Future<String> backupPath() async {
@@ -573,8 +585,24 @@ class SyncService {
       FirebaseFirestore.instance.collection('users').doc(uid).collection('meta').doc('backup');
 
   Future<String> status(AppLocalizations l10n) async {
-    if (_firebaseUid == null) return l10n.syncLocalOnly;
+    if (!AppEnv.cloudInBuild) return l10n.syncNotAvailable;
+    final uid = _firebaseUid;
+    if (uid == null) return l10n.syncNeedLogin;
+    if (!AppEnv.canUseCloud(uid)) return l10n.syncNotAuthorized;
     return l10n.syncReady;
+  }
+
+  void _ensureCloudAccess(AppLocalizations l10n) {
+    if (!AppEnv.cloudInBuild) {
+      throw SyncException(l10n.syncNotAvailable);
+    }
+    final uid = _firebaseUid;
+    if (uid == null) {
+      throw SyncException(l10n.syncNeedLogin);
+    }
+    if (!AppEnv.canUseCloud(uid)) {
+      throw SyncException(l10n.syncNotAuthorized);
+    }
   }
 
   String? get _firebaseUid {
@@ -587,13 +615,13 @@ class SyncService {
   }
 
   Future<void> upload(AppLocalizations l10n) async {
-    final uid = _firebaseUid;
-    if (uid == null) throw SyncException(l10n.syncNeedLogin);
+    _ensureCloudAccess(l10n);
+    final uid = _firebaseUid!;
     final map = await export.toJsonMap();
     final json = jsonEncode(map);
     // Firestore doc ~1MB limit; subscription ledger JSON is normally far smaller.
     if (json.length > 900 * 1024) {
-      throw SyncException('Backup too large for free Firestore document (~1MB). Export JSON locally instead.');
+      throw SyncException(l10n.syncBackupTooLarge);
     }
     await _doc(uid).set({
       'payload': json,
@@ -604,8 +632,8 @@ class SyncService {
 
   /// Returns backup JSON string, or null if document does not exist.
   Future<String?> download(AppLocalizations l10n) async {
-    final uid = _firebaseUid;
-    if (uid == null) throw SyncException(l10n.syncNeedLogin);
+    _ensureCloudAccess(l10n);
+    final uid = _firebaseUid!;
     try {
       final snap = await _doc(uid).get();
       if (!snap.exists) return null;

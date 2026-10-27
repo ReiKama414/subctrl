@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:subctrl/core/config/app_env.dart';
 import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/database/app_database.dart';
@@ -27,15 +28,17 @@ class BootstrapService {
         db.userAccounts,
         UserAccountsCompanion.insert(id: accountId, createdAt: now, displayName: const Value('Local')),
       );
-      b.insert(
-        db.linkedIdentities,
-        LinkedIdentitiesCompanion.insert(
-          id: 'identity-guest',
-          accountId: accountId,
-          provider: AuthProviderId.guest.name,
-          linkedAt: now,
-        ),
-      );
+      if (!AppEnv.requireAccountLogin) {
+        b.insert(
+          db.linkedIdentities,
+          LinkedIdentitiesCompanion.insert(
+            id: 'identity-guest',
+            accountId: accountId,
+            provider: AuthProviderId.guest.name,
+            linkedAt: now,
+          ),
+        );
+      }
       b.insert(
         db.userProfiles,
         UserProfilesCompanion.insert(

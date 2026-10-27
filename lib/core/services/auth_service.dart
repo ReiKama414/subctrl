@@ -4,21 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:subctrl/core/config/app_env.dart';
 
 class AuthConfig {
-  /// Client IDs are public (already in google-services.json / LINE console).
-  /// Override with `--dart-define=...` or `dart_defines.json` if needed.
-  static const googleServerClientId = String.fromEnvironment(
-    'GOOGLE_SERVER_CLIENT_ID',
-    defaultValue: 'your-web-client-id.apps.googleusercontent.com',
-  );
-  static const lineChannelId = String.fromEnvironment(
-    'LINE_CHANNEL_ID',
-    defaultValue: 'REDACTED_LINE_CHANNEL',
-  );
+  static String get googleServerClientId => AppEnv.googleServerClientId;
+  static String get lineChannelId => AppEnv.lineChannelId;
 
-  static bool get googleConfigured => googleServerClientId.isNotEmpty;
-  static bool get lineConfigured => lineChannelId.isNotEmpty;
+  static bool get googleConfigured => AppEnv.googleConfigured;
+  static bool get lineConfigured => AppEnv.lineConfigured;
 }
 
 class AuthException implements Exception {
@@ -305,4 +298,16 @@ class AuthService {
         'line' => line,
         _ => guest,
       };
+
+  Future<void> signOutRemote() async {
+    if (Firebase.apps.isEmpty) return;
+    try {
+      await firebase_auth.FirebaseAuth.instance.signOut();
+    } catch (_) {}
+    try {
+      if (AuthConfig.googleConfigured) {
+        await GoogleSignIn.instance.signOut();
+      }
+    } catch (_) {}
+  }
 }

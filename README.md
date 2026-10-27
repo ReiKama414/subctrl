@@ -1,56 +1,57 @@
 # SUB//CTRL
 
-Subscription Control Center — a local-first ledger for digital subscriptions, trials, promotions, renewals, and foreign-currency spend.
+Subscription Control Center — local-first subscription and preorder ledger.
 
-## Run
+Distribution is **GitHub Releases only** (not open source). Two APK variants:
+
+| APK | Who | How to get |
+| --- | --- | --- |
+| **Local** (`subctrl-local-release.apk`) | Everyone | GitHub Releases — tag `v*` |
+| **Account** (`subctrl-account-release.apk`) | Maintainer only | Build on your machine (never uploaded by CI) |
+
+## Public release (local APK)
+
+- **No login screen** — opens onboarding / home directly (guest session)
+- **No cloud backup**
+- **No Google / LINE / Firebase / cloud** — no developer API keys in CI
+- **FX refresh** uses public [open.er-api.com](https://open.er-api.com) when the user taps update rates (no key)
+- Data stays on device; backup via Settings → Data (JSON / file)
+
+CI builds this automatically when you push a version tag.
+
+## Your private APK (account)
+
+1. Copy `dart_defines.example.json` → `dart_defines.json` (gitignored)
+2. Set `APP_AUTH_MODE` to `account` and your `GOOGLE_SERVER_CLIENT_ID`, etc.
+3. Add `android/app/google-services.json` from your Firebase project
+4. Deploy `firestore.rules` to your Firebase project
+5. Cloud backup appears in Settings after **Google** sign-in (Firebase Auth session)
+6. Build:
+
+```powershell
+.\scripts\build-account-apk.ps1
+```
+
+Output: `build/account/subctrl-account-release.apk` — install manually; **do not** attach to public Releases.
+
+## Develop
 
 ```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter run
+flutter test
+flutter run --dart-define=APP_AUTH_MODE=local
 ```
 
-Google / LINE / Web Firebase credentials are **built in as defaults**.  
-You can just `flutter run` or `flutter run -d chrome` — no extra `--dart-define` needed.
+With private defines: `.\scripts\run.ps1` (uses `dart_defines.json` when present).
 
-Optional overrides:
+On Windows, use an ASCII path (e.g. `C:\Users\you\subctrl-apk`) if Flutter fails on non-ASCII project paths.
 
-- `dart_defines.json` (used by VS Code / Cursor launch configs and `scripts/run.ps1`)
-- or `--dart-define-from-file=dart_defines.json`
-
-```powershell
-.\scripts\run.ps1 -Device chrome
-```
-
-Guest mode works without an account. Demo sample data is **off** by default (Settings → Load demo data).
-
-## Configuration
-
-| Integration | Notes |
-| --- | --- |
-| Google Sign-In | Default Web client ID embedded; Android needs `google-services.json` |
-| LINE Login | Default Channel ID `REDACTED_LINE_CHANNEL` (native only; not Web) |
-| FX rates | `https://open.er-api.com/v6/latest/USD` (no key) |
-| Cloud backup | **Cloud Firestore** (Spark free). Settings → Account after Google sign-in |
-
-### Firestore rules (free Spark)
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
-Do **not** enable Storage (needs Blaze). This app uses Firestore only.
-
-## Tests
+## Release tag
 
 ```bash
-flutter analyze
-flutter test
+git tag v1.0.1
+git push origin v1.0.1
 ```
+
+Uploads **only** `subctrl-local-release.apk`.

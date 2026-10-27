@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:subctrl/core/providers.dart';
-import 'package:subctrl/core/services/notification_service.dart';
+import 'package:subctrl/core/utils/notification_prompt_store.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 
-/// Asks OS permission once when user enables reminders or adds a subscription.
-Future<void> ensureNotificationPermission(BuildContext context, WidgetRef ref) async {
+/// In-app explainer, then OS notification permission when user opts in.
+Future<void> ensureNotificationPermission(
+  BuildContext context,
+  WidgetRef ref, {
+  bool requireNotificationsEnabled = true,
+}) async {
   final prefs = ref.read(preferencesProvider).valueOrNull;
-  if (prefs?.notificationsEnabled != true) return;
-  final asked = ref.read(notificationPermissionAskedProvider);
-  if (asked) {
-    await ref.read(notificationServiceProvider).requestPermission();
+  if (requireNotificationsEnabled && prefs?.notificationsEnabled != true) return;
+
+  final shown = await NotificationPromptStore.wasShown();
+  if (shown) {
+    if (prefs?.notificationsEnabled == true) {
+      await ref.read(notificationServiceProvider).requestPermission();
+    }
     return;
   }
+
+  if (!context.mounted) return;
   final l10n = context.l10n;
   final ok = await showDialog<bool>(
     context: context,
+    barrierDismissible: false,
     builder: (ctx) => AlertDialog(
       title: Text(l10n.notificationPermissionTitle),
       content: Text(l10n.notificationPermissionBody),
@@ -25,10 +35,8 @@ Future<void> ensureNotificationPermission(BuildContext context, WidgetRef ref) a
       ],
     ),
   );
-  ref.read(notificationPermissionAskedProvider.notifier).state = true;
+  await NotificationPromptStore.markShown();
   if (ok == true) {
     await ref.read(notificationServiceProvider).requestPermission();
   }
 }
-
-final notificationPermissionAskedProvider = StateProvider<bool>((ref) => false);

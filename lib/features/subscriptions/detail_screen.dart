@@ -404,7 +404,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.usesPerMonth),
                   subtitle: sub.usageCountPerMonth != null && sub.usageCountPerMonth! > 0
-                      ? Text('Cost / use: ${MoneyMath.format(fx.monthlyBase(sub) / sub.usageCountPerMonth!, fx.baseCurrency)}')
+                      ? Text(
+                          l10n.costPerUse(
+                            MoneyMath.format(
+                              fx.monthlyBase(sub) / sub.usageCountPerMonth!,
+                              fx.baseCurrency,
+                            ),
+                          ),
+                        )
                       : null,
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/app_info.dart';
+import 'package:subctrl/core/utils/notification_prompt.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
 
   @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ensureNotificationPermission(context, ref);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final navigationShell = widget.navigationShell;
     final l10n = context.l10n;
     return Scaffold(
       body: SafeArea(bottom: false, child: navigationShell),
@@ -41,6 +58,7 @@ class AppShell extends StatelessWidget {
   }
 
   Widget _tab(BuildContext context, int index, IconData icon, IconData activeIcon, String label) {
+    final navigationShell = widget.navigationShell;
     final selected = navigationShell.currentIndex == index;
     final c = context.colors;
     final color = selected ? c.textPrimary : c.textMuted;

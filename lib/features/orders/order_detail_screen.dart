@@ -5,6 +5,7 @@ import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/money.dart';
+import 'package:subctrl/features/orders/order_actions.dart';
 import 'package:subctrl/features/orders/orders_screen.dart';
 import 'package:subctrl/features/orders/purchase_flow.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
@@ -31,6 +32,14 @@ class OrderDetailScreen extends ConsumerWidget {
             tooltip: l10n.editOrder,
             onPressed: () => context.push('/orders/$id/edit'),
             icon: const Icon(Icons.edit_rounded),
+          ),
+          IconButton(
+            tooltip: l10n.deleteOrder,
+            onPressed: () async {
+              final deleted = await confirmAndDeleteOrder(context, ref, id);
+              if (deleted && context.mounted) context.pop();
+            },
+            icon: Icon(Icons.delete_outline_rounded, color: c.danger),
           ),
         ],
       ),
@@ -212,28 +221,18 @@ class OrderDetailScreen extends ConsumerWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 32),
-                TextButton.icon(
+                const SizedBox(height: 24),
+                OutlinedButton.icon(
                   icon: Icon(Icons.delete_outline_rounded, color: c.danger, size: 20),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: c.danger,
+                    side: BorderSide(color: c.danger.withValues(alpha: 0.5)),
+                  ),
                   onPressed: () async {
-                    final ok = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: Text(l10n.deleteOrder),
-                        content: Text(l10n.deleteOrderBody),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
-                          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.deleteOrder)),
-                        ],
-                      ),
-                    );
-                    if (ok == true) {
-                      await ref.read(purchaseRepoProvider).delete(order.id);
-                      await resyncAllNotifications(ref);
-                      if (context.mounted) context.pop();
-                    }
+                    final deleted = await confirmAndDeleteOrder(context, ref, order.id);
+                    if (deleted && context.mounted) context.pop();
                   },
-                  label: Text(l10n.deleteOrder, style: TextStyle(color: c.danger)),
+                  label: Text(l10n.deleteOrder),
                 ),
               ],
             );

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/data/seed/bootstrap.dart';
 import 'package:subctrl/data/seed/catalog.dart';
 import 'package:uuid/uuid.dart';
 
@@ -322,6 +323,14 @@ class FinanceRepository {
   }
 }
 
+class ProfileNotDeletableException implements Exception {
+  const ProfileNotDeletableException();
+}
+
+class ProfileInUseException implements Exception {
+  const ProfileInUseException();
+}
+
 class SettingsRepository {
   SettingsRepository(this.db);
   final AppDatabase db;
@@ -360,6 +369,10 @@ class SettingsRepository {
   }
 
   Future<List<LinkedIdentity>> identities() => db.select(db.linkedIdentities).get();
+
+  Future<void> unlinkIdentity(String provider) async {
+    await (db.delete(db.linkedIdentities)..where((t) => t.provider.equals(provider))).go();
+  }
 
   Future<void> linkIdentity({
     required String provider,
@@ -405,6 +418,38 @@ class SettingsRepository {
           ),
         );
     return id;
+  }
+
+  Future<void> renameCustomProfile(String id, String name) async {
+    final row = await (db.select(db.userProfiles)..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+    if (row.type != ProfileType.custom.name) {
+      throw const ProfileNotDeletableException();
+    }
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
+    await (db.update(db.userProfiles)..where((t) => t.id.equals(id))).write(
+          UserProfilesCompanion(name: Value(trimmed.toUpperCase())),
+        );
+  }
+
+  /// Removes a user-created profile. Built-in personal / work / family cannot be deleted.
+  Future<void> deleteCustomProfile(String id) async {
+    final row = await (db.select(db.userProfiles)..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+    if (row.type != ProfileType.custom.name) {
+      throw const ProfileNotDeletableException();
+    }
+    final subs = await (db.select(db.subscriptions)..where((t) => t.profileId.equals(id))).get();
+    final orders = await (db.select(db.purchaseOrders)..where((t) => t.profileId.equals(id))).get();
+    if (subs.isNotEmpty || orders.isNotEmpty) {
+      throw const ProfileInUseException();
+    }
+    await (db.delete(db.userProfiles)..where((t) => t.id.equals(id))).go();
+    final prefs = await get();
+    if (prefs.activeProfileId == id) {
+      await setActiveProfile(personalProfileId);
+    }
   }
 
   Future<void> setActiveProfile(String? profileId) {

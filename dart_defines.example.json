@@ -1,0 +1,12 @@
+{
+  "APP_AUTH_MODE": "account",
+  "GOOGLE_SERVER_CLIENT_ID": "your-web-client-id.apps.googleusercontent.com",
+  "LINE_CHANNEL_ID": "",
+  "FIREBASE_ANDROID_API_KEY": "",
+  "FIREBASE_ANDROID_APP_ID": "",
+  "FIREBASE_MESSAGING_SENDER_ID": "",
+  "FIREBASE_PROJECT_ID": "",
+  "FIREBASE_STORAGE_BUCKET": "",
+  "FIREBASE_WEB_APP_ID": "",
+  "FIREBASE_WEB_API_KEY": ""
+}

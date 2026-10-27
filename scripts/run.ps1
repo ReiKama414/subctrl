@@ -6,6 +6,10 @@ param(
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$args = @("run", "--dart-define-from-file=dart_defines.json")
+$defines = Join-Path $root "dart_defines.json"
+$args = @("run")
+if (Test-Path $defines) {
+  $args += @("--dart-define-from-file=dart_defines.json")
+}
 if ($Device) { $args += @("-d", $Device) }
 flutter @args

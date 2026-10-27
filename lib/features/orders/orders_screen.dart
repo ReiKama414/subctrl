@@ -6,6 +6,7 @@ import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/repositories/purchase_repository.dart';
+import 'package:subctrl/features/orders/order_actions.dart';
 import 'package:subctrl/features/orders/purchase_flow.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
@@ -154,12 +155,26 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                   if (pending.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     SectionHeader(l10n.pendingOrders),
-                    ...pending.map((o) => _OrderTile(order: o, hide: hide, onTap: () => context.push('/orders/${o.id}'))),
+                    ...pending.map(
+                      (o) => _OrderTile(
+                        order: o,
+                        hide: hide,
+                        onTap: () => context.push('/orders/${o.id}'),
+                        onDelete: () => confirmAndDeleteOrder(context, ref, o.id),
+                      ),
+                    ),
                   ],
                   if (done.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     SectionHeader(l10n.completedOrders),
-                    ...done.map((o) => _OrderTile(order: o, hide: hide, onTap: () => context.push('/orders/${o.id}'))),
+                    ...done.map(
+                      (o) => _OrderTile(
+                        order: o,
+                        hide: hide,
+                        onTap: () => context.push('/orders/${o.id}'),
+                        onDelete: () => confirmAndDeleteOrder(context, ref, o.id),
+                      ),
+                    ),
                   ],
                 ],
               ],
@@ -172,10 +187,16 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 }
 
 class _OrderTile extends StatelessWidget {
-  const _OrderTile({required this.order, required this.hide, required this.onTap});
+  const _OrderTile({
+    required this.order,
+    required this.hide,
+    required this.onTap,
+    required this.onDelete,
+  });
   final PurchaseOrderView order;
   final bool hide;
   final VoidCallback onTap;
+  final Future<void> Function() onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +242,12 @@ class _OrderTile extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            IconButton(
+              tooltip: l10n.deleteOrder,
+              icon: Icon(Icons.delete_outline_rounded, color: c.danger, size: 22),
+              onPressed: () => onDelete(),
+            ),
+            const SizedBox(width: 4),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

@@ -12,6 +12,7 @@ import 'package:subctrl/core/services/notification_service.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/repositories/catalog_repository.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
+import 'package:subctrl/core/config/app_env.dart';
 import 'package:subctrl/firebase_options.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -64,6 +65,10 @@ Future<void> main() async {
 
 Future<void> _initFirebase() async {
   if (Firebase.apps.isNotEmpty) return;
+  if (!AppEnv.integrationsEnabled) return;
+  if (!DefaultFirebaseOptions.hasAndroidConfig && !DefaultFirebaseOptions.hasWebConfig) {
+    return;
+  }
   try {
     if (kIsWeb) {
       if (!DefaultFirebaseOptions.hasWebConfig) {
@@ -79,8 +84,17 @@ Future<void> _initFirebase() async {
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.android)
-          .timeout(const Duration(seconds: 10));
+      if (DefaultFirebaseOptions.hasAndroidConfig) {
+        await Firebase.initializeApp(options: DefaultFirebaseOptions.android)
+            .timeout(const Duration(seconds: 10));
+      } else {
+        try {
+          // Uses android/app/google-services.json when present (gitignored).
+          await Firebase.initializeApp().timeout(const Duration(seconds: 10));
+        } catch (e) {
+          debugPrint('SUB//CTRL: Android Firebase skipped ($e)');
+        }
+      }
     }
   } catch (e, st) {
     debugPrint('Firebase init skipped/failed: $e\n$st');

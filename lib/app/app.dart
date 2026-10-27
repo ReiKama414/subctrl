@@ -80,27 +80,80 @@ class SubCtrlApp extends ConsumerWidget {
   }
 }
 
-class _LockGate extends ConsumerWidget {
+class _LockGate extends ConsumerStatefulWidget {
   const _LockGate();
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_LockGate> createState() => _LockGateState();
+}
+
+class _LockGateState extends ConsumerState<_LockGate> {
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryUnlock());
+  }
+
+  Future<void> _tryUnlock() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final l10n = context.l10n;
+    final ok = await ref.read(securityServiceProvider).unlock(
+          reason: l10n.unlockReason,
+          cancelButton: l10n.unlockCancel,
+        );
+    if (!mounted) return;
+    if (ok) {
+      ref.read(unlockedProvider.notifier).state = true;
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _error = l10n.biometricUnlockFailed;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Material(
       color: context.colors.background.withValues(alpha: 0.96),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SectionLabel(l10n.locked),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () async {
-                final ok = await ref.read(securityServiceProvider).unlock();
-                if (ok) ref.read(unlockedProvider.notifier).state = true;
-              },
-              child: Text(l10n.unlock),
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SectionLabel(l10n.locked),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.lockedHint,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.body(context.colors.textMuted),
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _error!,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.caption(context.colors.danger),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: _busy ? null : _tryUnlock,
+                  child: Text(_busy ? '…' : l10n.unlock),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -861,7 +861,7 @@ class _CategoryPill extends StatelessWidget {
                 label,
                 softWrap: false,
                 maxLines: 1,
-                overflow: TextOverflow.clip,
+                overflow: TextOverflow.ellipsis,
                 style: AppTypography.sans.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

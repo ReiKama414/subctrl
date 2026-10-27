@@ -6,6 +6,7 @@ import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/notification_prompt.dart';
+import 'package:subctrl/features/orders/order_actions.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
@@ -230,9 +231,29 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(_editing ? l10n.editOrder : l10n.addOrderTitle)),
+      appBar: AppBar(
+        title: Text(_editing ? l10n.editOrder : l10n.addOrderTitle),
+        actions: [
+          if (_editing)
+            IconButton(
+              tooltip: l10n.deleteOrder,
+              onPressed: () async {
+                final deleted = await confirmAndDeleteOrder(context, ref, widget.editId!);
+                if (deleted && context.mounted) {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/orders');
+                  }
+                }
+              },
+              icon: Icon(Icons.delete_outline_rounded, color: c.danger),
+            ),
+        ],
+      ),
       body: AppPage(
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 32),
           children: [
             SectionLabel(l10n.orderItem),
             const SizedBox(height: 8),
@@ -308,7 +329,7 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => _pickDate(expected: false, reminder: true),
               child: Text(
@@ -319,6 +340,7 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
             ),
             const SizedBox(height: 16),
             SectionLabel(l10n.quantity),
+            const SizedBox(height: 8),
             Row(
               children: [
                 IconButton(
@@ -357,23 +379,50 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            TextField(controller: deposit, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.depositPaid)),
-            TextField(controller: balance, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.balanceDue)),
-            TextField(controller: shipping, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.shippingFee)),
-            TextField(controller: service, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.serviceFee)),
-            const SizedBox(height: 12),
-            TextField(controller: seller, decoration: InputDecoration(labelText: l10n.sellerName)),
-            TextField(controller: orderNo, decoration: InputDecoration(labelText: l10n.orderNumber)),
-            TextField(controller: trackingNo, decoration: InputDecoration(labelText: l10n.trackingNumber)),
-            TextField(controller: forwarder, decoration: InputDecoration(labelText: l10n.forwarder)),
-            TextField(controller: paymentNote, decoration: InputDecoration(labelText: l10n.paymentNote)),
+            const SizedBox(height: 16),
+            SectionLabel(l10n.depositPaid),
             const SizedBox(height: 8),
+            TextField(
+              controller: deposit,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: l10n.depositPaid),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: balance,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: l10n.balanceDue),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: shipping,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: l10n.shippingFee),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: service,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: l10n.serviceFee),
+            ),
+            const SizedBox(height: 20),
+            SectionLabel(l10n.orderDetail),
+            const SizedBox(height: 8),
+            TextField(controller: seller, decoration: InputDecoration(labelText: l10n.sellerName)),
+            const SizedBox(height: 12),
+            TextField(controller: orderNo, decoration: InputDecoration(labelText: l10n.orderNumber)),
+            const SizedBox(height: 12),
+            TextField(controller: trackingNo, decoration: InputDecoration(labelText: l10n.trackingNumber)),
+            const SizedBox(height: 12),
+            TextField(controller: forwarder, decoration: InputDecoration(labelText: l10n.forwarder)),
+            const SizedBox(height: 12),
+            TextField(controller: paymentNote, decoration: InputDecoration(labelText: l10n.paymentNote)),
+            const SizedBox(height: 12),
             TextField(
               controller: trackingUrl,
               decoration: InputDecoration(hintText: l10n.trackingUrlOptional),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextField(
               controller: notes,
               maxLines: 3,

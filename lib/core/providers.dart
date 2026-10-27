@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:subctrl/core/config/app_env.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/services/auth_service.dart';
 import 'package:subctrl/core/services/export_service.dart';
@@ -48,6 +51,21 @@ Future<void> resyncAllNotifications(WidgetRef ref, {bool? enabled}) async {
   );
 }
 final syncServiceProvider = Provider((ref) => SyncService(ref.watch(exportServiceProvider)));
+
+final firebaseUidProvider = StreamProvider<String?>((ref) {
+  if (!AppEnv.integrationsEnabled || Firebase.apps.isEmpty) {
+    return Stream.value(null);
+  }
+  return firebase_auth.FirebaseAuth.instance.authStateChanges().map((u) => u?.uid);
+});
+
+/// True on account APK when signed in with Google (Firebase Auth session active).
+final cloudSyncEnabledProvider = Provider<bool>((ref) {
+  if (!AppEnv.cloudInBuild) return false;
+  final uid = ref.watch(firebaseUidProvider).valueOrNull;
+  return AppEnv.canUseCloud(uid);
+});
+
 final logoResolverProvider = Provider((ref) => const ServiceLogoResolver());
 
 final preferencesProvider = StreamProvider<PreferenceView>((ref) {
@@ -132,6 +150,7 @@ final identitiesProvider = FutureProvider((ref) {
   return ref.watch(settingsRepoProvider).identities();
 });
 
+/// Session unlock flag; cold start sets this from [main] when biometric lock is on.
 final unlockedProvider = StateProvider<bool>((ref) => true);
 
 /// null = follow device locale

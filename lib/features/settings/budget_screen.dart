@@ -44,6 +44,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     }
 
     final l10n = context.l10n;
+    final c = context.colors;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.budget)),
       body: AppPage(
@@ -60,35 +61,43 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
             };
 
             return ListView(
+              padding: const EdgeInsets.only(bottom: 32),
               children: [
                 const ProfileSwitcher(compact: true),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 SurfaceCard(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SectionLabel(l10n.total),
+                      const SizedBox(height: 6),
                       Text(
                         '${MoneyMath.format(snapShot.spent, fx.baseCurrency)} / ${MoneyMath.format(snapShot.limit, fx.baseCurrency)}',
+                        style: AppTypography.body(c.textPrimary).copyWith(fontWeight: FontWeight.w600),
                       ),
+                      const SizedBox(height: 8),
                       Text(
                         '${(snapShot.ratio * 100).toStringAsFixed(0)}%',
-                        style: TextStyle(color: snapShot.over ? context.colors.warning : context.colors.textPrimary),
+                        style: AppTypography.caption(snapShot.over ? c.warning : c.textMuted),
                       ),
+                      const SizedBox(height: 10),
                       LinearProgressIndicator(
                         value: snapShot.ratio.clamp(0, 1),
-                        color: snapShot.over ? context.colors.warning : context.colors.accent,
+                        color: snapShot.over ? c.warning : c.accent,
+                        minHeight: 6,
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 TextField(
                   controller: totalCtrl,
                   decoration: InputDecoration(labelText: l10n.monthlyTotalBudget),
                   keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 FilledButton(
                   onPressed: () async {
                     final v = double.tryParse(totalCtrl.text);
@@ -103,9 +112,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   },
                   child: Text(l10n.saveTotal),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
                 SectionLabel(l10n.categoryBudgets),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 for (final cat in CategorySlug.values) ...[
                   Builder(builder: (_) {
                     final spentCat = byCat[cat.name] ?? 0;
@@ -117,58 +126,71 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: SurfaceCard(
+                        padding: const EdgeInsets.all(14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Expanded(child: Text(l10n.categoryLabel(cat), style: AppTypography.label(context.colors.textPrimary))),
-                                if (over) StatusMark(l10n.overBudget, tone: context.colors.warning),
+                                Expanded(child: Text(l10n.categoryLabel(cat), style: AppTypography.label(c.textPrimary))),
+                                if (over) StatusMark(l10n.overBudget, tone: c.warning),
                               ],
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Text(
                               limitCat <= 0
                                   ? '${MoneyMath.format(spentCat, fx.baseCurrency)} / —'
                                   : '${MoneyMath.format(spentCat, fx.baseCurrency)} / ${MoneyMath.format(limitCat, fx.baseCurrency)}',
+                              style: AppTypography.body(c.textSecondary),
                             ),
                             if (limitCat > 0) ...[
-                              Text('${(snap.ratio * 100).toStringAsFixed(0)}%'),
+                              const SizedBox(height: 6),
+                              Text(
+                                '${(snap.ratio * 100).toStringAsFixed(0)}%',
+                                style: AppTypography.caption(c.textMuted),
+                              ),
+                              const SizedBox(height: 8),
                               LinearProgressIndicator(
                                 value: snap.ratio.clamp(0, 1),
-                                color: over ? context.colors.warning : context.colors.accent,
+                                color: over ? c.warning : c.accent,
+                                minHeight: 5,
+                                borderRadius: BorderRadius.circular(4),
                               ),
                             ],
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 12),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
                                   child: TextField(
                                     controller: ctrl,
-                                    decoration: const InputDecoration(labelText: 'Limit', isDense: true),
+                                    decoration: InputDecoration(labelText: l10n.budgetCategoryLimit),
                                     keyboardType: TextInputType.number,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                FilledButton(
-                                  onPressed: () async {
-                                    final v = double.tryParse(ctrl.text);
-                                    if (v == null || v <= 0) {
-                                      if (budget != null) {
-                                        await ref.read(financeRepoProvider).deleteBudget(budget.id);
+                                const SizedBox(width: 10),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: FilledButton(
+                                    onPressed: () async {
+                                      final v = double.tryParse(ctrl.text);
+                                      if (v == null || v <= 0) {
+                                        if (budget != null) {
+                                          await ref.read(financeRepoProvider).deleteBudget(budget.id);
+                                        }
+                                      } else {
+                                        await ref.read(financeRepoProvider).upsertBudget(
+                                              id: 'budget-cat-${cat.name}',
+                                              scope: 'category',
+                                              categoryId: cat.name,
+                                              amount: v,
+                                              currency: fx.baseCurrency,
+                                            );
                                       }
-                                    } else {
-                                      await ref.read(financeRepoProvider).upsertBudget(
-                                            id: 'budget-cat-${cat.name}',
-                                            scope: 'category',
-                                            categoryId: cat.name,
-                                            amount: v,
-                                            currency: fx.baseCurrency,
-                                          );
-                                    }
-                                    ref.invalidate(budgetsProvider);
-                                  },
-                                  child: Text(l10n.save),
+                                      ref.invalidate(budgetsProvider);
+                                    },
+                                    child: Text(l10n.save),
+                                  ),
                                 ),
                               ],
                             ),

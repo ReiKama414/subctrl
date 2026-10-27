@@ -5,6 +5,7 @@ import 'package:subctrl/l10n/app_localizations.dart';
 
 /// Best-effort cloud backup after local edits when the user opted in.
 Future<void> maybeCloudUpload(WidgetRef ref, AppLocalizations l10n) async {
+  if (!ref.read(cloudSyncEnabledProvider)) return;
   final prefs = ref.read(preferencesProvider).valueOrNull;
   if (prefs?.cloudAutoUpload != true) return;
   try {

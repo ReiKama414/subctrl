@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/app_info.dart';
 import 'package:subctrl/core/constants/currencies.dart';
+import 'package:subctrl/core/config/app_env.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/utils/notification_prompt.dart';
@@ -14,6 +16,7 @@ import 'package:subctrl/shared/widgets/theme_color_picker.dart';
 import 'package:subctrl/core/services/auth_service.dart';
 import 'package:subctrl/core/services/export_service.dart';
 import 'package:subctrl/data/database/app_database.dart';
+import 'package:subctrl/data/repositories/catalog_repository.dart';
 import 'package:subctrl/data/seed/demo_seed.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
@@ -30,6 +33,7 @@ class SettingsScreen extends ConsumerWidget {
     final fx = ref.watch(currencyEngineProvider);
     final rates = ref.watch(ratesProvider).valueOrNull ?? {};
     final l10n = context.l10n;
+    final cloudOn = ref.watch(cloudSyncEnabledProvider);
     if (prefs == null) {
       return const Scaffold(body: Center(child: SkeletonBlock(height: 24, width: 80)));
     }
@@ -69,7 +73,8 @@ class SettingsScreen extends ConsumerWidget {
               label: l10n.profiles,
               children: [
                 const ProfileSwitcher(),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
+                ..._customProfileTiles(context, ref, l10n),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.person_add_alt_rounded),
@@ -176,7 +181,10 @@ class SettingsScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'USD → TWD ${(rates['TWD'] ?? AppCurrencies.usdFallbacks['TWD']!).toStringAsFixed(2)}',
+                      l10n.rateUsdTo(
+                        (rates['TWD'] ?? AppCurrencies.usdFallbacks['TWD']!).toStringAsFixed(2),
+                        'TWD',
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
@@ -211,9 +219,24 @@ class SettingsScreen extends ConsumerWidget {
                   title: Text(l10n.biometricLock),
                   subtitle: Text(l10n.securityBiometricHint),
                   value: prefs.biometricLock,
-                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
-                        UserPreferencesCompanion(biometricLock: Value(v)),
-                      ),
+                  onChanged: (v) async {
+                    if (v) {
+                      final can = await ref.read(securityServiceProvider).canBiometric();
+                      if (!can) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.biometricUnavailable)),
+                          );
+                        }
+                        return;
+                      }
+                    }
+                    await ref.read(settingsRepoProvider).patch(
+                          UserPreferencesCompanion(biometricLock: Value(v)),
+                        );
+                    // Stay unlocked until the next cold start.
+                    ref.read(unlockedProvider.notifier).state = true;
+                  },
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -227,13 +250,17 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            SettingsBlock(
-              label: l10n.account,
-              children: [
+            if (AppEnv.requireAccountLogin)
+              SettingsBlock(
+                label: l10n.account,
+                children: [
                 Text(l10n.accountOptionalNote, style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 8),
-                Text(l10n.firestoreSetupHint, style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 8),
+                Text(
+                  cloudOn ? l10n.firestoreSetupHint : l10n.accountLocalOnlyNote,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
                 ...[
                   'google',
                   if (!kIsWeb) 'line',
@@ -245,7 +272,14 @@ class SettingsScreen extends ConsumerWidget {
                     leading: Icon(p == 'guest' ? Icons.person_outline_rounded : Icons.account_circle_rounded),
                     title: Text(l10n.providerLabel(p)),
                     subtitle: Text(linked ? l10n.connected : l10n.notConnected),
-                    trailing: linked ? null : Text(l10n.link),
+                    trailing: linked
+                        ? (p == 'guest'
+                            ? null
+                            : TextButton(
+                                onPressed: () => _disconnectProvider(context, ref, p),
+                                child: Text(l10n.disconnect),
+                              ))
+                        : Text(l10n.link),
                     onTap: linked
                         ? null
                         : () async {
@@ -259,6 +293,7 @@ class SettingsScreen extends ConsumerWidget {
                                   );
                               ref.invalidate(identitiesProvider);
                               if (context.mounted &&
+                                  ref.read(cloudSyncEnabledProvider) &&
                                   (ref.read(preferencesProvider).valueOrNull?.cloudAutoDownload ?? true)) {
                                 await _cloudDownload(context, ref);
                               }
@@ -275,43 +310,46 @@ class SettingsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(l10n.lineWebUnsupported, style: Theme.of(context).textTheme.bodySmall),
                   ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.cloudAutoDownload),
-                  value: prefs.cloudAutoDownload,
-                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
-                        UserPreferencesCompanion(cloudAutoDownload: Value(v)),
-                      ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.cloudAutoUpload),
-                  value: prefs.cloudAutoUpload,
-                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
-                        UserPreferencesCompanion(cloudAutoUpload: Value(v)),
-                      ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.cloud_sync_rounded),
-                  title: Text(l10n.sync),
-                  subtitle: FutureBuilder(
-                    future: ref.read(syncServiceProvider).status(l10n),
-                    builder: (_, s) => Text(s.data ?? '…'),
+                if (cloudOn) ...[
+                  const SizedBox(height: 4),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.cloudAutoDownload),
+                    value: prefs.cloudAutoDownload,
+                    onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                          UserPreferencesCompanion(cloudAutoDownload: Value(v)),
+                        ),
                   ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.cloud_upload_rounded),
-                  title: Text(l10n.cloudUpload),
-                  onTap: () => _cloudUpload(context, ref),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.cloud_download_rounded),
-                  title: Text(l10n.cloudDownload),
-                  onTap: () => _cloudDownload(context, ref),
-                ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.cloudAutoUpload),
+                    value: prefs.cloudAutoUpload,
+                    onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                          UserPreferencesCompanion(cloudAutoUpload: Value(v)),
+                        ),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.cloud_sync_rounded),
+                    title: Text(l10n.sync),
+                    subtitle: FutureBuilder(
+                      future: ref.read(syncServiceProvider).status(l10n),
+                      builder: (_, s) => Text(s.data ?? '…'),
+                    ),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.cloud_upload_rounded),
+                    title: Text(l10n.cloudUpload),
+                    onTap: () => _cloudUpload(context, ref),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.cloud_download_rounded),
+                    title: Text(l10n.cloudDownload),
+                    onTap: () => _cloudDownload(context, ref),
+                  ),
+                ],
               ],
             ),
             SettingsBlock(
@@ -321,12 +359,14 @@ class SettingsScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.data_object_rounded),
                   title: Text(l10n.exportJson),
+                  subtitle: Text(l10n.exportSensitiveHint, style: Theme.of(context).textTheme.bodySmall),
                   onTap: () => ref.read(exportServiceProvider).shareJson(),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.table_chart_rounded),
                   title: Text(l10n.exportCsv),
+                  subtitle: Text(l10n.exportSensitiveHint, style: Theme.of(context).textTheme.bodySmall),
                   onTap: () => ref.read(exportServiceProvider).shareCsv(),
                 ),
                 ListTile(
@@ -423,13 +463,17 @@ class SettingsScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: Text(l10n.privacy),
-                  subtitle: Text(l10n.privacyBody),
+                  subtitle: Text(l10n.privacyBody, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                  onTap: () => context.push('/legal/privacy'),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.description_outlined),
                   title: Text(l10n.terms),
-                  subtitle: Text(l10n.termsBody),
+                  subtitle: Text(l10n.termsBody, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                  onTap: () => context.push('/legal/terms'),
                 ),
               ],
             ),
@@ -437,6 +481,27 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _disconnectProvider(BuildContext context, WidgetRef ref, String provider) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.disconnect),
+        content: Text(l10n.disconnectProviderBody(l10n.providerLabel(provider))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.disconnect)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await ref.read(settingsRepoProvider).unlinkIdentity(provider);
+    if (provider == 'google' || provider == 'line') {
+      await ref.read(authServiceProvider).signOutRemote();
+    }
+    ref.invalidate(identitiesProvider);
   }
 
   Future<void> _cloudUpload(BuildContext context, WidgetRef ref) async {
@@ -478,6 +543,96 @@ class SettingsScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
       }
     }
+  }
+
+  List<Widget> _customProfileTiles(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+    final profiles = ref.watch(profilesProvider).valueOrNull ?? [];
+    final custom = profiles.where((p) => p.type == ProfileType.custom.name).toList();
+    if (custom.isEmpty) return const [];
+    return [
+      for (final p in custom)
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.folder_special_outlined),
+          title: Text(l10n.profileDisplayName(p.type, p.name)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                tooltip: l10n.renameCustomProfile,
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _renameProfile(context, ref, p.id, p.name),
+              ),
+              IconButton(
+                tooltip: l10n.deleteCustomProfile,
+                icon: Icon(Icons.delete_outline_rounded, color: context.colors.danger),
+                onPressed: () => _deleteProfile(context, ref, p.id, p.name),
+              ),
+            ],
+          ),
+        ),
+      const SizedBox(height: 4),
+    ];
+  }
+
+  Future<void> _deleteProfile(BuildContext context, WidgetRef ref, String id, String name) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteCustomProfile),
+        content: Text(l10n.deleteCustomProfileBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.deleteCustomProfile)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref.read(settingsRepoProvider).deleteCustomProfile(id);
+      ref.invalidate(profilesProvider);
+      ref.invalidate(preferencesProvider);
+    } on ProfileInUseException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.customProfileInUse)));
+      }
+    } on ProfileNotDeletableException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.profileNotDeletable)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
+  }
+
+  Future<void> _renameProfile(BuildContext context, WidgetRef ref, String id, String current) async {
+    final l10n = context.l10n;
+    final ctrl = TextEditingController(text: current);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.renameCustomProfile),
+        content: TextField(
+          controller: ctrl,
+          decoration: InputDecoration(hintText: l10n.addCustomProfile),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name == null || name.isEmpty) return;
+    await ref.read(settingsRepoProvider).renameCustomProfile(id, name);
+    ref.invalidate(profilesProvider);
   }
 
   Future<void> _addProfile(BuildContext context, WidgetRef ref) async {

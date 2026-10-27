@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/app_info.dart';
+import 'package:subctrl/core/config/app_env.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/services/auth_service.dart';
@@ -54,6 +55,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!AppEnv.requireAccountLogin) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final c = context.colors;
     final l10n = context.l10n;
     return Scaffold(
@@ -101,20 +105,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
-                            onPressed: _busy ? null : () => _go(AuthProviderId.guest.name),
-                            child: Text(l10n.continueLocally),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.loginOptionalHint,
-                          textAlign: TextAlign.center,
-                          style: AppTypography.body(c.textMuted).copyWith(fontSize: 12),
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
                             onPressed: _busy ? null : () => _go(AuthProviderId.google.name),
                             child: Text(l10n.continueGoogle),
                           ),

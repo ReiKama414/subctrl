@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:subctrl/core/config/app_env.dart';
+import 'package:subctrl/core/config/auth_gate.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/features/add_subscription/add_subscription_screen.dart';
 import 'package:subctrl/features/analytics/data_screen.dart';
@@ -15,6 +17,7 @@ import 'package:subctrl/features/orders/add_order_screen.dart';
 import 'package:subctrl/features/orders/order_detail_screen.dart';
 import 'package:subctrl/features/orders/orders_screen.dart';
 import 'package:subctrl/features/settings/budget_screen.dart';
+import 'package:subctrl/features/settings/legal_screen.dart';
 import 'package:subctrl/features/settings/payment_methods_screen.dart';
 import 'package:subctrl/features/settings/settings_screen.dart';
 import 'package:subctrl/features/subscriptions/detail_screen.dart';
@@ -56,8 +59,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         return atBoot ? null : '/boot';
       }
 
-      final signedIn = ids.isNotEmpty;
+      final signedIn = authGateSatisfied(ids);
       final onboarded = prefs.onboardingComplete;
+      final atLogin = loc == '/login';
+      final atOnboarding = loc == '/onboarding';
+
+      if (AppEnv.isPublicLocalBuild) {
+        final dest = !onboarded ? '/onboarding' : '/home';
+        if (atBoot) return dest;
+        if (atLogin) return dest;
+        if (!onboarded) return atOnboarding ? null : '/onboarding';
+        if (atOnboarding) return '/home';
+        return null;
+      }
+
       final dest = !signedIn
           ? '/login'
           : !onboarded
@@ -65,9 +80,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               : '/home';
 
       if (atBoot) return dest;
-
-      final atLogin = loc == '/login';
-      final atOnboarding = loc == '/onboarding';
 
       if (!signedIn) return atLogin ? null : '/login';
       if (!onboarded) return atOnboarding ? null : '/onboarding';
@@ -103,6 +115,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => DetailScreen(id: s.pathParameters['id']!),
       ),
       GoRoute(path: '/settings', builder: (c, s) => const SettingsScreen()),
+      GoRoute(
+        path: '/legal/privacy',
+        builder: (c, s) => const LegalScreen(kind: LegalKind.privacy),
+      ),
+      GoRoute(
+        path: '/legal/terms',
+        builder: (c, s) => const LegalScreen(kind: LegalKind.terms),
+      ),
       GoRoute(path: '/simulator', builder: (c, s) => const SimulatorScreen()),
       GoRoute(path: '/budget', builder: (c, s) => const BudgetScreen()),
       GoRoute(path: '/methods', builder: (c, s) => const PaymentMethodsScreen()),
