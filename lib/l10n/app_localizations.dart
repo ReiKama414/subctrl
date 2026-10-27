@@ -109,6 +109,22 @@ class AppLocalizations {
     'recordPayment': '+ RECORD',
     'noPaymentsYet': 'No payments recorded yet.',
     'cancelKeepHistory': 'Cancel (keep history)',
+    'deleteSubscription': 'Delete subscription',
+    'deleteSubscriptionBody': 'Permanently remove "{0}" and all its history on this device?',
+    'editSubscription': 'Edit subscription',
+    'planName': 'Plan name',
+    'notes': 'Notes',
+    'pricePhases': 'Price phases',
+    'addPhase': 'Add phase',
+    'editPhase': 'Edit phase',
+    'regularPriceAfterOffer': 'Regular price after offer',
+    'promoName': 'Promotion name',
+    'regularPriceRequired': 'Enter the regular price (after trial / promo)',
+    'selectProfileForSub': 'Profile for this subscription',
+    'notificationsEnabled': 'Subscription reminders',
+    'cloudAutoDownload': 'Download cloud backup when signing in',
+    'cloudAutoUpload': 'Upload after subscription changes',
+    'statusTitle': 'Status',
     'renewalIntent': 'RENEWAL INTENT',
     'usage': 'USAGE',
     'profile': 'PROFILE',
@@ -251,6 +267,7 @@ class AppLocalizations {
     'sortCategory': 'Category',
     'sortName': 'Name',
     'sortRecentlyAdded': 'Recently added',
+    'sortStatusActiveFirst': 'Active first',
     'sortRenewalUrgency': 'Renewal urgency',
     'catAi': 'AI',
     'catVideo': 'Video',
@@ -510,6 +527,22 @@ class AppLocalizations {
     'recordPayment': '+ 記錄付款',
     'noPaymentsYet': '尚無付款紀錄。',
     'cancelKeepHistory': '取消訂閱（保留歷史）',
+    'deleteSubscription': '刪除訂閱',
+    'deleteSubscriptionBody': '要永久移除「{0}」及本機所有相關紀錄嗎？',
+    'editSubscription': '編輯訂閱',
+    'planName': '方案名稱',
+    'notes': '備註',
+    'pricePhases': '價格階段',
+    'addPhase': '新增階段',
+    'editPhase': '編輯階段',
+    'regularPriceAfterOffer': '優惠結束後牌價',
+    'promoName': '優惠名稱',
+    'regularPriceRequired': '請輸入正常價格（試用／優惠結束後）',
+    'selectProfileForSub': '此訂閱所屬檔案',
+    'notificationsEnabled': '訂閱提醒通知',
+    'cloudAutoDownload': '登入時下載雲端備份',
+    'cloudAutoUpload': '變更訂閱後自動上傳',
+    'statusTitle': '狀態',
     'renewalIntent': '續訂意向',
     'usage': '使用頻率',
     'profile': '檔案',
@@ -650,6 +683,7 @@ class AppLocalizations {
     'sortCategory': '分類',
     'sortName': '名稱',
     'sortRecentlyAdded': '最近新增',
+    'sortStatusActiveFirst': '有效優先',
     'sortRenewalUrgency': '續訂急迫',
     'catAi': 'AI',
     'catVideo': '影音',
@@ -909,6 +943,22 @@ class AppLocalizations {
     'recordPayment': '+ 支払い記録',
     'noPaymentsYet': '支払い記録はまだありません。',
     'cancelKeepHistory': '解約（履歴は保持）',
+    'deleteSubscription': 'サブスクを削除',
+    'deleteSubscriptionBody': '「{0}」とこの端末の履歴を完全に削除しますか？',
+    'editSubscription': 'サブスクを編集',
+    'planName': 'プラン名',
+    'notes': 'メモ',
+    'pricePhases': '価格フェーズ',
+    'addPhase': 'フェーズを追加',
+    'editPhase': 'フェーズを編集',
+    'regularPriceAfterOffer': 'オファー後の通常価格',
+    'promoName': 'プロモ名',
+    'regularPriceRequired': '通常価格（トライアル／プロモ後）を入力',
+    'selectProfileForSub': 'このサブスクのプロファイル',
+    'notificationsEnabled': 'サブスクリマインダー',
+    'cloudAutoDownload': 'サインイン時にクラウドから取得',
+    'cloudAutoUpload': '変更後に自動アップロード',
+    'statusTitle': 'ステータス',
     'renewalIntent': '更新意向',
     'usage': '利用頻度',
     'profile': 'プロファイル',
@@ -1049,6 +1099,7 @@ class AppLocalizations {
     'sortCategory': 'カテゴリ',
     'sortName': '名前',
     'sortRecentlyAdded': '最近追加',
+    'sortStatusActiveFirst': '有効を先に',
     'sortRenewalUrgency': '更新の緊急度',
     'catAi': 'AI',
     'catVideo': '動画',
@@ -1325,6 +1376,22 @@ class AppLocalizations {
   String get recordPayment => t('recordPayment');
   String get noPaymentsYet => t('noPaymentsYet');
   String get cancelKeepHistory => t('cancelKeepHistory');
+  String get deleteSubscription => t('deleteSubscription');
+  String deleteSubscriptionBody(String name) => _fmt('deleteSubscriptionBody', [name]);
+  String get editSubscription => t('editSubscription');
+  String get planName => t('planName');
+  String get notes => t('notes');
+  String get pricePhases => t('pricePhases');
+  String get addPhase => t('addPhase');
+  String get editPhase => t('editPhase');
+  String get regularPriceAfterOffer => t('regularPriceAfterOffer');
+  String get promoName => t('promoName');
+  String get regularPriceRequired => t('regularPriceRequired');
+  String get selectProfileForSub => t('selectProfileForSub');
+  String get notificationsEnabled => t('notificationsEnabled');
+  String get cloudAutoDownload => t('cloudAutoDownload');
+  String get cloudAutoUpload => t('cloudAutoUpload');
+  String get statusTitle => t('statusTitle');
   String get renewalIntent => t('renewalIntent');
   String get usage => t('usage');
   String get profile => t('profile');

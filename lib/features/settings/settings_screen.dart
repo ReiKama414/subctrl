@@ -9,6 +9,7 @@ import 'package:subctrl/core/constants/app_info.dart';
 import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
+import 'package:subctrl/core/services/notification_service.dart';
 import 'package:subctrl/core/services/auth_service.dart';
 import 'package:subctrl/core/services/export_service.dart';
 import 'package:subctrl/data/database/app_database.dart';
@@ -184,6 +185,21 @@ class SettingsScreen extends ConsumerWidget {
               label: l10n.notifications,
               children: [
                 Text(l10n.notificationsBody, style: Theme.of(context).textTheme.bodyMedium),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.notificationsEnabled),
+                  value: prefs.notificationsEnabled,
+                  onChanged: (v) async {
+                    await ref.read(settingsRepoProvider).patch(
+                          UserPreferencesCompanion(notificationsEnabled: Value(v)),
+                        );
+                    final enabled = v;
+                    await ref.read(notificationServiceProvider).resync(
+                          await ref.read(subscriptionRepoProvider).allReminders(),
+                          enabled: enabled,
+                        );
+                  },
+                ),
               ],
             ),
             SettingsBlock(
@@ -240,6 +256,10 @@ class SettingsScreen extends ConsumerWidget {
                                     displayName: id.displayName,
                                   );
                               ref.invalidate(identitiesProvider);
+                              if (context.mounted &&
+                                  (ref.read(preferencesProvider).valueOrNull?.cloudAutoDownload ?? true)) {
+                                await _cloudDownload(context, ref);
+                              }
                             } on AuthException catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
@@ -253,6 +273,22 @@ class SettingsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(l10n.lineWebUnsupported, style: Theme.of(context).textTheme.bodySmall),
                   ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.cloudAutoDownload),
+                  value: prefs.cloudAutoDownload,
+                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                        UserPreferencesCompanion(cloudAutoDownload: Value(v)),
+                      ),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.cloudAutoUpload),
+                  value: prefs.cloudAutoUpload,
+                  onChanged: (v) => ref.read(settingsRepoProvider).patch(
+                        UserPreferencesCompanion(cloudAutoUpload: Value(v)),
+                      ),
+                ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.cloud_sync_rounded),

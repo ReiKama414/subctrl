@@ -328,6 +328,9 @@ class PreferenceView {
     this.ratesUpdatedAt,
     this.lastFxError,
     this.localeCode = 'system',
+    this.notificationsEnabled = true,
+    this.cloudAutoDownload = true,
+    this.cloudAutoUpload = false,
   });
 
   final String baseCurrency;
@@ -344,4 +347,7 @@ class PreferenceView {
   final DateTime? ratesUpdatedAt;
   final String? lastFxError;
   final String localeCode;
+  final bool notificationsEnabled;
+  final bool cloudAutoDownload;
+  final bool cloudAutoUpload;
 }

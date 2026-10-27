@@ -93,6 +93,63 @@ class CatalogRepository {
     return (await services()).firstWhere((s) => s.id == id);
   }
 
+  /// Picks an existing plan row or creates one when the user customizes name / price.
+  Future<String> resolvePlanId({
+    required String serviceId,
+    String? selectedPlanId,
+    required String planName,
+    required String billingCycle,
+    double? suggestedPrice,
+    String? suggestedCurrency,
+  }) async {
+    final name = planName.trim().isEmpty ? 'Custom' : planName.trim();
+    Plan? selected;
+    if (selectedPlanId != null) {
+      selected = await (db.select(db.plans)..where((t) => t.id.equals(selectedPlanId))).getSingleOrNull();
+    }
+    final service = await (db.select(db.services)..where((t) => t.id.equals(serviceId))).getSingleOrNull();
+    final builtin = service?.isBuiltin ?? true;
+    if (selected != null &&
+        !builtin &&
+        selected.name == name &&
+        selected.billingCycle == billingCycle) {
+      await (db.update(db.plans)..where((t) => t.id.equals(selected!.id))).write(
+        PlansCompanion(
+          suggestedPrice: Value(suggestedPrice),
+          suggestedCurrency: Value(suggestedCurrency),
+        ),
+      );
+      return selected.id;
+    }
+    if (selected != null &&
+        builtin &&
+        selected.name == name &&
+        selected.billingCycle == billingCycle &&
+        selected.serviceId == serviceId) {
+      return selected.id;
+    }
+    final id = _uuid.v4();
+    await db.into(db.plans).insert(
+          PlansCompanion.insert(
+            id: id,
+            serviceId: serviceId,
+            name: name,
+            billingCycle: billingCycle,
+            suggestedPrice: Value(suggestedPrice),
+            suggestedCurrency: Value(suggestedCurrency),
+          ),
+        );
+    return id;
+  }
+
+  Future<void> renamePlan(String planId, String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
+    await (db.update(db.plans)..where((t) => t.id.equals(planId))).write(
+      PlansCompanion(name: Value(trimmed)),
+    );
+  }
+
   /// Deletes a user-created service. Built-in catalog rows are never removed.
   Future<void> deleteCustomService(String id) async {
     final row = await (db.select(db.services)..where((t) => t.id.equals(id))).getSingleOrNull();
@@ -293,6 +350,9 @@ class SettingsRepository {
         ratesUpdatedAt: row.ratesUpdatedAt,
         lastFxError: row.lastFxError,
         localeCode: row.localeCode,
+        notificationsEnabled: row.notificationsEnabled,
+        cloudAutoDownload: row.cloudAutoDownload,
+        cloudAutoUpload: row.cloudAutoUpload,
       );
 
   Future<void> patch(UserPreferencesCompanion companion) {

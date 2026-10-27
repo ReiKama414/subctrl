@@ -8,6 +8,7 @@ import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/models/views.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
+import 'package:subctrl/features/subscriptions/edit_subscription.dart';
 import 'package:subctrl/shared/widgets/profile_switcher.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
@@ -24,7 +25,7 @@ class SubscriptionsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final c = context.colors;
     final monthly = scoped.fold<double>(0, (p, s) => p + fx.monthlyBase(s));
-    final refined = query.category != null || query.sort != SubscriptionSort.nextBilling;
+    final refined = query.category != null || query.sort != SubscriptionSort.statusActiveFirst;
     return AppPage(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +104,7 @@ class SubscriptionsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 24),
                   itemCount: list.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (_, i) => _SubscriptionTile(sub: list[i], hide: hide),
+                  itemBuilder: (_, i) => _SubscriptionTile(sub: list[i], hide: hide, ref: ref),
                 );
               },
             ),
@@ -136,29 +137,44 @@ class SubscriptionsScreen extends ConsumerWidget {
       final n = q.search.toLowerCase();
       list = list.where((s) => s.serviceName.toLowerCase().contains(n)).toList();
     }
+    int statusRank(SubscriptionStatus s) => switch (s) {
+          SubscriptionStatus.active => 0,
+          SubscriptionStatus.trial => 1,
+          SubscriptionStatus.promo => 2,
+          SubscriptionStatus.paused => 3,
+          SubscriptionStatus.cancelled => 4,
+          SubscriptionStatus.expired => 5,
+        };
+    int tieStatus(SubscriptionView a, SubscriptionView b) =>
+        statusRank(a.status).compareTo(statusRank(b.status));
+
     list.sort((a, b) {
-      switch (q.sort) {
-        case SubscriptionSort.name:
-          return a.serviceName.compareTo(b.serviceName);
-        case SubscriptionSort.price:
-          return b.currentPrice.compareTo(a.currentPrice);
-        case SubscriptionSort.category:
-          return a.categorySlug.compareTo(b.categorySlug);
-        case SubscriptionSort.recentlyAdded:
-          return b.createdAt.compareTo(a.createdAt);
-        case SubscriptionSort.renewalUrgency:
-        case SubscriptionSort.nextBilling:
-          return (a.nextBillingDate ?? DateTime(9999)).compareTo(b.nextBillingDate ?? DateTime(9999));
+      final primary = switch (q.sort) {
+        SubscriptionSort.name => a.serviceName.compareTo(b.serviceName),
+        SubscriptionSort.price => b.currentPrice.compareTo(a.currentPrice),
+        SubscriptionSort.category => a.categorySlug.compareTo(b.categorySlug),
+        SubscriptionSort.recentlyAdded => b.createdAt.compareTo(a.createdAt),
+        SubscriptionSort.statusActiveFirst => tieStatus(a, b),
+        SubscriptionSort.renewalUrgency || SubscriptionSort.nextBilling =>
+          (a.nextBillingDate ?? DateTime(9999)).compareTo(b.nextBillingDate ?? DateTime(9999)),
+      };
+      if (primary != 0) return primary;
+      final st = tieStatus(a, b);
+      if (st != 0) return st;
+      if (q.sort == SubscriptionSort.statusActiveFirst) {
+        return (a.nextBillingDate ?? DateTime(9999)).compareTo(b.nextBillingDate ?? DateTime(9999));
       }
+      return a.serviceName.compareTo(b.serviceName);
     });
     return list;
   }
 }
 
 class _SubscriptionTile extends StatelessWidget {
-  const _SubscriptionTile({required this.sub, required this.hide});
+  const _SubscriptionTile({required this.sub, required this.hide, required this.ref});
   final SubscriptionView sub;
   final bool hide;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +239,28 @@ class _SubscriptionTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, size: 20, color: c.textMuted),
+            onSelected: (action) async {
+              if (action == 'edit') {
+                await showEditSubscriptionSheet(
+                  context: context,
+                  ref: ref,
+                  sub: s,
+                );
+              } else if (action == 'delete') {
+                await showDeleteSubscriptionDialog(context: context, ref: ref, sub: s);
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'edit', child: Text(l10n.editSubscription)),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(l10n.deleteSubscription, style: TextStyle(color: c.danger)),
+              ),
+            ],
+          ),
+          const SizedBox(width: 4),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -267,7 +304,7 @@ class _FilterSheet extends ConsumerWidget {
               children: [
                 Expanded(child: Text(l10n.filterSort, style: AppTypography.title(c.textPrimary).copyWith(fontSize: 20))),
                 TextButton(
-                  onPressed: () => notifier.state = query.copyWith(clearCategory: true, sort: SubscriptionSort.nextBilling),
+                  onPressed: () => notifier.state = query.copyWith(clearCategory: true, sort: SubscriptionSort.statusActiveFirst),
                   child: Text(l10n.resetFilters),
                 ),
               ],

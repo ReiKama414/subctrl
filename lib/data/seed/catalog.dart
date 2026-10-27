@@ -63,6 +63,7 @@ final catalogServices = <CatalogSeedItem>[
   ]),
   CatalogSeedItem(id: 'cursor', name: 'Cursor', category: 'ai', site: 'https://cursor.com', manage: 'https://cursor.com/dashboard', plans: const [
     CatalogPlanSeed('Pro', 'monthly', 20, 'USD'),
+    CatalogPlanSeed('Plus', 'monthly', 60, 'USD'),
   ]),
   CatalogSeedItem(id: 'copilot', name: 'GitHub Copilot', category: 'ai', site: 'https://github.com/features/copilot', manage: 'https://github.com/settings/billing', plans: const [
     CatalogPlanSeed('Individual', 'monthly', 10, 'USD'),

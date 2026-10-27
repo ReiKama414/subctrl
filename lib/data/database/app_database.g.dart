@@ -8227,6 +8227,51 @@ class $UserPreferencesTable extends UserPreferences
     requiredDuringInsert: false,
     defaultValue: const Constant('system'),
   );
+  static const VerificationMeta _notificationsEnabledMeta = const VerificationMeta(
+    'notificationsEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> notificationsEnabled = GeneratedColumn<bool>(
+    'notifications_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("notifications_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _cloudAutoDownloadMeta = const VerificationMeta(
+    'cloudAutoDownload',
+  );
+  @override
+  late final GeneratedColumn<bool> cloudAutoDownload = GeneratedColumn<bool>(
+    'cloud_auto_download',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("cloud_auto_download" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _cloudAutoUploadMeta = const VerificationMeta(
+    'cloudAutoUpload',
+  );
+  @override
+  late final GeneratedColumn<bool> cloudAutoUpload = GeneratedColumn<bool>(
+    'cloud_auto_upload',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("cloud_auto_upload" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -8244,6 +8289,9 @@ class $UserPreferencesTable extends UserPreferences
     ratesUpdatedAt,
     lastFxError,
     localeCode,
+    notificationsEnabled,
+    cloudAutoDownload,
+    cloudAutoUpload,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8391,6 +8439,33 @@ class $UserPreferencesTable extends UserPreferences
         localeCode.isAcceptableOrUnknown(data['locale_code']!, _localeCodeMeta),
       );
     }
+    if (data.containsKey('notifications_enabled')) {
+      context.handle(
+        _notificationsEnabledMeta,
+        notificationsEnabled.isAcceptableOrUnknown(
+          data['notifications_enabled']!,
+          _notificationsEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cloud_auto_download')) {
+      context.handle(
+        _cloudAutoDownloadMeta,
+        cloudAutoDownload.isAcceptableOrUnknown(
+          data['cloud_auto_download']!,
+          _cloudAutoDownloadMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cloud_auto_upload')) {
+      context.handle(
+        _cloudAutoUploadMeta,
+        cloudAutoUpload.isAcceptableOrUnknown(
+          data['cloud_auto_upload']!,
+          _cloudAutoUploadMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -8460,6 +8535,18 @@ class $UserPreferencesTable extends UserPreferences
         DriftSqlType.string,
         data['${effectivePrefix}locale_code'],
       )!,
+      notificationsEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}notifications_enabled'],
+      )!,
+      cloudAutoDownload: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}cloud_auto_download'],
+      )!,
+      cloudAutoUpload: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}cloud_auto_upload'],
+      )!,
     );
   }
 
@@ -8487,6 +8574,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
 
   /// system | en | zh_TW | ja
   final String localeCode;
+  final bool notificationsEnabled;
+  final bool cloudAutoDownload;
+  final bool cloudAutoUpload;
   const UserPreference({
     required this.id,
     required this.baseCurrency,
@@ -8503,6 +8593,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     this.ratesUpdatedAt,
     this.lastFxError,
     required this.localeCode,
+    required this.notificationsEnabled,
+    required this.cloudAutoDownload,
+    required this.cloudAutoUpload,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -8530,6 +8623,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       map['last_fx_error'] = Variable<String>(lastFxError);
     }
     map['locale_code'] = Variable<String>(localeCode);
+    map['notifications_enabled'] = Variable<bool>(notificationsEnabled);
+    map['cloud_auto_download'] = Variable<bool>(cloudAutoDownload);
+    map['cloud_auto_upload'] = Variable<bool>(cloudAutoUpload);
     return map;
   }
 
@@ -8558,6 +8654,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ? const Value.absent()
           : Value(lastFxError),
       localeCode: Value(localeCode),
+      notificationsEnabled: Value(notificationsEnabled),
+      cloudAutoDownload: Value(cloudAutoDownload),
+      cloudAutoUpload: Value(cloudAutoUpload),
     );
   }
 
@@ -8584,6 +8683,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       ratesUpdatedAt: serializer.fromJson<DateTime?>(json['ratesUpdatedAt']),
       lastFxError: serializer.fromJson<String?>(json['lastFxError']),
       localeCode: serializer.fromJson<String>(json['localeCode']),
+      notificationsEnabled: serializer.fromJson<bool>(json['notificationsEnabled']),
+      cloudAutoDownload: serializer.fromJson<bool>(json['cloudAutoDownload']),
+      cloudAutoUpload: serializer.fromJson<bool>(json['cloudAutoUpload']),
     );
   }
   @override
@@ -8605,6 +8707,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       'ratesUpdatedAt': serializer.toJson<DateTime?>(ratesUpdatedAt),
       'lastFxError': serializer.toJson<String?>(lastFxError),
       'localeCode': serializer.toJson<String>(localeCode),
+      'notificationsEnabled': serializer.toJson<bool>(notificationsEnabled),
+      'cloudAutoDownload': serializer.toJson<bool>(cloudAutoDownload),
+      'cloudAutoUpload': serializer.toJson<bool>(cloudAutoUpload),
     };
   }
 
@@ -8624,6 +8729,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     Value<DateTime?> ratesUpdatedAt = const Value.absent(),
     Value<String?> lastFxError = const Value.absent(),
     String? localeCode,
+    bool? notificationsEnabled,
+    bool? cloudAutoDownload,
+    bool? cloudAutoUpload,
   }) => UserPreference(
     id: id ?? this.id,
     baseCurrency: baseCurrency ?? this.baseCurrency,
@@ -8647,6 +8755,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
         : this.ratesUpdatedAt,
     lastFxError: lastFxError.present ? lastFxError.value : this.lastFxError,
     localeCode: localeCode ?? this.localeCode,
+    notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+    cloudAutoDownload: cloudAutoDownload ?? this.cloudAutoDownload,
+    cloudAutoUpload: cloudAutoUpload ?? this.cloudAutoUpload,
   );
   UserPreference copyWithCompanion(UserPreferencesCompanion data) {
     return UserPreference(
@@ -8693,6 +8804,15 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       localeCode: data.localeCode.present
           ? data.localeCode.value
           : this.localeCode,
+      notificationsEnabled: data.notificationsEnabled.present
+          ? data.notificationsEnabled.value
+          : this.notificationsEnabled,
+      cloudAutoDownload: data.cloudAutoDownload.present
+          ? data.cloudAutoDownload.value
+          : this.cloudAutoDownload,
+      cloudAutoUpload: data.cloudAutoUpload.present
+          ? data.cloudAutoUpload.value
+          : this.cloudAutoUpload,
     );
   }
 
@@ -8713,7 +8833,10 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ..write('activeProfileId: $activeProfileId, ')
           ..write('ratesUpdatedAt: $ratesUpdatedAt, ')
           ..write('lastFxError: $lastFxError, ')
-          ..write('localeCode: $localeCode')
+          ..write('localeCode: $localeCode, ')
+          ..write('notificationsEnabled: $notificationsEnabled, ')
+          ..write('cloudAutoDownload: $cloudAutoDownload, ')
+          ..write('cloudAutoUpload: $cloudAutoUpload')
           ..write(')'))
         .toString();
   }
@@ -8735,6 +8858,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     ratesUpdatedAt,
     lastFxError,
     localeCode,
+    notificationsEnabled,
+    cloudAutoDownload,
+    cloudAutoUpload,
   );
   @override
   bool operator ==(Object other) =>
@@ -8754,7 +8880,10 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           other.activeProfileId == this.activeProfileId &&
           other.ratesUpdatedAt == this.ratesUpdatedAt &&
           other.lastFxError == this.lastFxError &&
-          other.localeCode == this.localeCode);
+          other.localeCode == this.localeCode &&
+          other.notificationsEnabled == this.notificationsEnabled &&
+          other.cloudAutoDownload == this.cloudAutoDownload &&
+          other.cloudAutoUpload == this.cloudAutoUpload);
 }
 
 class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
@@ -8773,6 +8902,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   final Value<DateTime?> ratesUpdatedAt;
   final Value<String?> lastFxError;
   final Value<String> localeCode;
+  final Value<bool> notificationsEnabled;
+  final Value<bool> cloudAutoDownload;
+  final Value<bool> cloudAutoUpload;
   final Value<int> rowid;
   const UserPreferencesCompanion({
     this.id = const Value.absent(),
@@ -8790,6 +8922,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.ratesUpdatedAt = const Value.absent(),
     this.lastFxError = const Value.absent(),
     this.localeCode = const Value.absent(),
+    this.notificationsEnabled = const Value.absent(),
+    this.cloudAutoDownload = const Value.absent(),
+    this.cloudAutoUpload = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserPreferencesCompanion.insert({
@@ -8808,6 +8943,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.ratesUpdatedAt = const Value.absent(),
     this.lastFxError = const Value.absent(),
     this.localeCode = const Value.absent(),
+    this.notificationsEnabled = const Value.absent(),
+    this.cloudAutoDownload = const Value.absent(),
+    this.cloudAutoUpload = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        baseCurrency = Value(baseCurrency),
@@ -8829,6 +8967,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Expression<DateTime>? ratesUpdatedAt,
     Expression<String>? lastFxError,
     Expression<String>? localeCode,
+    Expression<bool>? notificationsEnabled,
+    Expression<bool>? cloudAutoDownload,
+    Expression<bool>? cloudAutoUpload,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -8848,6 +8989,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       if (ratesUpdatedAt != null) 'rates_updated_at': ratesUpdatedAt,
       if (lastFxError != null) 'last_fx_error': lastFxError,
       if (localeCode != null) 'locale_code': localeCode,
+      if (notificationsEnabled != null) 'notifications_enabled': notificationsEnabled,
+      if (cloudAutoDownload != null) 'cloud_auto_download': cloudAutoDownload,
+      if (cloudAutoUpload != null) 'cloud_auto_upload': cloudAutoUpload,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -8868,6 +9012,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Value<DateTime?>? ratesUpdatedAt,
     Value<String?>? lastFxError,
     Value<String>? localeCode,
+    Value<bool>? notificationsEnabled,
+    Value<bool>? cloudAutoDownload,
+    Value<bool>? cloudAutoUpload,
     Value<int>? rowid,
   }) {
     return UserPreferencesCompanion(
@@ -8887,6 +9034,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       ratesUpdatedAt: ratesUpdatedAt ?? this.ratesUpdatedAt,
       lastFxError: lastFxError ?? this.lastFxError,
       localeCode: localeCode ?? this.localeCode,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      cloudAutoDownload: cloudAutoDownload ?? this.cloudAutoDownload,
+      cloudAutoUpload: cloudAutoUpload ?? this.cloudAutoUpload,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8940,6 +9090,15 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     }
     if (localeCode.present) {
       map['locale_code'] = Variable<String>(localeCode.value);
+    }
+    if (notificationsEnabled.present) {
+      map['notifications_enabled'] = Variable<bool>(notificationsEnabled.value);
+    }
+    if (cloudAutoDownload.present) {
+      map['cloud_auto_download'] = Variable<bool>(cloudAutoDownload.value);
+    }
+    if (cloudAutoUpload.present) {
+      map['cloud_auto_upload'] = Variable<bool>(cloudAutoUpload.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);

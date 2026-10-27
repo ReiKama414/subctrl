@@ -8,6 +8,8 @@ import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/core/utils/sync_coordinator.dart';
+import 'package:subctrl/features/subscriptions/edit_subscription.dart';
 import 'package:subctrl/features/subscriptions/price_review.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/charts/price_chart.dart';
@@ -61,6 +63,37 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: _goBack,
           ),
+          actions: [
+            IconButton(
+              tooltip: context.l10n.editSubscription,
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () async {
+                final async = ref.read(subscriptionsProvider).valueOrNull;
+                final sub = async?.where((s) => s.id == widget.id).firstOrNull;
+                if (sub == null) return;
+                await showEditSubscriptionSheet(
+                  context: context,
+                  ref: ref,
+                  sub: sub,
+                  onChanged: () {
+                    _invalidateExtras();
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+            IconButton(
+              tooltip: context.l10n.deleteSubscription,
+              icon: Icon(Icons.delete_outline_rounded, color: context.colors.danger),
+              onPressed: () async {
+                final async = ref.read(subscriptionsProvider).valueOrNull;
+                final sub = async?.where((s) => s.id == widget.id).firstOrNull;
+                if (sub == null) return;
+                final deleted = await showDeleteSubscriptionDialog(context: context, ref: ref, sub: sub);
+                if (deleted && context.mounted) context.go('/subs');
+              },
+            ),
+          ],
         ),
         body: async.when(
           loading: () => const Center(child: SkeletonBlock(height: 40, width: 120)),
@@ -124,7 +157,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
     return AppPage(
       child: ListView(
-        padding: const EdgeInsets.only(bottom: 40),
+        padding: EdgeInsets.only(bottom: 40 + MediaQuery.paddingOf(context).bottom),
         children: [
           const SizedBox(height: 8),
           Row(
@@ -286,6 +319,49 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           SurfaceCard(
             child: PriceLineChart(points: points, range: range, onRange: (r) => setState(() => range = r)),
           ),
+          const SizedBox(height: 20),
+          SectionHeader(
+            l10n.pricePhases,
+            trailing: TextButton(
+              onPressed: () => showManagePhasesSheet(
+                context: context,
+                ref: ref,
+                sub: sub,
+                onChanged: () {
+                  _invalidateExtras();
+                  setState(() {});
+                },
+              ),
+              child: Text(l10n.editPhase),
+            ),
+          ),
+          if (sub.phases.isNotEmpty)
+            SurfaceCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                children: [
+                  for (final p in sub.phases)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${l10n.pricePhaseLabel(p.type)} · ${p.startDate.toIso8601String().substring(0, 10)}'
+                              '${p.endDate != null ? ' → ${p.endDate!.toIso8601String().substring(0, 10)}' : ''}',
+                              style: AppTypography.body(c.textSecondary),
+                            ),
+                          ),
+                          Text(
+                            MoneyMath.format(p.price, p.currency),
+                            style: AppTypography.amount(c.textPrimary, size: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
           const SizedBox(height: 28),
           SectionHeader(l10n.renewalIntent),
           SurfaceCard(
@@ -581,6 +657,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           billingCycle: cycle,
           nextBillingDate: next,
         );
+    await maybeCloudUpload(ref, l10n);
     _invalidateExtras();
     if (mounted) setState(() {});
   }

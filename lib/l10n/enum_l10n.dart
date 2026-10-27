@@ -55,6 +55,7 @@ extension EnumL10n on AppLocalizations {
 
   String subscriptionSortLabel(SubscriptionSort v) => switch (v) {
         SubscriptionSort.nextBilling => t('sortNextBilling'),
+        SubscriptionSort.statusActiveFirst => t('sortStatusActiveFirst'),
         SubscriptionSort.price => t('sortPrice'),
         SubscriptionSort.category => t('sortCategory'),
         SubscriptionSort.name => t('sortName'),

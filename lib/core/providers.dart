@@ -143,7 +143,7 @@ class SubListQuery {
     this.filter = SubFilter.all,
     this.category,
     this.search = '',
-    this.sort = SubscriptionSort.nextBilling,
+    this.sort = SubscriptionSort.statusActiveFirst,
     this.profileId,
   });
 

@@ -33,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.memory() => AppDatabase(connection.openMemoryExecutor());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,6 +44,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.createTable(purchaseOrders);
+          }
+          if (from < 4) {
+            await m.addColumn(userPreferences, userPreferences.notificationsEnabled);
+            await m.addColumn(userPreferences, userPreferences.cloudAutoDownload);
+            await m.addColumn(userPreferences, userPreferences.cloudAutoUpload);
           }
         },
       );

@@ -507,12 +507,63 @@ class SubscriptionRepository {
   Future<void> deleteDemo() async {
     final demos = await (db.select(db.subscriptions)..where((t) => t.isDemo.equals(true))).get();
     for (final d in demos) {
-      await (db.delete(db.reminders)..where((t) => t.subscriptionId.equals(d.id))).go();
-      await (db.delete(db.pricePhases)..where((t) => t.subscriptionId.equals(d.id))).go();
-      await (db.delete(db.paymentRecords)..where((t) => t.subscriptionId.equals(d.id))).go();
-      await (db.delete(db.priceHistory)..where((t) => t.subscriptionId.equals(d.id))).go();
-      await (db.delete(db.subscriptionEvents)..where((t) => t.subscriptionId.equals(d.id))).go();
-      await (db.delete(db.subscriptions)..where((t) => t.id.equals(d.id))).go();
+      await deleteSubscription(d.id);
     }
+  }
+
+  /// Permanently removes a subscription and all related rows.
+  Future<void> deleteSubscription(String id) async {
+    await (db.delete(db.reminders)..where((t) => t.subscriptionId.equals(id))).go();
+    await (db.delete(db.pricePhases)..where((t) => t.subscriptionId.equals(id))).go();
+    await (db.delete(db.paymentRecords)..where((t) => t.subscriptionId.equals(id))).go();
+    await (db.delete(db.priceHistory)..where((t) => t.subscriptionId.equals(id))).go();
+    await (db.delete(db.subscriptionEvents)..where((t) => t.subscriptionId.equals(id))).go();
+    await (db.delete(db.subscriptions)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<void> updateMeta({
+    required String id,
+    String? planId,
+    DateTime? startDate,
+    DateTime? nextBillingDate,
+    DateTime? accessEndDate,
+    bool? autoRenew,
+    String? notes,
+    SubscriptionStatus? status,
+  }) async {
+    await (db.update(db.subscriptions)..where((t) => t.id.equals(id))).write(
+      SubscriptionsCompanion(
+        planId: planId == null ? const Value.absent() : Value(planId),
+        startDate: startDate == null ? const Value.absent() : Value(startDate),
+        nextBillingDate: nextBillingDate == null ? const Value.absent() : Value(nextBillingDate),
+        accessEndDate: accessEndDate == null ? const Value.absent() : Value(accessEndDate),
+        autoRenew: autoRenew == null ? const Value.absent() : Value(autoRenew),
+        notes: notes == null ? const Value.absent() : Value(notes),
+        status: status == null ? const Value.absent() : Value(status.name),
+        active: status == null
+            ? const Value.absent()
+            : Value(status != SubscriptionStatus.expired && status != SubscriptionStatus.cancelled),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    await addEvent(id, SubscriptionEventType.planChanged, SubscriptionEventType.planChanged.name);
+  }
+
+  Future<void> replacePhases(String subscriptionId, List<PricePhasesCompanion> phases) async {
+    await (db.delete(db.pricePhases)..where((t) => t.subscriptionId.equals(subscriptionId))).go();
+    for (var i = 0; i < phases.length; i++) {
+      final phase = phases[i].copyWith(
+        id: phases[i].id.present ? phases[i].id : Value(_uuid.v4()),
+        subscriptionId: Value(subscriptionId),
+        sortOrder: Value(i),
+      );
+      await db.into(db.pricePhases).insert(phase);
+    }
+    await addEvent(
+      subscriptionId,
+      SubscriptionEventType.priceChanged,
+      SubscriptionEventType.priceChanged.name,
+      detail: 'phases',
+    );
   }
 }

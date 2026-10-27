@@ -7,6 +7,7 @@ import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/services/notification_service.dart';
+import 'package:subctrl/core/utils/sync_coordinator.dart';
 import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
 import 'package:subctrl/core/utils/money.dart';
@@ -28,6 +29,8 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   ServiceView? service;
   PlanView? plan;
   final price = TextEditingController();
+  final planName = TextEditingController();
+  String profileId = personalProfileId;
   String currency = 'USD';
   String cycle = 'monthly';
   DateTime start = DateTime.now();
@@ -48,7 +51,11 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _purgeUnusedCustoms());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _purgeUnusedCustoms();
+      final active = ref.read(activeProfileIdProvider);
+      if (active != null) profileId = active;
+    });
   }
 
   Future<void> _purgeUnusedCustoms() async {
@@ -68,6 +75,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
   @override
   void dispose() {
     price.dispose();
+    planName.dispose();
     super.dispose();
   }
 
@@ -265,6 +273,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
       if (s.plans.isNotEmpty) {
         final p = s.plans.first;
         plan = p;
+        planName.text = p.name;
         cycle = p.billingCycle;
         if (p.suggestedPrice != null) price.text = p.suggestedPrice.toString();
         if (p.suggestedCurrency != null) currency = p.suggestedCurrency!;
@@ -391,6 +400,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
 
   Widget _stepPlan() {
     final plans = service?.plans ?? [];
+    final profiles = ref.watch(profilesProvider).valueOrNull ?? [];
     final l10n = context.l10n;
     final c = context.colors;
     final parsed = double.tryParse(price.text) ?? 0;
@@ -398,6 +408,24 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (profiles.isNotEmpty) ...[
+          SectionLabel(l10n.selectProfileForSub),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final p in profiles)
+                _CategoryPill(
+                  label: l10n.profileDisplayName(p.type, p.name),
+                  selected: profileId == p.id,
+                  color: c.accent,
+                  onTap: () => setState(() => profileId = p.id),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
         SectionLabel(l10n.selectPlan),
         if (plans.isEmpty)
           Text(l10n.noSuggestedPlans, style: AppTypography.body(c.textMuted))
@@ -418,14 +446,20 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
               ),
               onTap: () => setState(() {
                 plan = p;
+                planName.text = p.name;
                 if (p.suggestedPrice != null) price.text = p.suggestedPrice.toString();
                 if (p.suggestedCurrency != null) currency = p.suggestedCurrency!;
                 cycle = p.billingCycle;
               }),
             ),
         ],
+        const SizedBox(height: 12),
+        TextField(
+          controller: planName,
+          decoration: InputDecoration(labelText: l10n.planName, hintText: l10n.planPriceHint),
+        ),
         const SizedBox(height: 16),
-        SectionLabel(l10n.currentPrice),
+        SectionLabel(l10n.regularPriceAfterOffer),
         const SizedBox(height: 8),
         TextField(
           controller: price,
@@ -654,7 +688,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
     if (step == 1) {
       final parsed = double.tryParse(price.text.trim());
       if (parsed == null || parsed <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.currentPrice)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.regularPriceRequired)));
         return;
       }
     }
@@ -706,7 +740,7 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
         type: PricePhaseType.promo.name,
         startDate: start,
         endDate: Value(end),
-        price: promoPrice == 0 ? parsed : promoPrice,
+        price: promoPrice,
         currency: currency,
         billingCycle: cycle,
         regularPrice: Value(parsed),
@@ -728,21 +762,29 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
     final firstCharge = trialEnd?.add(const Duration(days: 1));
     final fire = (trialEnd ?? next).subtract(Duration(days: reminder.days ?? 3));
     final rid = const Uuid().v4();
+    final resolvedPlanId = await ref.read(catalogRepoProvider).resolvePlanId(
+          serviceId: service!.id,
+          selectedPlanId: plan?.id,
+          planName: planName.text.trim().isEmpty ? (plan?.name ?? service!.name) : planName.text.trim(),
+          billingCycle: cycle,
+          suggestedPrice: parsed,
+          suggestedCurrency: currency,
+        );
+    final listPrice = switch (offer) {
+      OfferKind.discount || OfferKind.multiStage || OfferKind.custom => promoPrice,
+      _ => parsed,
+    };
     final id = await ref.read(subscriptionRepoProvider).create(
           serviceId: service!.id,
-          planId: plan?.id,
+          planId: resolvedPlanId,
           categoryId: service!.categoryId,
-          profileId: ref.read(activeProfileIdProvider) ?? personalProfileId,
+          profileId: profileId,
           status: status,
           startDate: start,
           nextBillingDate: firstCharge ?? next,
           autoRenew: true,
           currency: currency,
-          currentPrice: offer != OfferKind.none &&
-                  offer != OfferKind.freePeriod &&
-                  promoPrice > 0
-              ? promoPrice
-              : parsed,
+          currentPrice: listPrice,
           billingCycle: cycle,
           officialWebsiteUrl: service!.officialWebsiteUrl,
           manageSubscriptionUrl: service!.manageSubscriptionUrl,
@@ -758,7 +800,12 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
             ),
           ],
         );
-    await ref.read(notificationServiceProvider).resync(await ref.read(subscriptionRepoProvider).allReminders());
+    final notifOn = ref.read(preferencesProvider).valueOrNull?.notificationsEnabled ?? true;
+    await ref.read(notificationServiceProvider).resync(
+          await ref.read(subscriptionRepoProvider).allReminders(),
+          enabled: notifOn,
+        );
+    await maybeCloudUpload(ref, context.l10n);
     if (!mounted) return;
     // Land on home first so detail has a back target (go() alone clears the stack).
     context.go('/home');

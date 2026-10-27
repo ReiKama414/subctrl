@@ -27,9 +27,10 @@ class NotificationService {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
-  Future<void> resync(List<ReminderView> reminders) async {
+  Future<void> resync(List<ReminderView> reminders, {bool enabled = true}) async {
     if (kIsWeb || !_ready) return;
     await _plugin.cancelAll();
+    if (!enabled) return;
     for (final r in reminders.where((e) => e.enabled)) {
       await _schedule(r);
     }

@@ -70,6 +70,10 @@ class ForecastEngine {
 
   final CurrencyEngine fx;
 
+  /// Billable charge dates and amounts for one calendar month (respects price phases).
+  List<ForecastLine> occurrencesInMonth(SubscriptionView sub, DateTime monthStart) =>
+      _occurrencesInMonth(sub, monthStart);
+
   List<ForecastMonth> nextTwelveMonths(List<SubscriptionView> subs, {DateTime? from}) {
     final start = BillingMath.dateOnly(from ?? DateTime.now());
     final months = <ForecastMonth>[];
@@ -332,17 +336,18 @@ class CalendarEngine {
   }) {
     final start = DateTime(month.year, month.month, 1);
     final end = DateTime(month.year, month.month + 1, 0);
+    final engine = ForecastEngine(fx);
     final out = <CalendarDayEvent>[];
     for (final sub in subs) {
-      if (sub.nextBillingDate != null && _in(sub.nextBillingDate!, start, end)) {
-        final q = fx.quote(sub.currentPrice, sub.currency);
+      for (final line in engine.occurrencesInMonth(sub, start)) {
+        if (!_in(line.date, start, end)) continue;
         out.add(CalendarDayEvent(
-          date: BillingMath.dateOnly(sub.nextBillingDate!),
+          date: BillingMath.dateOnly(line.date),
           kind: CalendarEventKind.payment.name,
           subscriptionId: sub.id,
           title: sub.serviceName,
-          amountBase: q.estimatedCharge,
-          currencyLabel: MoneyMath.format(q.estimatedCharge, fx.baseCurrency),
+          amountBase: line.amountBase,
+          currencyLabel: MoneyMath.format(line.amountBase, fx.baseCurrency),
         ));
       }
       for (final phase in sub.phases) {

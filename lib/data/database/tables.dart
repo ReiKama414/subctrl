@@ -215,6 +215,11 @@ class UserPreferences extends Table {
   TextColumn get lastFxError => text().nullable()();
   /// system | en | zh_TW | ja
   TextColumn get localeCode => text().withDefault(const Constant('system'))();
+  BoolColumn get notificationsEnabled => boolean().withDefault(const Constant(true))();
+  /// When linked to cloud account, offer / run download on sign-in.
+  BoolColumn get cloudAutoDownload => boolean().withDefault(const Constant(true))();
+  /// Upload backup after local subscription changes (when signed in).
+  BoolColumn get cloudAutoUpload => boolean().withDefault(const Constant(false))();
   @override
   Set<Column> get primaryKey => {id};
 }

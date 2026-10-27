@@ -42,9 +42,10 @@ class _DataScreenState extends ConsumerState<DataScreen> {
     final l10n = context.l10n;
     final open = forecast.isEmpty ? null : forecast[openIndex.clamp(0, forecast.length - 1)];
 
+    final bottomPad = 32.0 + MediaQuery.paddingOf(context).bottom + 72;
     return AppPage(
       child: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: EdgeInsets.only(bottom: bottomPad),
         children: [
           PageHeader(
             title: l10n.data,
@@ -150,30 +151,40 @@ class _DataScreenState extends ConsumerState<DataScreen> {
                       ],
                     ),
                   ),
-                  for (final line in open.lines)
-                    InkWell(
-                      borderRadius: BorderRadius.circular(AppRadius.r12),
-                      onTap: () => context.push('/subs/${line.subscriptionId}'),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                        child: Row(
-                          children: [
-                            ServiceAvatar(line.name, size: 32),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 280),
+                    child: ListView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      children: [
+                        for (final line in open.lines)
+                          InkWell(
+                            borderRadius: BorderRadius.circular(AppRadius.r12),
+                            onTap: () => context.push('/subs/${line.subscriptionId}'),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                              child: Row(
                                 children: [
-                                  Text(line.name, style: AppTypography.body(c.textPrimary).copyWith(fontWeight: FontWeight.w600)),
-                                  Text('${l10n.shortDate(line.date)} · ${line.reason}', style: AppTypography.caption(c.textMuted)),
+                                  ServiceAvatar(line.name, size: 32),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(line.name, style: AppTypography.body(c.textPrimary).copyWith(fontWeight: FontWeight.w600)),
+                                        Text('${l10n.shortDate(line.date)} · ${line.reason}', style: AppTypography.caption(c.textMuted)),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(money(line.amountBase), style: AppTypography.amount(c.textSecondary, size: 14, weight: FontWeight.w600)),
                                 ],
                               ),
                             ),
-                            Text(money(line.amountBase), style: AppTypography.amount(c.textSecondary, size: 14, weight: FontWeight.w600)),
-                          ],
-                        ),
-                      ),
+                          ),
+                      ],
                     ),
+                  ),
                 ],
               ],
             ),

@@ -283,6 +283,7 @@ const purchasePlatformPresets = [
 
 enum SubscriptionSort {
   nextBilling,
+  statusActiveFirst,
   price,
   category,
   name,

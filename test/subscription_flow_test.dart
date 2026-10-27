@@ -189,4 +189,68 @@ void main() {
     expect(events.any((e) => e.type == SubscriptionEventType.priceReviewed), isTrue);
     await db.close();
   });
+
+  test('calendar charges zero during free phase even when list price is stored', () async {
+    final db = AppDatabase.memory();
+    await BootstrapService(db).ensureInitialized();
+    final subs = SubscriptionRepository(db);
+    final start = DateTime(2026, 10, 13);
+    final trialEnd = BillingMath.addFreePeriod(start, 365);
+    final id = await subs.create(
+      serviceId: 'googleone',
+      planId: 'googleone-100-gb',
+      categoryId: 'cloud',
+      profileId: personalProfileId,
+      status: SubscriptionStatus.trial,
+      startDate: start,
+      nextBillingDate: DateTime(2026, 11, 13),
+      autoRenew: true,
+      currency: 'TWD',
+      currentPrice: 7800,
+      billingCycle: 'yearly',
+      phases: [
+        PricePhasesCompanion.insert(
+          id: 'free-1y',
+          subscriptionId: 'pending',
+          type: PricePhaseType.free.name,
+          startDate: start,
+          endDate: Value(trialEnd),
+          price: 0,
+          currency: 'TWD',
+          billingCycle: 'yearly',
+          regularPrice: const Value(7800),
+          regularCurrency: const Value('TWD'),
+        ),
+      ],
+    );
+    final list = await subs.listAll();
+    final fx = CurrencyEngine(ratesVsUsd: const {'USD': 1, 'TWD': 1}, baseCurrency: 'TWD', feePercent: 0);
+    final events = CalendarEngine.events(list, fx, month: DateTime(2026, 11));
+    final pay = events.where((e) => e.kind == 'payment' && e.subscriptionId == id).toList();
+    expect(pay, isNotEmpty);
+    expect(pay.first.amountBase, 0);
+    await db.close();
+  });
+
+  test('deleteSubscription removes all related rows', () async {
+    final db = AppDatabase.memory();
+    await BootstrapService(db).ensureInitialized();
+    final subs = SubscriptionRepository(db);
+    final id = await subs.create(
+      serviceId: 'chatgpt',
+      planId: 'chatgpt-plus',
+      categoryId: 'ai',
+      profileId: personalProfileId,
+      status: SubscriptionStatus.active,
+      startDate: DateTime(2026, 1, 1),
+      nextBillingDate: DateTime(2026, 2, 1),
+      autoRenew: true,
+      currency: 'USD',
+      currentPrice: 20,
+      billingCycle: 'monthly',
+    );
+    await subs.deleteSubscription(id);
+    expect(await subs.getById(id), isNull);
+    await db.close();
+  });
 }
