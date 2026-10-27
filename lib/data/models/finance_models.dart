@@ -91,11 +91,14 @@ class CalendarDayEvent {
     required this.title,
     required this.amountBase,
     required this.currencyLabel,
+    this.orderId,
   });
 
   final DateTime date;
   final String kind;
+  /// Empty when [orderId] is set.
   final String subscriptionId;
+  final String? orderId;
   final String title;
   final double amountBase;
   final String currencyLabel;

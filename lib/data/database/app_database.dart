@@ -25,6 +25,7 @@ part 'app_database.g.dart';
     UserPreferences,
     AppThemeRows,
     PurchaseOrders,
+    PurchaseOrderEvents,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -33,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.memory() => AppDatabase(connection.openMemoryExecutor());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -49,6 +50,19 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(userPreferences, userPreferences.notificationsEnabled);
             await m.addColumn(userPreferences, userPreferences.cloudAutoDownload);
             await m.addColumn(userPreferences, userPreferences.cloudAutoUpload);
+          }
+          if (from < 5) {
+            await m.addColumn(purchaseOrders, purchaseOrders.orderKind);
+            await m.addColumn(purchaseOrders, purchaseOrders.depositPaid);
+            await m.addColumn(purchaseOrders, purchaseOrders.balanceDue);
+            await m.addColumn(purchaseOrders, purchaseOrders.shippingFee);
+            await m.addColumn(purchaseOrders, purchaseOrders.serviceFee);
+            await m.addColumn(purchaseOrders, purchaseOrders.sellerName);
+            await m.addColumn(purchaseOrders, purchaseOrders.orderNumber);
+            await m.addColumn(purchaseOrders, purchaseOrders.trackingNumber);
+            await m.addColumn(purchaseOrders, purchaseOrders.forwarder);
+            await m.addColumn(purchaseOrders, purchaseOrders.paymentNote);
+            await m.createTable(purchaseOrderEvents);
           }
         },
       );

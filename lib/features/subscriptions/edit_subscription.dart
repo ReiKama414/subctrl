@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
-import 'package:subctrl/core/services/notification_service.dart';
 import 'package:subctrl/core/utils/sync_coordinator.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
@@ -34,12 +33,8 @@ Future<bool> showDeleteSubscriptionDialog({
     ),
   );
   if (ok != true) return false;
-  final enabled = ref.read(preferencesProvider).valueOrNull?.notificationsEnabled ?? true;
   await ref.read(subscriptionRepoProvider).deleteSubscription(sub.id);
-  await ref.read(notificationServiceProvider).resync(
-        await ref.read(subscriptionRepoProvider).allReminders(),
-        enabled: enabled,
-      );
+  await resyncAllNotifications(ref);
   await maybeCloudUpload(ref, l10n);
   return true;
 }
@@ -414,6 +409,7 @@ Future<PhaseView?> _editPhaseDialog(
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<PricePhaseType>(
                 initialValue: type,
@@ -426,7 +422,9 @@ Future<PhaseView?> _editPhaseDialog(
                   if (v != null) setDialog(() => type = v);
                 },
               ),
+              const SizedBox(height: 12),
               ListTile(
+                contentPadding: EdgeInsets.zero,
                 title: Text(l10n.startDate),
                 trailing: Text(start.toIso8601String().substring(0, 10)),
                 onTap: () async {
@@ -440,6 +438,7 @@ Future<PhaseView?> _editPhaseDialog(
                 },
               ),
               ListTile(
+                contentPadding: EdgeInsets.zero,
                 title: Text(l10n.labelPromoEnd),
                 trailing: Text(end?.toIso8601String().substring(0, 10) ?? '—'),
                 onTap: () async {
@@ -452,16 +451,19 @@ Future<PhaseView?> _editPhaseDialog(
                   if (d != null) setDialog(() => end = d);
                 },
               ),
+              const SizedBox(height: 16),
               TextField(
                 controller: priceCtrl,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: l10n.currentPrice),
               ),
+              const SizedBox(height: 12),
               TextField(
                 controller: regularCtrl,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: l10n.regularPriceAfterOffer),
               ),
+              const SizedBox(height: 12),
               TextField(
                 controller: promoCtrl,
                 decoration: InputDecoration(labelText: l10n.promoName),

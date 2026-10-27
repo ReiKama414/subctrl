@@ -12,16 +12,18 @@ import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/models/views.dart';
 import 'package:subctrl/data/repositories/catalog_repository.dart';
+import 'package:subctrl/data/repositories/purchase_repository.dart';
 import 'package:subctrl/data/repositories/subscription_repository.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 class ExportService {
-  ExportService(this.db, this.subs, this.finance);
+  ExportService(this.db, this.subs, this.finance, this.purchases);
   final AppDatabase db;
   final SubscriptionRepository subs;
   final FinanceRepository finance;
+  final PurchaseRepository purchases;
   final _uuid = const Uuid();
 
   Future<Map<String, dynamic>> toJsonMap() async {
@@ -29,8 +31,9 @@ class ExportService {
     final payments = await finance.payments();
     final methods = await finance.methods();
     final budgets = await finance.budgets();
+    final orderList = await purchases.listAll();
     final payload = <String, dynamic>{
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
       'subscriptions': [
         for (final s in list)
@@ -153,6 +156,47 @@ class ExportService {
             'currency': b.currency,
           },
       ],
+      'purchaseOrders': [
+        for (final o in orderList)
+          {
+            'id': o.id,
+            'profileId': o.profileId,
+            'platform': o.platform,
+            'title': o.title,
+            'quantity': o.quantity,
+            'status': o.status.name,
+            'orderKind': o.orderKind.name,
+            'orderedAt': o.orderedAt.toIso8601String(),
+            'expectedAt': o.expectedAt?.toIso8601String(),
+            'deliveredAt': o.deliveredAt?.toIso8601String(),
+            'reminderAt': o.reminderAt?.toIso8601String(),
+            'price': o.price,
+            'depositPaid': o.depositPaid,
+            'balanceDue': o.balanceDue,
+            'shippingFee': o.shippingFee,
+            'serviceFee': o.serviceFee,
+            'currency': o.currency,
+            'sellerName': o.sellerName,
+            'orderNumber': o.orderNumber,
+            'trackingNumber': o.trackingNumber,
+            'trackingUrl': o.trackingUrl,
+            'forwarder': o.forwarder,
+            'paymentNote': o.paymentNote,
+            'notes': o.notes,
+            'createdAt': o.createdAt.toIso8601String(),
+            'updatedAt': o.updatedAt.toIso8601String(),
+            'events': [
+              for (final e in await purchases.eventsFor(o.id))
+                {
+                  'id': e.id,
+                  'type': e.type.name,
+                  'at': e.at.toIso8601String(),
+                  'title': e.title,
+                  'detail': e.detail,
+                },
+            ],
+          },
+      ],
     };
     return payload;
   }
@@ -253,6 +297,19 @@ class ExportService {
           categoryId: b['categoryId'] as String?,
           amount: (b['monthlyAmount'] as num?)?.toDouble() ?? 0,
           currency: (b['currency'] as String?) ?? 'TWD',
+        );
+      }
+    }
+
+    final orderList = payload['purchaseOrders'];
+    if (orderList is List) {
+      for (final raw in orderList) {
+        if (raw is! Map) continue;
+        final o = Map<String, dynamic>.from(raw);
+        final events = o['events'];
+        await purchases.restoreOrder(
+          o,
+          eventList: events is List ? events.map((e) => Map<String, dynamic>.from(e as Map)).toList() : null,
         );
       }
     }
@@ -429,6 +486,8 @@ class ExportService {
   }
 
   Future<void> _clearLedger() async {
+    await db.delete(db.purchaseOrderEvents).go();
+    await db.delete(db.purchaseOrders).go();
     await db.delete(db.reminders).go();
     await db.delete(db.pricePhases).go();
     await db.delete(db.paymentRecords).go();

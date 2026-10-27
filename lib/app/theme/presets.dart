@@ -60,15 +60,28 @@ class ThemeTokens {
       return d;
     }
 
+    final accent = c('accent', fallback.colors.accent);
+    final background = c('background', fallback.colors.background);
+    final surface = c('surface', fallback.colors.surface);
+    final border = c('border', fallback.colors.border);
+    final brightness = json['brightness'] == 'light' ? Brightness.light : Brightness.dark;
+    final onLight = brightness == Brightness.light;
     final colors = fallback.colors.copyWith(
-      accent: c('accent', fallback.colors.accent),
-      background: c('background', fallback.colors.background),
-      surface: c('surface', fallback.colors.surface),
-      border: c('border', fallback.colors.border),
-      chartPrimary: c('accent', fallback.colors.accent),
+      accent: accent,
+      background: background,
+      surface: surface,
+      border: border,
+      surfaceHigh: c('surfaceHigh', onLight ? const Color(0xFFFFFFFF) : fallback.colors.surfaceHigh),
+      onAccent: c('onAccent', onLight ? const Color(0xFFFAF7F2) : fallback.colors.onAccent),
+      textPrimary: c('textPrimary', onLight ? const Color(0xFF161616) : fallback.colors.textPrimary),
+      textSecondary: c('textSecondary', onLight ? const Color(0xFF5C5A56) : fallback.colors.textSecondary),
+      textMuted: c('textMuted', onLight ? const Color(0xFF8A8680) : fallback.colors.textMuted),
+      chartPrimary: accent,
+      glassFill: Color(onLight ? 0xCCFAF7F2 : 0xE617191F),
     );
     return fallback.copyWith(
       preset: ThemePreset.custom,
+      brightness: brightness,
       colors: colors,
       glowIntensity: (json['glowIntensity'] as num?)?.toDouble() ?? fallback.glowIntensity,
       blur: (json['blur'] as num?)?.toDouble() ?? fallback.blur,
@@ -206,7 +219,7 @@ class ThemePresets {
     colors: const AppColors(
       background: Color(0xFFF3EFEA),
       surface: Color(0xFFFAF7F2),
-      surfaceHigh: Color(0xFFFFFFFF),
+      surfaceHigh: Color(0xFFE8E4DE),
       border: Color(0xFFD8D2CA),
       accent: Color(0xFF1C1C1C),
       onAccent: Color(0xFFFAF7F2),
@@ -225,12 +238,102 @@ class ThemePresets {
     ),
   );
 
+  static final noir = ThemeTokens(
+    preset: ThemePreset.noir,
+    brightness: Brightness.dark,
+    glowIntensity: 0.2,
+    blur: AppBlur.low,
+    radius: AppRadius.r16,
+    chart: chart,
+    colors: const AppColors(
+      background: Color(0xFF0A0810),
+      surface: Color(0xFF14101C),
+      surfaceHigh: Color(0xFF221C2E),
+      border: Color(0xFF3D3350),
+      accent: Color(0xFFB794F6),
+      onAccent: Color(0xFF12081E),
+      textPrimary: Color(0xFFF2ECFA),
+      textSecondary: Color(0xFFC4B8D4),
+      textMuted: Color(0xFF8E82A0),
+      warning: Color(0xFFE0B04A),
+      danger: Color(0xFFE07090),
+      success: Color(0xFF9AE6B4),
+      glow: Color(0x33B794F6),
+      chartGrid: Color(0xFF2E2640),
+      chartPrimary: Color(0xFFB794F6),
+      chartSecondary: Color(0xFFC4B8D4),
+      chartWarning: Color(0xFFE0B04A),
+      glassFill: Color(0xCC14101C),
+    ),
+  );
+
+  static final sakura = ThemeTokens(
+    preset: ThemePreset.sakura,
+    brightness: Brightness.light,
+    glowIntensity: 0.08,
+    blur: AppBlur.low,
+    radius: AppRadius.r16,
+    chart: chart,
+    colors: const AppColors(
+      background: Color(0xFFFFF5F7),
+      surface: Color(0xFFFFFBFC),
+      surfaceHigh: Color(0xFFF5E6EA),
+      border: Color(0xFFE8C4CF),
+      accent: Color(0xFFD4547A),
+      onAccent: Color(0xFFFFF5F7),
+      textPrimary: Color(0xFF3D2030),
+      textSecondary: Color(0xFF6B4558),
+      textMuted: Color(0xFF9A7080),
+      warning: Color(0xFFC08030),
+      danger: Color(0xFFC04050),
+      success: Color(0xFF5A9A70),
+      glow: Color(0x22D4547A),
+      chartGrid: Color(0xFFE8C4CF),
+      chartPrimary: Color(0xFFD4547A),
+      chartSecondary: Color(0xFF6B4558),
+      chartWarning: Color(0xFFC08030),
+      glassFill: Color(0xCCFFFBFC),
+    ),
+  );
+
+  static final macaron = ThemeTokens(
+    preset: ThemePreset.macaron,
+    brightness: Brightness.light,
+    glowIntensity: 0.07,
+    blur: AppBlur.low,
+    radius: AppRadius.r16,
+    chart: chart,
+    colors: const AppColors(
+      background: Color(0xFFF5F8FF),
+      surface: Color(0xFFFCFEFF),
+      surfaceHigh: Color(0xFFE8F0FA),
+      border: Color(0xFFC8D8EC),
+      accent: Color(0xFF6BA3E8),
+      onAccent: Color(0xFF0A2848),
+      textPrimary: Color(0xFF1A2840),
+      textSecondary: Color(0xFF4A5870),
+      textMuted: Color(0xFF7888A0),
+      warning: Color(0xFFE8A848),
+      danger: Color(0xFFE07088),
+      success: Color(0xFF58B888),
+      glow: Color(0x226BA3E8),
+      chartGrid: Color(0xFFC8D8EC),
+      chartPrimary: Color(0xFF6BA3E8),
+      chartSecondary: Color(0xFF4A5870),
+      chartWarning: Color(0xFFE8A848),
+      glassFill: Color(0xCCFCFEFF),
+    ),
+  );
+
   static ThemeTokens byPreset(ThemePreset preset) => switch (preset) {
         ThemePreset.voidTheme => voidTheme,
         ThemePreset.terminal => terminal,
         ThemePreset.akira => akira,
         ThemePreset.ice => ice,
         ThemePreset.light => light,
+        ThemePreset.noir => noir,
+        ThemePreset.sakura => sakura,
+        ThemePreset.macaron => macaron,
         ThemePreset.custom => voidTheme.copyWith(preset: ThemePreset.custom),
       };
 }

@@ -8227,9 +8227,8 @@ class $UserPreferencesTable extends UserPreferences
     requiredDuringInsert: false,
     defaultValue: const Constant('system'),
   );
-  static const VerificationMeta _notificationsEnabledMeta = const VerificationMeta(
-    'notificationsEnabled',
-  );
+  static const VerificationMeta _notificationsEnabledMeta =
+      const VerificationMeta('notificationsEnabled');
   @override
   late final GeneratedColumn<bool> notificationsEnabled = GeneratedColumn<bool>(
     'notifications_enabled',
@@ -8575,7 +8574,11 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   /// system | en | zh_TW | ja
   final String localeCode;
   final bool notificationsEnabled;
+
+  /// When linked to cloud account, offer / run download on sign-in.
   final bool cloudAutoDownload;
+
+  /// Upload backup after local subscription changes (when signed in).
   final bool cloudAutoUpload;
   const UserPreference({
     required this.id,
@@ -8683,7 +8686,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       ratesUpdatedAt: serializer.fromJson<DateTime?>(json['ratesUpdatedAt']),
       lastFxError: serializer.fromJson<String?>(json['lastFxError']),
       localeCode: serializer.fromJson<String>(json['localeCode']),
-      notificationsEnabled: serializer.fromJson<bool>(json['notificationsEnabled']),
+      notificationsEnabled: serializer.fromJson<bool>(
+        json['notificationsEnabled'],
+      ),
       cloudAutoDownload: serializer.fromJson<bool>(json['cloudAutoDownload']),
       cloudAutoUpload: serializer.fromJson<bool>(json['cloudAutoUpload']),
     );
@@ -8989,7 +8994,8 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       if (ratesUpdatedAt != null) 'rates_updated_at': ratesUpdatedAt,
       if (lastFxError != null) 'last_fx_error': lastFxError,
       if (localeCode != null) 'locale_code': localeCode,
-      if (notificationsEnabled != null) 'notifications_enabled': notificationsEnabled,
+      if (notificationsEnabled != null)
+        'notifications_enabled': notificationsEnabled,
       if (cloudAutoDownload != null) 'cloud_auto_download': cloudAutoDownload,
       if (cloudAutoUpload != null) 'cloud_auto_upload': cloudAutoUpload,
       if (rowid != null) 'rowid': rowid,
@@ -9124,6 +9130,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
           ..write('ratesUpdatedAt: $ratesUpdatedAt, ')
           ..write('lastFxError: $lastFxError, ')
           ..write('localeCode: $localeCode, ')
+          ..write('notificationsEnabled: $notificationsEnabled, ')
+          ..write('cloudAutoDownload: $cloudAutoDownload, ')
+          ..write('cloudAutoUpload: $cloudAutoUpload, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9449,6 +9458,18 @@ class $PurchaseOrdersTable extends PurchaseOrders
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _orderKindMeta = const VerificationMeta(
+    'orderKind',
+  );
+  @override
+  late final GeneratedColumn<String> orderKind = GeneratedColumn<String>(
+    'order_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('preorder'),
+  );
   static const VerificationMeta _orderedAtMeta = const VerificationMeta(
     'orderedAt',
   );
@@ -9502,6 +9523,50 @@ class $PurchaseOrdersTable extends PurchaseOrders
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _depositPaidMeta = const VerificationMeta(
+    'depositPaid',
+  );
+  @override
+  late final GeneratedColumn<double> depositPaid = GeneratedColumn<double>(
+    'deposit_paid',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _balanceDueMeta = const VerificationMeta(
+    'balanceDue',
+  );
+  @override
+  late final GeneratedColumn<double> balanceDue = GeneratedColumn<double>(
+    'balance_due',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _shippingFeeMeta = const VerificationMeta(
+    'shippingFee',
+  );
+  @override
+  late final GeneratedColumn<double> shippingFee = GeneratedColumn<double>(
+    'shipping_fee',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _serviceFeeMeta = const VerificationMeta(
+    'serviceFee',
+  );
+  @override
+  late final GeneratedColumn<double> serviceFee = GeneratedColumn<double>(
+    'service_fee',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _currencyMeta = const VerificationMeta(
     'currency',
   );
@@ -9513,12 +9578,67 @@ class $PurchaseOrdersTable extends PurchaseOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _sellerNameMeta = const VerificationMeta(
+    'sellerName',
+  );
+  @override
+  late final GeneratedColumn<String> sellerName = GeneratedColumn<String>(
+    'seller_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _orderNumberMeta = const VerificationMeta(
+    'orderNumber',
+  );
+  @override
+  late final GeneratedColumn<String> orderNumber = GeneratedColumn<String>(
+    'order_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _trackingNumberMeta = const VerificationMeta(
+    'trackingNumber',
+  );
+  @override
+  late final GeneratedColumn<String> trackingNumber = GeneratedColumn<String>(
+    'tracking_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _trackingUrlMeta = const VerificationMeta(
     'trackingUrl',
   );
   @override
   late final GeneratedColumn<String> trackingUrl = GeneratedColumn<String>(
     'tracking_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _forwarderMeta = const VerificationMeta(
+    'forwarder',
+  );
+  @override
+  late final GeneratedColumn<String> forwarder = GeneratedColumn<String>(
+    'forwarder',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _paymentNoteMeta = const VerificationMeta(
+    'paymentNote',
+  );
+  @override
+  late final GeneratedColumn<String> paymentNote = GeneratedColumn<String>(
+    'payment_note',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -9563,13 +9683,23 @@ class $PurchaseOrdersTable extends PurchaseOrders
     title,
     quantity,
     status,
+    orderKind,
     orderedAt,
     expectedAt,
     deliveredAt,
     reminderAt,
     price,
+    depositPaid,
+    balanceDue,
+    shippingFee,
+    serviceFee,
     currency,
+    sellerName,
+    orderNumber,
+    trackingNumber,
     trackingUrl,
+    forwarder,
+    paymentNote,
     notes,
     createdAt,
     updatedAt,
@@ -9629,6 +9759,12 @@ class $PurchaseOrdersTable extends PurchaseOrders
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
+    if (data.containsKey('order_kind')) {
+      context.handle(
+        _orderKindMeta,
+        orderKind.isAcceptableOrUnknown(data['order_kind']!, _orderKindMeta),
+      );
+    }
     if (data.containsKey('ordered_at')) {
       context.handle(
         _orderedAtMeta,
@@ -9664,10 +9800,64 @@ class $PurchaseOrdersTable extends PurchaseOrders
         price.isAcceptableOrUnknown(data['price']!, _priceMeta),
       );
     }
+    if (data.containsKey('deposit_paid')) {
+      context.handle(
+        _depositPaidMeta,
+        depositPaid.isAcceptableOrUnknown(
+          data['deposit_paid']!,
+          _depositPaidMeta,
+        ),
+      );
+    }
+    if (data.containsKey('balance_due')) {
+      context.handle(
+        _balanceDueMeta,
+        balanceDue.isAcceptableOrUnknown(data['balance_due']!, _balanceDueMeta),
+      );
+    }
+    if (data.containsKey('shipping_fee')) {
+      context.handle(
+        _shippingFeeMeta,
+        shippingFee.isAcceptableOrUnknown(
+          data['shipping_fee']!,
+          _shippingFeeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('service_fee')) {
+      context.handle(
+        _serviceFeeMeta,
+        serviceFee.isAcceptableOrUnknown(data['service_fee']!, _serviceFeeMeta),
+      );
+    }
     if (data.containsKey('currency')) {
       context.handle(
         _currencyMeta,
         currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    }
+    if (data.containsKey('seller_name')) {
+      context.handle(
+        _sellerNameMeta,
+        sellerName.isAcceptableOrUnknown(data['seller_name']!, _sellerNameMeta),
+      );
+    }
+    if (data.containsKey('order_number')) {
+      context.handle(
+        _orderNumberMeta,
+        orderNumber.isAcceptableOrUnknown(
+          data['order_number']!,
+          _orderNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tracking_number')) {
+      context.handle(
+        _trackingNumberMeta,
+        trackingNumber.isAcceptableOrUnknown(
+          data['tracking_number']!,
+          _trackingNumberMeta,
+        ),
       );
     }
     if (data.containsKey('tracking_url')) {
@@ -9676,6 +9866,21 @@ class $PurchaseOrdersTable extends PurchaseOrders
         trackingUrl.isAcceptableOrUnknown(
           data['tracking_url']!,
           _trackingUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('forwarder')) {
+      context.handle(
+        _forwarderMeta,
+        forwarder.isAcceptableOrUnknown(data['forwarder']!, _forwarderMeta),
+      );
+    }
+    if (data.containsKey('payment_note')) {
+      context.handle(
+        _paymentNoteMeta,
+        paymentNote.isAcceptableOrUnknown(
+          data['payment_note']!,
+          _paymentNoteMeta,
         ),
       );
     }
@@ -9734,6 +9939,10 @@ class $PurchaseOrdersTable extends PurchaseOrders
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      orderKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_kind'],
+      )!,
       orderedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}ordered_at'],
@@ -9754,13 +9963,49 @@ class $PurchaseOrdersTable extends PurchaseOrders
         DriftSqlType.double,
         data['${effectivePrefix}price'],
       ),
+      depositPaid: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}deposit_paid'],
+      ),
+      balanceDue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}balance_due'],
+      ),
+      shippingFee: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}shipping_fee'],
+      ),
+      serviceFee: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}service_fee'],
+      ),
       currency: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}currency'],
       ),
+      sellerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seller_name'],
+      ),
+      orderNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_number'],
+      ),
+      trackingNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tracking_number'],
+      ),
       trackingUrl: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tracking_url'],
+      ),
+      forwarder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}forwarder'],
+      ),
+      paymentNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_note'],
       ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -9794,13 +10039,27 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
 
   /// ordered | preorder | awaitingShipment | shipped | delivered | cancelled
   final String status;
+
+  /// preorder | instock | proxy
+  final String orderKind;
   final DateTime orderedAt;
   final DateTime? expectedAt;
   final DateTime? deliveredAt;
   final DateTime? reminderAt;
+
+  /// List / total price (legacy rows use this as the only amount).
   final double? price;
+  final double? depositPaid;
+  final double? balanceDue;
+  final double? shippingFee;
+  final double? serviceFee;
   final String? currency;
+  final String? sellerName;
+  final String? orderNumber;
+  final String? trackingNumber;
   final String? trackingUrl;
+  final String? forwarder;
+  final String? paymentNote;
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -9811,13 +10070,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     required this.title,
     required this.quantity,
     required this.status,
+    required this.orderKind,
     required this.orderedAt,
     this.expectedAt,
     this.deliveredAt,
     this.reminderAt,
     this.price,
+    this.depositPaid,
+    this.balanceDue,
+    this.shippingFee,
+    this.serviceFee,
     this.currency,
+    this.sellerName,
+    this.orderNumber,
+    this.trackingNumber,
     this.trackingUrl,
+    this.forwarder,
+    this.paymentNote,
     this.notes,
     required this.createdAt,
     required this.updatedAt,
@@ -9831,6 +10100,7 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     map['title'] = Variable<String>(title);
     map['quantity'] = Variable<int>(quantity);
     map['status'] = Variable<String>(status);
+    map['order_kind'] = Variable<String>(orderKind);
     map['ordered_at'] = Variable<DateTime>(orderedAt);
     if (!nullToAbsent || expectedAt != null) {
       map['expected_at'] = Variable<DateTime>(expectedAt);
@@ -9844,11 +10114,38 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     if (!nullToAbsent || price != null) {
       map['price'] = Variable<double>(price);
     }
+    if (!nullToAbsent || depositPaid != null) {
+      map['deposit_paid'] = Variable<double>(depositPaid);
+    }
+    if (!nullToAbsent || balanceDue != null) {
+      map['balance_due'] = Variable<double>(balanceDue);
+    }
+    if (!nullToAbsent || shippingFee != null) {
+      map['shipping_fee'] = Variable<double>(shippingFee);
+    }
+    if (!nullToAbsent || serviceFee != null) {
+      map['service_fee'] = Variable<double>(serviceFee);
+    }
     if (!nullToAbsent || currency != null) {
       map['currency'] = Variable<String>(currency);
     }
+    if (!nullToAbsent || sellerName != null) {
+      map['seller_name'] = Variable<String>(sellerName);
+    }
+    if (!nullToAbsent || orderNumber != null) {
+      map['order_number'] = Variable<String>(orderNumber);
+    }
+    if (!nullToAbsent || trackingNumber != null) {
+      map['tracking_number'] = Variable<String>(trackingNumber);
+    }
     if (!nullToAbsent || trackingUrl != null) {
       map['tracking_url'] = Variable<String>(trackingUrl);
+    }
+    if (!nullToAbsent || forwarder != null) {
+      map['forwarder'] = Variable<String>(forwarder);
+    }
+    if (!nullToAbsent || paymentNote != null) {
+      map['payment_note'] = Variable<String>(paymentNote);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -9866,6 +10163,7 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       title: Value(title),
       quantity: Value(quantity),
       status: Value(status),
+      orderKind: Value(orderKind),
       orderedAt: Value(orderedAt),
       expectedAt: expectedAt == null && nullToAbsent
           ? const Value.absent()
@@ -9879,12 +10177,39 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       price: price == null && nullToAbsent
           ? const Value.absent()
           : Value(price),
+      depositPaid: depositPaid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(depositPaid),
+      balanceDue: balanceDue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(balanceDue),
+      shippingFee: shippingFee == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shippingFee),
+      serviceFee: serviceFee == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serviceFee),
       currency: currency == null && nullToAbsent
           ? const Value.absent()
           : Value(currency),
+      sellerName: sellerName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sellerName),
+      orderNumber: orderNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderNumber),
+      trackingNumber: trackingNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trackingNumber),
       trackingUrl: trackingUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(trackingUrl),
+      forwarder: forwarder == null && nullToAbsent
+          ? const Value.absent()
+          : Value(forwarder),
+      paymentNote: paymentNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentNote),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -9905,13 +10230,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       title: serializer.fromJson<String>(json['title']),
       quantity: serializer.fromJson<int>(json['quantity']),
       status: serializer.fromJson<String>(json['status']),
+      orderKind: serializer.fromJson<String>(json['orderKind']),
       orderedAt: serializer.fromJson<DateTime>(json['orderedAt']),
       expectedAt: serializer.fromJson<DateTime?>(json['expectedAt']),
       deliveredAt: serializer.fromJson<DateTime?>(json['deliveredAt']),
       reminderAt: serializer.fromJson<DateTime?>(json['reminderAt']),
       price: serializer.fromJson<double?>(json['price']),
+      depositPaid: serializer.fromJson<double?>(json['depositPaid']),
+      balanceDue: serializer.fromJson<double?>(json['balanceDue']),
+      shippingFee: serializer.fromJson<double?>(json['shippingFee']),
+      serviceFee: serializer.fromJson<double?>(json['serviceFee']),
       currency: serializer.fromJson<String?>(json['currency']),
+      sellerName: serializer.fromJson<String?>(json['sellerName']),
+      orderNumber: serializer.fromJson<String?>(json['orderNumber']),
+      trackingNumber: serializer.fromJson<String?>(json['trackingNumber']),
       trackingUrl: serializer.fromJson<String?>(json['trackingUrl']),
+      forwarder: serializer.fromJson<String?>(json['forwarder']),
+      paymentNote: serializer.fromJson<String?>(json['paymentNote']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -9927,13 +10262,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       'title': serializer.toJson<String>(title),
       'quantity': serializer.toJson<int>(quantity),
       'status': serializer.toJson<String>(status),
+      'orderKind': serializer.toJson<String>(orderKind),
       'orderedAt': serializer.toJson<DateTime>(orderedAt),
       'expectedAt': serializer.toJson<DateTime?>(expectedAt),
       'deliveredAt': serializer.toJson<DateTime?>(deliveredAt),
       'reminderAt': serializer.toJson<DateTime?>(reminderAt),
       'price': serializer.toJson<double?>(price),
+      'depositPaid': serializer.toJson<double?>(depositPaid),
+      'balanceDue': serializer.toJson<double?>(balanceDue),
+      'shippingFee': serializer.toJson<double?>(shippingFee),
+      'serviceFee': serializer.toJson<double?>(serviceFee),
       'currency': serializer.toJson<String?>(currency),
+      'sellerName': serializer.toJson<String?>(sellerName),
+      'orderNumber': serializer.toJson<String?>(orderNumber),
+      'trackingNumber': serializer.toJson<String?>(trackingNumber),
       'trackingUrl': serializer.toJson<String?>(trackingUrl),
+      'forwarder': serializer.toJson<String?>(forwarder),
+      'paymentNote': serializer.toJson<String?>(paymentNote),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -9947,13 +10292,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     String? title,
     int? quantity,
     String? status,
+    String? orderKind,
     DateTime? orderedAt,
     Value<DateTime?> expectedAt = const Value.absent(),
     Value<DateTime?> deliveredAt = const Value.absent(),
     Value<DateTime?> reminderAt = const Value.absent(),
     Value<double?> price = const Value.absent(),
+    Value<double?> depositPaid = const Value.absent(),
+    Value<double?> balanceDue = const Value.absent(),
+    Value<double?> shippingFee = const Value.absent(),
+    Value<double?> serviceFee = const Value.absent(),
     Value<String?> currency = const Value.absent(),
+    Value<String?> sellerName = const Value.absent(),
+    Value<String?> orderNumber = const Value.absent(),
+    Value<String?> trackingNumber = const Value.absent(),
     Value<String?> trackingUrl = const Value.absent(),
+    Value<String?> forwarder = const Value.absent(),
+    Value<String?> paymentNote = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -9964,13 +10319,25 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     title: title ?? this.title,
     quantity: quantity ?? this.quantity,
     status: status ?? this.status,
+    orderKind: orderKind ?? this.orderKind,
     orderedAt: orderedAt ?? this.orderedAt,
     expectedAt: expectedAt.present ? expectedAt.value : this.expectedAt,
     deliveredAt: deliveredAt.present ? deliveredAt.value : this.deliveredAt,
     reminderAt: reminderAt.present ? reminderAt.value : this.reminderAt,
     price: price.present ? price.value : this.price,
+    depositPaid: depositPaid.present ? depositPaid.value : this.depositPaid,
+    balanceDue: balanceDue.present ? balanceDue.value : this.balanceDue,
+    shippingFee: shippingFee.present ? shippingFee.value : this.shippingFee,
+    serviceFee: serviceFee.present ? serviceFee.value : this.serviceFee,
     currency: currency.present ? currency.value : this.currency,
+    sellerName: sellerName.present ? sellerName.value : this.sellerName,
+    orderNumber: orderNumber.present ? orderNumber.value : this.orderNumber,
+    trackingNumber: trackingNumber.present
+        ? trackingNumber.value
+        : this.trackingNumber,
     trackingUrl: trackingUrl.present ? trackingUrl.value : this.trackingUrl,
+    forwarder: forwarder.present ? forwarder.value : this.forwarder,
+    paymentNote: paymentNote.present ? paymentNote.value : this.paymentNote,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -9983,6 +10350,7 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       title: data.title.present ? data.title.value : this.title,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
       status: data.status.present ? data.status.value : this.status,
+      orderKind: data.orderKind.present ? data.orderKind.value : this.orderKind,
       orderedAt: data.orderedAt.present ? data.orderedAt.value : this.orderedAt,
       expectedAt: data.expectedAt.present
           ? data.expectedAt.value
@@ -9994,10 +10362,35 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           ? data.reminderAt.value
           : this.reminderAt,
       price: data.price.present ? data.price.value : this.price,
+      depositPaid: data.depositPaid.present
+          ? data.depositPaid.value
+          : this.depositPaid,
+      balanceDue: data.balanceDue.present
+          ? data.balanceDue.value
+          : this.balanceDue,
+      shippingFee: data.shippingFee.present
+          ? data.shippingFee.value
+          : this.shippingFee,
+      serviceFee: data.serviceFee.present
+          ? data.serviceFee.value
+          : this.serviceFee,
       currency: data.currency.present ? data.currency.value : this.currency,
+      sellerName: data.sellerName.present
+          ? data.sellerName.value
+          : this.sellerName,
+      orderNumber: data.orderNumber.present
+          ? data.orderNumber.value
+          : this.orderNumber,
+      trackingNumber: data.trackingNumber.present
+          ? data.trackingNumber.value
+          : this.trackingNumber,
       trackingUrl: data.trackingUrl.present
           ? data.trackingUrl.value
           : this.trackingUrl,
+      forwarder: data.forwarder.present ? data.forwarder.value : this.forwarder,
+      paymentNote: data.paymentNote.present
+          ? data.paymentNote.value
+          : this.paymentNote,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -10013,13 +10406,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           ..write('title: $title, ')
           ..write('quantity: $quantity, ')
           ..write('status: $status, ')
+          ..write('orderKind: $orderKind, ')
           ..write('orderedAt: $orderedAt, ')
           ..write('expectedAt: $expectedAt, ')
           ..write('deliveredAt: $deliveredAt, ')
           ..write('reminderAt: $reminderAt, ')
           ..write('price: $price, ')
+          ..write('depositPaid: $depositPaid, ')
+          ..write('balanceDue: $balanceDue, ')
+          ..write('shippingFee: $shippingFee, ')
+          ..write('serviceFee: $serviceFee, ')
           ..write('currency: $currency, ')
+          ..write('sellerName: $sellerName, ')
+          ..write('orderNumber: $orderNumber, ')
+          ..write('trackingNumber: $trackingNumber, ')
           ..write('trackingUrl: $trackingUrl, ')
+          ..write('forwarder: $forwarder, ')
+          ..write('paymentNote: $paymentNote, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -10028,24 +10431,34 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     profileId,
     platform,
     title,
     quantity,
     status,
+    orderKind,
     orderedAt,
     expectedAt,
     deliveredAt,
     reminderAt,
     price,
+    depositPaid,
+    balanceDue,
+    shippingFee,
+    serviceFee,
     currency,
+    sellerName,
+    orderNumber,
+    trackingNumber,
     trackingUrl,
+    forwarder,
+    paymentNote,
     notes,
     createdAt,
     updatedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -10056,13 +10469,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           other.title == this.title &&
           other.quantity == this.quantity &&
           other.status == this.status &&
+          other.orderKind == this.orderKind &&
           other.orderedAt == this.orderedAt &&
           other.expectedAt == this.expectedAt &&
           other.deliveredAt == this.deliveredAt &&
           other.reminderAt == this.reminderAt &&
           other.price == this.price &&
+          other.depositPaid == this.depositPaid &&
+          other.balanceDue == this.balanceDue &&
+          other.shippingFee == this.shippingFee &&
+          other.serviceFee == this.serviceFee &&
           other.currency == this.currency &&
+          other.sellerName == this.sellerName &&
+          other.orderNumber == this.orderNumber &&
+          other.trackingNumber == this.trackingNumber &&
           other.trackingUrl == this.trackingUrl &&
+          other.forwarder == this.forwarder &&
+          other.paymentNote == this.paymentNote &&
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -10075,13 +10498,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
   final Value<String> title;
   final Value<int> quantity;
   final Value<String> status;
+  final Value<String> orderKind;
   final Value<DateTime> orderedAt;
   final Value<DateTime?> expectedAt;
   final Value<DateTime?> deliveredAt;
   final Value<DateTime?> reminderAt;
   final Value<double?> price;
+  final Value<double?> depositPaid;
+  final Value<double?> balanceDue;
+  final Value<double?> shippingFee;
+  final Value<double?> serviceFee;
   final Value<String?> currency;
+  final Value<String?> sellerName;
+  final Value<String?> orderNumber;
+  final Value<String?> trackingNumber;
   final Value<String?> trackingUrl;
+  final Value<String?> forwarder;
+  final Value<String?> paymentNote;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -10093,13 +10526,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     this.title = const Value.absent(),
     this.quantity = const Value.absent(),
     this.status = const Value.absent(),
+    this.orderKind = const Value.absent(),
     this.orderedAt = const Value.absent(),
     this.expectedAt = const Value.absent(),
     this.deliveredAt = const Value.absent(),
     this.reminderAt = const Value.absent(),
     this.price = const Value.absent(),
+    this.depositPaid = const Value.absent(),
+    this.balanceDue = const Value.absent(),
+    this.shippingFee = const Value.absent(),
+    this.serviceFee = const Value.absent(),
     this.currency = const Value.absent(),
+    this.sellerName = const Value.absent(),
+    this.orderNumber = const Value.absent(),
+    this.trackingNumber = const Value.absent(),
     this.trackingUrl = const Value.absent(),
+    this.forwarder = const Value.absent(),
+    this.paymentNote = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -10112,13 +10555,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     required String title,
     this.quantity = const Value.absent(),
     required String status,
+    this.orderKind = const Value.absent(),
     required DateTime orderedAt,
     this.expectedAt = const Value.absent(),
     this.deliveredAt = const Value.absent(),
     this.reminderAt = const Value.absent(),
     this.price = const Value.absent(),
+    this.depositPaid = const Value.absent(),
+    this.balanceDue = const Value.absent(),
+    this.shippingFee = const Value.absent(),
+    this.serviceFee = const Value.absent(),
     this.currency = const Value.absent(),
+    this.sellerName = const Value.absent(),
+    this.orderNumber = const Value.absent(),
+    this.trackingNumber = const Value.absent(),
     this.trackingUrl = const Value.absent(),
+    this.forwarder = const Value.absent(),
+    this.paymentNote = const Value.absent(),
     this.notes = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -10138,13 +10591,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     Expression<String>? title,
     Expression<int>? quantity,
     Expression<String>? status,
+    Expression<String>? orderKind,
     Expression<DateTime>? orderedAt,
     Expression<DateTime>? expectedAt,
     Expression<DateTime>? deliveredAt,
     Expression<DateTime>? reminderAt,
     Expression<double>? price,
+    Expression<double>? depositPaid,
+    Expression<double>? balanceDue,
+    Expression<double>? shippingFee,
+    Expression<double>? serviceFee,
     Expression<String>? currency,
+    Expression<String>? sellerName,
+    Expression<String>? orderNumber,
+    Expression<String>? trackingNumber,
     Expression<String>? trackingUrl,
+    Expression<String>? forwarder,
+    Expression<String>? paymentNote,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -10157,13 +10620,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
       if (title != null) 'title': title,
       if (quantity != null) 'quantity': quantity,
       if (status != null) 'status': status,
+      if (orderKind != null) 'order_kind': orderKind,
       if (orderedAt != null) 'ordered_at': orderedAt,
       if (expectedAt != null) 'expected_at': expectedAt,
       if (deliveredAt != null) 'delivered_at': deliveredAt,
       if (reminderAt != null) 'reminder_at': reminderAt,
       if (price != null) 'price': price,
+      if (depositPaid != null) 'deposit_paid': depositPaid,
+      if (balanceDue != null) 'balance_due': balanceDue,
+      if (shippingFee != null) 'shipping_fee': shippingFee,
+      if (serviceFee != null) 'service_fee': serviceFee,
       if (currency != null) 'currency': currency,
+      if (sellerName != null) 'seller_name': sellerName,
+      if (orderNumber != null) 'order_number': orderNumber,
+      if (trackingNumber != null) 'tracking_number': trackingNumber,
       if (trackingUrl != null) 'tracking_url': trackingUrl,
+      if (forwarder != null) 'forwarder': forwarder,
+      if (paymentNote != null) 'payment_note': paymentNote,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -10178,13 +10651,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     Value<String>? title,
     Value<int>? quantity,
     Value<String>? status,
+    Value<String>? orderKind,
     Value<DateTime>? orderedAt,
     Value<DateTime?>? expectedAt,
     Value<DateTime?>? deliveredAt,
     Value<DateTime?>? reminderAt,
     Value<double?>? price,
+    Value<double?>? depositPaid,
+    Value<double?>? balanceDue,
+    Value<double?>? shippingFee,
+    Value<double?>? serviceFee,
     Value<String?>? currency,
+    Value<String?>? sellerName,
+    Value<String?>? orderNumber,
+    Value<String?>? trackingNumber,
     Value<String?>? trackingUrl,
+    Value<String?>? forwarder,
+    Value<String?>? paymentNote,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -10197,13 +10680,23 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
       title: title ?? this.title,
       quantity: quantity ?? this.quantity,
       status: status ?? this.status,
+      orderKind: orderKind ?? this.orderKind,
       orderedAt: orderedAt ?? this.orderedAt,
       expectedAt: expectedAt ?? this.expectedAt,
       deliveredAt: deliveredAt ?? this.deliveredAt,
       reminderAt: reminderAt ?? this.reminderAt,
       price: price ?? this.price,
+      depositPaid: depositPaid ?? this.depositPaid,
+      balanceDue: balanceDue ?? this.balanceDue,
+      shippingFee: shippingFee ?? this.shippingFee,
+      serviceFee: serviceFee ?? this.serviceFee,
       currency: currency ?? this.currency,
+      sellerName: sellerName ?? this.sellerName,
+      orderNumber: orderNumber ?? this.orderNumber,
+      trackingNumber: trackingNumber ?? this.trackingNumber,
       trackingUrl: trackingUrl ?? this.trackingUrl,
+      forwarder: forwarder ?? this.forwarder,
+      paymentNote: paymentNote ?? this.paymentNote,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -10232,6 +10725,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (orderKind.present) {
+      map['order_kind'] = Variable<String>(orderKind.value);
+    }
     if (orderedAt.present) {
       map['ordered_at'] = Variable<DateTime>(orderedAt.value);
     }
@@ -10247,11 +10743,38 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     if (price.present) {
       map['price'] = Variable<double>(price.value);
     }
+    if (depositPaid.present) {
+      map['deposit_paid'] = Variable<double>(depositPaid.value);
+    }
+    if (balanceDue.present) {
+      map['balance_due'] = Variable<double>(balanceDue.value);
+    }
+    if (shippingFee.present) {
+      map['shipping_fee'] = Variable<double>(shippingFee.value);
+    }
+    if (serviceFee.present) {
+      map['service_fee'] = Variable<double>(serviceFee.value);
+    }
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
     }
+    if (sellerName.present) {
+      map['seller_name'] = Variable<String>(sellerName.value);
+    }
+    if (orderNumber.present) {
+      map['order_number'] = Variable<String>(orderNumber.value);
+    }
+    if (trackingNumber.present) {
+      map['tracking_number'] = Variable<String>(trackingNumber.value);
+    }
     if (trackingUrl.present) {
       map['tracking_url'] = Variable<String>(trackingUrl.value);
+    }
+    if (forwarder.present) {
+      map['forwarder'] = Variable<String>(forwarder.value);
+    }
+    if (paymentNote.present) {
+      map['payment_note'] = Variable<String>(paymentNote.value);
     }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
@@ -10277,16 +10800,419 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
           ..write('title: $title, ')
           ..write('quantity: $quantity, ')
           ..write('status: $status, ')
+          ..write('orderKind: $orderKind, ')
           ..write('orderedAt: $orderedAt, ')
           ..write('expectedAt: $expectedAt, ')
           ..write('deliveredAt: $deliveredAt, ')
           ..write('reminderAt: $reminderAt, ')
           ..write('price: $price, ')
+          ..write('depositPaid: $depositPaid, ')
+          ..write('balanceDue: $balanceDue, ')
+          ..write('shippingFee: $shippingFee, ')
+          ..write('serviceFee: $serviceFee, ')
           ..write('currency: $currency, ')
+          ..write('sellerName: $sellerName, ')
+          ..write('orderNumber: $orderNumber, ')
+          ..write('trackingNumber: $trackingNumber, ')
           ..write('trackingUrl: $trackingUrl, ')
+          ..write('forwarder: $forwarder, ')
+          ..write('paymentNote: $paymentNote, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PurchaseOrderEventsTable extends PurchaseOrderEvents
+    with TableInfo<$PurchaseOrderEventsTable, PurchaseOrderEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PurchaseOrderEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<String> orderId = GeneratedColumn<String>(
+    'order_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _atMeta = const VerificationMeta('at');
+  @override
+  late final GeneratedColumn<DateTime> at = GeneratedColumn<DateTime>(
+    'at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detailMeta = const VerificationMeta('detail');
+  @override
+  late final GeneratedColumn<String> detail = GeneratedColumn<String>(
+    'detail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, orderId, type, at, title, detail];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'purchase_order_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PurchaseOrderEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('at')) {
+      context.handle(_atMeta, at.isAcceptableOrUnknown(data['at']!, _atMeta));
+    } else if (isInserting) {
+      context.missing(_atMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('detail')) {
+      context.handle(
+        _detailMeta,
+        detail.isAcceptableOrUnknown(data['detail']!, _detailMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PurchaseOrderEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PurchaseOrderEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      at: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}at'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      detail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detail'],
+      ),
+    );
+  }
+
+  @override
+  $PurchaseOrderEventsTable createAlias(String alias) {
+    return $PurchaseOrderEventsTable(attachedDatabase, alias);
+  }
+}
+
+class PurchaseOrderEvent extends DataClass
+    implements Insertable<PurchaseOrderEvent> {
+  final String id;
+  final String orderId;
+  final String type;
+  final DateTime at;
+  final String title;
+  final String? detail;
+  const PurchaseOrderEvent({
+    required this.id,
+    required this.orderId,
+    required this.type,
+    required this.at,
+    required this.title,
+    this.detail,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['order_id'] = Variable<String>(orderId);
+    map['type'] = Variable<String>(type);
+    map['at'] = Variable<DateTime>(at);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || detail != null) {
+      map['detail'] = Variable<String>(detail);
+    }
+    return map;
+  }
+
+  PurchaseOrderEventsCompanion toCompanion(bool nullToAbsent) {
+    return PurchaseOrderEventsCompanion(
+      id: Value(id),
+      orderId: Value(orderId),
+      type: Value(type),
+      at: Value(at),
+      title: Value(title),
+      detail: detail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detail),
+    );
+  }
+
+  factory PurchaseOrderEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PurchaseOrderEvent(
+      id: serializer.fromJson<String>(json['id']),
+      orderId: serializer.fromJson<String>(json['orderId']),
+      type: serializer.fromJson<String>(json['type']),
+      at: serializer.fromJson<DateTime>(json['at']),
+      title: serializer.fromJson<String>(json['title']),
+      detail: serializer.fromJson<String?>(json['detail']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orderId': serializer.toJson<String>(orderId),
+      'type': serializer.toJson<String>(type),
+      'at': serializer.toJson<DateTime>(at),
+      'title': serializer.toJson<String>(title),
+      'detail': serializer.toJson<String?>(detail),
+    };
+  }
+
+  PurchaseOrderEvent copyWith({
+    String? id,
+    String? orderId,
+    String? type,
+    DateTime? at,
+    String? title,
+    Value<String?> detail = const Value.absent(),
+  }) => PurchaseOrderEvent(
+    id: id ?? this.id,
+    orderId: orderId ?? this.orderId,
+    type: type ?? this.type,
+    at: at ?? this.at,
+    title: title ?? this.title,
+    detail: detail.present ? detail.value : this.detail,
+  );
+  PurchaseOrderEvent copyWithCompanion(PurchaseOrderEventsCompanion data) {
+    return PurchaseOrderEvent(
+      id: data.id.present ? data.id.value : this.id,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      type: data.type.present ? data.type.value : this.type,
+      at: data.at.present ? data.at.value : this.at,
+      title: data.title.present ? data.title.value : this.title,
+      detail: data.detail.present ? data.detail.value : this.detail,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PurchaseOrderEvent(')
+          ..write('id: $id, ')
+          ..write('orderId: $orderId, ')
+          ..write('type: $type, ')
+          ..write('at: $at, ')
+          ..write('title: $title, ')
+          ..write('detail: $detail')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, orderId, type, at, title, detail);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PurchaseOrderEvent &&
+          other.id == this.id &&
+          other.orderId == this.orderId &&
+          other.type == this.type &&
+          other.at == this.at &&
+          other.title == this.title &&
+          other.detail == this.detail);
+}
+
+class PurchaseOrderEventsCompanion extends UpdateCompanion<PurchaseOrderEvent> {
+  final Value<String> id;
+  final Value<String> orderId;
+  final Value<String> type;
+  final Value<DateTime> at;
+  final Value<String> title;
+  final Value<String?> detail;
+  final Value<int> rowid;
+  const PurchaseOrderEventsCompanion({
+    this.id = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.at = const Value.absent(),
+    this.title = const Value.absent(),
+    this.detail = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PurchaseOrderEventsCompanion.insert({
+    required String id,
+    required String orderId,
+    required String type,
+    required DateTime at,
+    required String title,
+    this.detail = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orderId = Value(orderId),
+       type = Value(type),
+       at = Value(at),
+       title = Value(title);
+  static Insertable<PurchaseOrderEvent> custom({
+    Expression<String>? id,
+    Expression<String>? orderId,
+    Expression<String>? type,
+    Expression<DateTime>? at,
+    Expression<String>? title,
+    Expression<String>? detail,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (orderId != null) 'order_id': orderId,
+      if (type != null) 'type': type,
+      if (at != null) 'at': at,
+      if (title != null) 'title': title,
+      if (detail != null) 'detail': detail,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PurchaseOrderEventsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orderId,
+    Value<String>? type,
+    Value<DateTime>? at,
+    Value<String>? title,
+    Value<String?>? detail,
+    Value<int>? rowid,
+  }) {
+    return PurchaseOrderEventsCompanion(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      type: type ?? this.type,
+      at: at ?? this.at,
+      title: title ?? this.title,
+      detail: detail ?? this.detail,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<String>(orderId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (at.present) {
+      map['at'] = Variable<DateTime>(at.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (detail.present) {
+      map['detail'] = Variable<String>(detail.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PurchaseOrderEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('orderId: $orderId, ')
+          ..write('type: $type, ')
+          ..write('at: $at, ')
+          ..write('title: $title, ')
+          ..write('detail: $detail, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10319,6 +11245,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $AppThemeRowsTable appThemeRows = $AppThemeRowsTable(this);
   late final $PurchaseOrdersTable purchaseOrders = $PurchaseOrdersTable(this);
+  late final $PurchaseOrderEventsTable purchaseOrderEvents =
+      $PurchaseOrderEventsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10342,6 +11270,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userPreferences,
     appThemeRows,
     purchaseOrders,
+    purchaseOrderEvents,
   ];
 }
 
@@ -14364,6 +15293,9 @@ typedef $$UserPreferencesTableCreateCompanionBuilder =
       Value<DateTime?> ratesUpdatedAt,
       Value<String?> lastFxError,
       Value<String> localeCode,
+      Value<bool> notificationsEnabled,
+      Value<bool> cloudAutoDownload,
+      Value<bool> cloudAutoUpload,
       Value<int> rowid,
     });
 typedef $$UserPreferencesTableUpdateCompanionBuilder =
@@ -14383,6 +15315,9 @@ typedef $$UserPreferencesTableUpdateCompanionBuilder =
       Value<DateTime?> ratesUpdatedAt,
       Value<String?> lastFxError,
       Value<String> localeCode,
+      Value<bool> notificationsEnabled,
+      Value<bool> cloudAutoDownload,
+      Value<bool> cloudAutoUpload,
       Value<int> rowid,
     });
 
@@ -14467,6 +15402,21 @@ class $$UserPreferencesTableFilterComposer
 
   ColumnFilters<String> get localeCode => $composableBuilder(
     column: $table.localeCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get notificationsEnabled => $composableBuilder(
+    column: $table.notificationsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cloudAutoDownload => $composableBuilder(
+    column: $table.cloudAutoDownload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cloudAutoUpload => $composableBuilder(
+    column: $table.cloudAutoUpload,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -14554,6 +15504,21 @@ class $$UserPreferencesTableOrderingComposer
     column: $table.localeCode,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get notificationsEnabled => $composableBuilder(
+    column: $table.notificationsEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cloudAutoDownload => $composableBuilder(
+    column: $table.cloudAutoDownload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cloudAutoUpload => $composableBuilder(
+    column: $table.cloudAutoUpload,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserPreferencesTableAnnotationComposer
@@ -14637,6 +15602,21 @@ class $$UserPreferencesTableAnnotationComposer
     column: $table.localeCode,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get notificationsEnabled => $composableBuilder(
+    column: $table.notificationsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cloudAutoDownload => $composableBuilder(
+    column: $table.cloudAutoDownload,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cloudAutoUpload => $composableBuilder(
+    column: $table.cloudAutoUpload,
+    builder: (column) => column,
+  );
 }
 
 class $$UserPreferencesTableTableManager
@@ -14691,6 +15671,9 @@ class $$UserPreferencesTableTableManager
                 Value<DateTime?> ratesUpdatedAt = const Value.absent(),
                 Value<String?> lastFxError = const Value.absent(),
                 Value<String> localeCode = const Value.absent(),
+                Value<bool> notificationsEnabled = const Value.absent(),
+                Value<bool> cloudAutoDownload = const Value.absent(),
+                Value<bool> cloudAutoUpload = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserPreferencesCompanion(
                 id: id,
@@ -14708,6 +15691,9 @@ class $$UserPreferencesTableTableManager
                 ratesUpdatedAt: ratesUpdatedAt,
                 lastFxError: lastFxError,
                 localeCode: localeCode,
+                notificationsEnabled: notificationsEnabled,
+                cloudAutoDownload: cloudAutoDownload,
+                cloudAutoUpload: cloudAutoUpload,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -14727,6 +15713,9 @@ class $$UserPreferencesTableTableManager
                 Value<DateTime?> ratesUpdatedAt = const Value.absent(),
                 Value<String?> lastFxError = const Value.absent(),
                 Value<String> localeCode = const Value.absent(),
+                Value<bool> notificationsEnabled = const Value.absent(),
+                Value<bool> cloudAutoDownload = const Value.absent(),
+                Value<bool> cloudAutoUpload = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserPreferencesCompanion.insert(
                 id: id,
@@ -14744,6 +15733,9 @@ class $$UserPreferencesTableTableManager
                 ratesUpdatedAt: ratesUpdatedAt,
                 lastFxError: lastFxError,
                 localeCode: localeCode,
+                notificationsEnabled: notificationsEnabled,
+                cloudAutoDownload: cloudAutoDownload,
+                cloudAutoUpload: cloudAutoUpload,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -14941,13 +15933,23 @@ typedef $$PurchaseOrdersTableCreateCompanionBuilder =
       required String title,
       Value<int> quantity,
       required String status,
+      Value<String> orderKind,
       required DateTime orderedAt,
       Value<DateTime?> expectedAt,
       Value<DateTime?> deliveredAt,
       Value<DateTime?> reminderAt,
       Value<double?> price,
+      Value<double?> depositPaid,
+      Value<double?> balanceDue,
+      Value<double?> shippingFee,
+      Value<double?> serviceFee,
       Value<String?> currency,
+      Value<String?> sellerName,
+      Value<String?> orderNumber,
+      Value<String?> trackingNumber,
       Value<String?> trackingUrl,
+      Value<String?> forwarder,
+      Value<String?> paymentNote,
       Value<String?> notes,
       required DateTime createdAt,
       required DateTime updatedAt,
@@ -14961,13 +15963,23 @@ typedef $$PurchaseOrdersTableUpdateCompanionBuilder =
       Value<String> title,
       Value<int> quantity,
       Value<String> status,
+      Value<String> orderKind,
       Value<DateTime> orderedAt,
       Value<DateTime?> expectedAt,
       Value<DateTime?> deliveredAt,
       Value<DateTime?> reminderAt,
       Value<double?> price,
+      Value<double?> depositPaid,
+      Value<double?> balanceDue,
+      Value<double?> shippingFee,
+      Value<double?> serviceFee,
       Value<String?> currency,
+      Value<String?> sellerName,
+      Value<String?> orderNumber,
+      Value<String?> trackingNumber,
       Value<String?> trackingUrl,
+      Value<String?> forwarder,
+      Value<String?> paymentNote,
       Value<String?> notes,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -15013,6 +16025,11 @@ class $$PurchaseOrdersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get orderKind => $composableBuilder(
+    column: $table.orderKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get orderedAt => $composableBuilder(
     column: $table.orderedAt,
     builder: (column) => ColumnFilters(column),
@@ -15038,13 +16055,58 @@ class $$PurchaseOrdersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get depositPaid => $composableBuilder(
+    column: $table.depositPaid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get balanceDue => $composableBuilder(
+    column: $table.balanceDue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get shippingFee => $composableBuilder(
+    column: $table.shippingFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get serviceFee => $composableBuilder(
+    column: $table.serviceFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get currency => $composableBuilder(
     column: $table.currency,
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get sellerName => $composableBuilder(
+    column: $table.sellerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get trackingNumber => $composableBuilder(
+    column: $table.trackingNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get trackingUrl => $composableBuilder(
     column: $table.trackingUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get forwarder => $composableBuilder(
+    column: $table.forwarder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentNote => $composableBuilder(
+    column: $table.paymentNote,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15103,6 +16165,11 @@ class $$PurchaseOrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get orderKind => $composableBuilder(
+    column: $table.orderKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get orderedAt => $composableBuilder(
     column: $table.orderedAt,
     builder: (column) => ColumnOrderings(column),
@@ -15128,13 +16195,58 @@ class $$PurchaseOrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get depositPaid => $composableBuilder(
+    column: $table.depositPaid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get balanceDue => $composableBuilder(
+    column: $table.balanceDue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get shippingFee => $composableBuilder(
+    column: $table.shippingFee,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get serviceFee => $composableBuilder(
+    column: $table.serviceFee,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get currency => $composableBuilder(
     column: $table.currency,
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sellerName => $composableBuilder(
+    column: $table.sellerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get trackingNumber => $composableBuilder(
+    column: $table.trackingNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get trackingUrl => $composableBuilder(
     column: $table.trackingUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get forwarder => $composableBuilder(
+    column: $table.forwarder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentNote => $composableBuilder(
+    column: $table.paymentNote,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -15181,6 +16293,9 @@ class $$PurchaseOrdersTableAnnotationComposer
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
+  GeneratedColumn<String> get orderKind =>
+      $composableBuilder(column: $table.orderKind, builder: (column) => column);
+
   GeneratedColumn<DateTime> get orderedAt =>
       $composableBuilder(column: $table.orderedAt, builder: (column) => column);
 
@@ -15202,11 +16317,54 @@ class $$PurchaseOrdersTableAnnotationComposer
   GeneratedColumn<double> get price =>
       $composableBuilder(column: $table.price, builder: (column) => column);
 
+  GeneratedColumn<double> get depositPaid => $composableBuilder(
+    column: $table.depositPaid,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get balanceDue => $composableBuilder(
+    column: $table.balanceDue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get shippingFee => $composableBuilder(
+    column: $table.shippingFee,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get serviceFee => $composableBuilder(
+    column: $table.serviceFee,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
 
+  GeneratedColumn<String> get sellerName => $composableBuilder(
+    column: $table.sellerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get trackingNumber => $composableBuilder(
+    column: $table.trackingNumber,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get trackingUrl => $composableBuilder(
     column: $table.trackingUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get forwarder =>
+      $composableBuilder(column: $table.forwarder, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentNote => $composableBuilder(
+    column: $table.paymentNote,
     builder: (column) => column,
   );
 
@@ -15259,13 +16417,23 @@ class $$PurchaseOrdersTableTableManager
                 Value<String> title = const Value.absent(),
                 Value<int> quantity = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String> orderKind = const Value.absent(),
                 Value<DateTime> orderedAt = const Value.absent(),
                 Value<DateTime?> expectedAt = const Value.absent(),
                 Value<DateTime?> deliveredAt = const Value.absent(),
                 Value<DateTime?> reminderAt = const Value.absent(),
                 Value<double?> price = const Value.absent(),
+                Value<double?> depositPaid = const Value.absent(),
+                Value<double?> balanceDue = const Value.absent(),
+                Value<double?> shippingFee = const Value.absent(),
+                Value<double?> serviceFee = const Value.absent(),
                 Value<String?> currency = const Value.absent(),
+                Value<String?> sellerName = const Value.absent(),
+                Value<String?> orderNumber = const Value.absent(),
+                Value<String?> trackingNumber = const Value.absent(),
                 Value<String?> trackingUrl = const Value.absent(),
+                Value<String?> forwarder = const Value.absent(),
+                Value<String?> paymentNote = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -15277,13 +16445,23 @@ class $$PurchaseOrdersTableTableManager
                 title: title,
                 quantity: quantity,
                 status: status,
+                orderKind: orderKind,
                 orderedAt: orderedAt,
                 expectedAt: expectedAt,
                 deliveredAt: deliveredAt,
                 reminderAt: reminderAt,
                 price: price,
+                depositPaid: depositPaid,
+                balanceDue: balanceDue,
+                shippingFee: shippingFee,
+                serviceFee: serviceFee,
                 currency: currency,
+                sellerName: sellerName,
+                orderNumber: orderNumber,
+                trackingNumber: trackingNumber,
                 trackingUrl: trackingUrl,
+                forwarder: forwarder,
+                paymentNote: paymentNote,
                 notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -15297,13 +16475,23 @@ class $$PurchaseOrdersTableTableManager
                 required String title,
                 Value<int> quantity = const Value.absent(),
                 required String status,
+                Value<String> orderKind = const Value.absent(),
                 required DateTime orderedAt,
                 Value<DateTime?> expectedAt = const Value.absent(),
                 Value<DateTime?> deliveredAt = const Value.absent(),
                 Value<DateTime?> reminderAt = const Value.absent(),
                 Value<double?> price = const Value.absent(),
+                Value<double?> depositPaid = const Value.absent(),
+                Value<double?> balanceDue = const Value.absent(),
+                Value<double?> shippingFee = const Value.absent(),
+                Value<double?> serviceFee = const Value.absent(),
                 Value<String?> currency = const Value.absent(),
+                Value<String?> sellerName = const Value.absent(),
+                Value<String?> orderNumber = const Value.absent(),
+                Value<String?> trackingNumber = const Value.absent(),
                 Value<String?> trackingUrl = const Value.absent(),
+                Value<String?> forwarder = const Value.absent(),
+                Value<String?> paymentNote = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
@@ -15315,13 +16503,23 @@ class $$PurchaseOrdersTableTableManager
                 title: title,
                 quantity: quantity,
                 status: status,
+                orderKind: orderKind,
                 orderedAt: orderedAt,
                 expectedAt: expectedAt,
                 deliveredAt: deliveredAt,
                 reminderAt: reminderAt,
                 price: price,
+                depositPaid: depositPaid,
+                balanceDue: balanceDue,
+                shippingFee: shippingFee,
+                serviceFee: serviceFee,
                 currency: currency,
+                sellerName: sellerName,
+                orderNumber: orderNumber,
+                trackingNumber: trackingNumber,
                 trackingUrl: trackingUrl,
+                forwarder: forwarder,
+                paymentNote: paymentNote,
                 notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -15350,6 +16548,241 @@ typedef $$PurchaseOrdersTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $PurchaseOrdersTable, PurchaseOrder>,
       ),
       PurchaseOrder,
+      PrefetchHooks Function()
+    >;
+typedef $$PurchaseOrderEventsTableCreateCompanionBuilder =
+    PurchaseOrderEventsCompanion Function({
+      required String id,
+      required String orderId,
+      required String type,
+      required DateTime at,
+      required String title,
+      Value<String?> detail,
+      Value<int> rowid,
+    });
+typedef $$PurchaseOrderEventsTableUpdateCompanionBuilder =
+    PurchaseOrderEventsCompanion Function({
+      Value<String> id,
+      Value<String> orderId,
+      Value<String> type,
+      Value<DateTime> at,
+      Value<String> title,
+      Value<String?> detail,
+      Value<int> rowid,
+    });
+
+class $$PurchaseOrderEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $PurchaseOrderEventsTable> {
+  $$PurchaseOrderEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PurchaseOrderEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PurchaseOrderEventsTable> {
+  $$PurchaseOrderEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PurchaseOrderEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PurchaseOrderEventsTable> {
+  $$PurchaseOrderEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orderId =>
+      $composableBuilder(column: $table.orderId, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get at =>
+      $composableBuilder(column: $table.at, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get detail =>
+      $composableBuilder(column: $table.detail, builder: (column) => column);
+}
+
+class $$PurchaseOrderEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PurchaseOrderEventsTable,
+          PurchaseOrderEvent,
+          $$PurchaseOrderEventsTableFilterComposer,
+          $$PurchaseOrderEventsTableOrderingComposer,
+          $$PurchaseOrderEventsTableAnnotationComposer,
+          $$PurchaseOrderEventsTableCreateCompanionBuilder,
+          $$PurchaseOrderEventsTableUpdateCompanionBuilder,
+          (
+            PurchaseOrderEvent,
+            BaseReferences<
+              _$AppDatabase,
+              $PurchaseOrderEventsTable,
+              PurchaseOrderEvent
+            >,
+          ),
+          PurchaseOrderEvent,
+          PrefetchHooks Function()
+        > {
+  $$PurchaseOrderEventsTableTableManager(
+    _$AppDatabase db,
+    $PurchaseOrderEventsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PurchaseOrderEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PurchaseOrderEventsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PurchaseOrderEventsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orderId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<DateTime> at = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> detail = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PurchaseOrderEventsCompanion(
+                id: id,
+                orderId: orderId,
+                type: type,
+                at: at,
+                title: title,
+                detail: detail,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orderId,
+                required String type,
+                required DateTime at,
+                required String title,
+                Value<String?> detail = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PurchaseOrderEventsCompanion.insert(
+                id: id,
+                orderId: orderId,
+                type: type,
+                at: at,
+                title: title,
+                detail: detail,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PurchaseOrderEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PurchaseOrderEventsTable,
+      PurchaseOrderEvent,
+      $$PurchaseOrderEventsTableFilterComposer,
+      $$PurchaseOrderEventsTableOrderingComposer,
+      $$PurchaseOrderEventsTableAnnotationComposer,
+      $$PurchaseOrderEventsTableCreateCompanionBuilder,
+      $$PurchaseOrderEventsTableUpdateCompanionBuilder,
+      (
+        PurchaseOrderEvent,
+        BaseReferences<
+          _$AppDatabase,
+          $PurchaseOrderEventsTable,
+          PurchaseOrderEvent
+        >,
+      ),
+      PurchaseOrderEvent,
       PrefetchHooks Function()
     >;
 
@@ -15392,4 +16825,6 @@ class $AppDatabaseManager {
       $$AppThemeRowsTableTableManager(_db, _db.appThemeRows);
   $$PurchaseOrdersTableTableManager get purchaseOrders =>
       $$PurchaseOrdersTableTableManager(_db, _db.purchaseOrders);
+  $$PurchaseOrderEventsTableTableManager get purchaseOrderEvents =>
+      $$PurchaseOrderEventsTableTableManager(_db, _db.purchaseOrderEvents);
 }

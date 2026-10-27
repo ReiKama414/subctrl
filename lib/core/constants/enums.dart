@@ -149,7 +149,10 @@ enum CalendarEventKind {
   trialEnd,
   cancelDeadline,
   priceChange,
-  expiry;
+  expiry,
+  orderExpected,
+  orderReminder,
+  orderDelivered;
 }
 
 enum PaymentMethodType {
@@ -185,6 +188,9 @@ enum ThemePreset {
   akira,
   ice,
   light,
+  noir,
+  sakura,
+  macaron,
   custom;
 
   String get label => switch (this) {
@@ -193,6 +199,9 @@ enum ThemePreset {
     ThemePreset.akira => 'AKIRA',
     ThemePreset.ice => 'ICE',
     ThemePreset.light => 'LIGHT',
+    ThemePreset.noir => 'NOIR',
+    ThemePreset.sakura => 'SAKURA',
+    ThemePreset.macaron => 'MACARON',
     ThemePreset.custom => 'CUSTOM',
   };
 }
@@ -270,14 +279,34 @@ enum PurchaseStatus {
       this == PurchaseStatus.preorder || this == PurchaseStatus.awaitingShipment;
 }
 
+enum PurchaseOrderKind {
+  preorder,
+  instock,
+  proxy;
+
+  bool get isPreorderLike => this == PurchaseOrderKind.preorder || this == PurchaseOrderKind.proxy;
+}
+
+enum PurchaseOrderEventType {
+  created,
+  statusChanged,
+  amountUpdated,
+  reminderSet,
+  noteUpdated,
+}
+
 /// Suggested shop / platform names (user can still type custom).
 const purchasePlatformPresets = [
   'Taobao',
+  '蝦皮',
+  '露天',
   'PLUSHSHOP',
   'Mercari',
   'Amazon',
   'Shopee',
   'Yahoo Auction',
+  '代購團',
+  '集運',
   'Other',
 ];
 

@@ -30,8 +30,23 @@ final notificationServiceProvider = Provider((ref) => NotificationService());
 final securityServiceProvider = Provider((ref) => SecurityService());
 final fxServiceProvider = Provider((ref) => FxService(ref.watch(financeRepoProvider), ref.watch(settingsRepoProvider)));
 final exportServiceProvider = Provider(
-  (ref) => ExportService(ref.watch(databaseProvider), ref.watch(subscriptionRepoProvider), ref.watch(financeRepoProvider)),
+  (ref) => ExportService(
+    ref.watch(databaseProvider),
+    ref.watch(subscriptionRepoProvider),
+    ref.watch(financeRepoProvider),
+    ref.watch(purchaseRepoProvider),
+  ),
 );
+
+Future<void> resyncAllNotifications(WidgetRef ref, {bool? enabled}) async {
+  final on = enabled ?? ref.read(preferencesProvider).valueOrNull?.notificationsEnabled ?? true;
+  final svc = ref.read(notificationServiceProvider);
+  await svc.resync(
+    await ref.read(subscriptionRepoProvider).allReminders(),
+    orders: await ref.read(purchaseRepoProvider).listAll(),
+    enabled: on,
+  );
+}
 final syncServiceProvider = Provider((ref) => SyncService(ref.watch(exportServiceProvider)));
 final logoResolverProvider = Provider((ref) => const ServiceLogoResolver());
 
@@ -68,6 +83,10 @@ final scopedSubscriptionsProvider = Provider<List<SubscriptionView>>((ref) {
 
 final purchaseOrdersProvider = StreamProvider<List<PurchaseOrderView>>((ref) {
   return ref.watch(purchaseRepoProvider).watchAll();
+});
+
+final purchaseOrderEventsProvider = StreamProvider.family<List<PurchaseOrderEventView>, String>((ref, orderId) {
+  return ref.watch(purchaseRepoProvider).watchEvents(orderId);
 });
 
 final scopedPurchaseOrdersProvider = Provider<List<PurchaseOrderView>>((ref) {

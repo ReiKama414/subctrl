@@ -5,12 +5,14 @@ import 'package:subctrl/app/theme/tokens.dart';
 import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
+import 'package:subctrl/core/utils/notification_prompt.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 import 'package:subctrl/shared/widgets/ui.dart';
 
 class AddOrderScreen extends ConsumerStatefulWidget {
-  const AddOrderScreen({super.key});
+  const AddOrderScreen({super.key, this.editId});
+  final String? editId;
 
   @override
   ConsumerState<AddOrderScreen> createState() => _AddOrderScreenState();
@@ -20,22 +22,82 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
   final title = TextEditingController();
   final platformCustom = TextEditingController();
   final price = TextEditingController();
+  final deposit = TextEditingController();
+  final balance = TextEditingController();
+  final shipping = TextEditingController();
+  final service = TextEditingController();
+  final seller = TextEditingController();
+  final orderNo = TextEditingController();
+  final trackingNo = TextEditingController();
+  final forwarder = TextEditingController();
+  final paymentNote = TextEditingController();
   final notes = TextEditingController();
   final trackingUrl = TextEditingController();
   String platform = purchasePlatformPresets.first;
   PurchaseStatus status = PurchaseStatus.preorder;
+  PurchaseOrderKind orderKind = PurchaseOrderKind.preorder;
   DateTime orderedAt = DateTime.now();
   DateTime? expectedAt;
   DateTime? reminderAt;
   int quantity = 1;
   String currency = 'TWD';
   bool saving = false;
+  bool loaded = false;
+
+  bool get _editing => widget.editId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_editing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    } else {
+      loaded = true;
+    }
+  }
+
+  Future<void> _load() async {
+    final o = await ref.read(purchaseRepoProvider).getById(widget.editId!);
+    if (o == null || !mounted) return;
+    title.text = o.title;
+    platform = purchasePlatformPresets.contains(o.platform) ? o.platform : 'Other';
+    if (platform == 'Other') platformCustom.text = o.platform;
+    status = o.status;
+    orderKind = o.orderKind;
+    orderedAt = o.orderedAt;
+    expectedAt = o.expectedAt;
+    reminderAt = o.reminderAt;
+    quantity = o.quantity;
+    currency = o.currency ?? 'TWD';
+    if (o.price != null) price.text = '${o.price}';
+    if (o.depositPaid != null) deposit.text = '${o.depositPaid}';
+    if (o.balanceDue != null) balance.text = '${o.balanceDue}';
+    if (o.shippingFee != null) shipping.text = '${o.shippingFee}';
+    if (o.serviceFee != null) service.text = '${o.serviceFee}';
+    seller.text = o.sellerName ?? '';
+    orderNo.text = o.orderNumber ?? '';
+    trackingNo.text = o.trackingNumber ?? '';
+    forwarder.text = o.forwarder ?? '';
+    paymentNote.text = o.paymentNote ?? '';
+    notes.text = o.notes ?? '';
+    trackingUrl.text = o.trackingUrl ?? '';
+    setState(() => loaded = true);
+  }
 
   @override
   void dispose() {
     title.dispose();
     platformCustom.dispose();
     price.dispose();
+    deposit.dispose();
+    balance.dispose();
+    shipping.dispose();
+    service.dispose();
+    seller.dispose();
+    orderNo.dispose();
+    trackingNo.dispose();
+    forwarder.dispose();
+    paymentNote.dispose();
     notes.dispose();
     trackingUrl.dispose();
     super.dispose();
@@ -49,8 +111,18 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
     return platform;
   }
 
-  Future<void> _pickDate({required bool expected}) async {
-    final initial = expected ? (expectedAt ?? orderedAt.add(const Duration(days: 30))) : orderedAt;
+  double? _parse(String c) {
+    final t = c.trim();
+    if (t.isEmpty) return null;
+    return double.tryParse(t);
+  }
+
+  Future<void> _pickDate({required bool expected, bool reminder = false}) async {
+    final initial = reminder
+        ? (reminderAt ?? expectedAt ?? orderedAt)
+        : expected
+            ? (expectedAt ?? orderedAt.add(const Duration(days: 30)))
+            : orderedAt;
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
@@ -59,7 +131,9 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
     );
     if (picked == null) return;
     setState(() {
-      if (expected) {
+      if (reminder) {
+        reminderAt = picked;
+      } else if (expected) {
         expectedAt = picked;
       } else {
         orderedAt = picked;
@@ -72,21 +146,64 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
     if (name.isEmpty) return;
     setState(() => saving = true);
     try {
-      final parsedPrice = double.tryParse(price.text.trim());
-      await ref.read(purchaseRepoProvider).create(
-            profileId: ref.read(activeProfileIdProvider) ?? personalProfileId,
-            platform: _platformValue,
-            title: name,
-            status: status,
-            orderedAt: orderedAt,
-            quantity: quantity,
-            expectedAt: expectedAt,
-            reminderAt: reminderAt ?? expectedAt?.subtract(const Duration(days: 3)),
-            price: parsedPrice,
-            currency: parsedPrice == null ? null : currency,
-            trackingUrl: trackingUrl.text.trim().isEmpty ? null : trackingUrl.text.trim(),
-            notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-          );
+      final parsedPrice = _parse(price.text);
+      final rem = reminderAt ?? expectedAt?.subtract(const Duration(days: 3));
+      final repo = ref.read(purchaseRepoProvider);
+      if (_editing) {
+        await repo.updateFields(
+          id: widget.editId!,
+          platform: _platformValue,
+          title: name,
+          status: status,
+          orderKind: orderKind,
+          orderedAt: orderedAt,
+          quantity: quantity,
+          expectedAt: expectedAt,
+          reminderAt: rem,
+          price: parsedPrice,
+          depositPaid: _parse(deposit.text),
+          balanceDue: _parse(balance.text),
+          shippingFee: _parse(shipping.text),
+          serviceFee: _parse(service.text),
+          currency: currency,
+          sellerName: seller.text.trim().isEmpty ? null : seller.text.trim(),
+          orderNumber: orderNo.text.trim().isEmpty ? null : orderNo.text.trim(),
+          trackingNumber: trackingNo.text.trim().isEmpty ? null : trackingNo.text.trim(),
+          trackingUrl: trackingUrl.text.trim().isEmpty ? null : trackingUrl.text.trim(),
+          forwarder: forwarder.text.trim().isEmpty ? null : forwarder.text.trim(),
+          paymentNote: paymentNote.text.trim().isEmpty ? null : paymentNote.text.trim(),
+          notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
+        );
+      } else {
+        await repo.create(
+          profileId: ref.read(activeProfileIdProvider) ?? personalProfileId,
+          platform: _platformValue,
+          title: name,
+          status: status,
+          orderKind: orderKind,
+          orderedAt: orderedAt,
+          quantity: quantity,
+          expectedAt: expectedAt,
+          reminderAt: rem,
+          price: parsedPrice,
+          depositPaid: _parse(deposit.text),
+          balanceDue: _parse(balance.text),
+          shippingFee: _parse(shipping.text),
+          serviceFee: _parse(service.text),
+          currency: parsedPrice == null && _parse(deposit.text) == null ? null : currency,
+          sellerName: seller.text.trim().isEmpty ? null : seller.text.trim(),
+          orderNumber: orderNo.text.trim().isEmpty ? null : orderNo.text.trim(),
+          trackingNumber: trackingNo.text.trim().isEmpty ? null : trackingNo.text.trim(),
+          trackingUrl: trackingUrl.text.trim().isEmpty ? null : trackingUrl.text.trim(),
+          forwarder: forwarder.text.trim().isEmpty ? null : forwarder.text.trim(),
+          paymentNote: paymentNote.text.trim().isEmpty ? null : paymentNote.text.trim(),
+          notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
+        );
+      }
+      if (rem != null && mounted) {
+        await ensureNotificationPermission(context, ref);
+      }
+      await resyncAllNotifications(ref);
       if (!mounted) return;
       if (context.canPop()) {
         context.pop();
@@ -106,8 +223,14 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final c = context.colors;
+    if (!loaded) {
+      return Scaffold(
+        appBar: AppBar(title: Text(_editing ? l10n.editOrder : l10n.addOrderTitle)),
+        body: const Center(child: SkeletonBlock(height: 24, width: 120)),
+      );
+    }
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addOrderTitle)),
+      appBar: AppBar(title: Text(_editing ? l10n.editOrder : l10n.addOrderTitle)),
       body: AppPage(
         child: ListView(
           children: [
@@ -116,7 +239,21 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
             TextField(
               controller: title,
               decoration: InputDecoration(hintText: l10n.orderItemHint),
-              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+            SectionLabel(l10n.purchaseStatus),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final k in PurchaseOrderKind.values)
+                  ChoiceChip(
+                    label: Text(l10n.orderKindLabel(k)),
+                    selected: orderKind == k,
+                    onSelected: (_) => setState(() => orderKind = k),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             SectionLabel(l10n.platform),
@@ -141,8 +278,6 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
               ),
             ],
             const SizedBox(height: 16),
-            SectionLabel(l10n.purchaseStatus),
-            const SizedBox(height: 8),
             DropdownButtonFormField<PurchaseStatus>(
               value: status,
               items: [
@@ -173,9 +308,17 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => _pickDate(expected: false, reminder: true),
+              child: Text(
+                reminderAt == null
+                    ? l10n.labelMyReminder
+                    : '${l10n.labelMyReminder}: ${reminderAt!.toIso8601String().substring(0, 10)}',
+              ),
+            ),
             const SizedBox(height: 16),
             SectionLabel(l10n.quantity),
-            const SizedBox(height: 8),
             Row(
               children: [
                 IconButton(
@@ -191,7 +334,6 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
             ),
             const SizedBox(height: 16),
             SectionLabel(l10n.priceOptional),
-            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -215,7 +357,18 @@ class _AddOrderScreenState extends ConsumerState<AddOrderScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            TextField(controller: deposit, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.depositPaid)),
+            TextField(controller: balance, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.balanceDue)),
+            TextField(controller: shipping, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.shippingFee)),
+            TextField(controller: service, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l10n.serviceFee)),
+            const SizedBox(height: 12),
+            TextField(controller: seller, decoration: InputDecoration(labelText: l10n.sellerName)),
+            TextField(controller: orderNo, decoration: InputDecoration(labelText: l10n.orderNumber)),
+            TextField(controller: trackingNo, decoration: InputDecoration(labelText: l10n.trackingNumber)),
+            TextField(controller: forwarder, decoration: InputDecoration(labelText: l10n.forwarder)),
+            TextField(controller: paymentNote, decoration: InputDecoration(labelText: l10n.paymentNote)),
+            const SizedBox(height: 8),
             TextField(
               controller: trackingUrl,
               decoration: InputDecoration(hintText: l10n.trackingUrlOptional),

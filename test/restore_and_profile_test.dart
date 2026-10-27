@@ -5,6 +5,7 @@ import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/services/export_service.dart';
 import 'package:subctrl/data/database/app_database.dart';
 import 'package:subctrl/data/repositories/catalog_repository.dart';
+import 'package:subctrl/data/repositories/purchase_repository.dart';
 import 'package:subctrl/data/repositories/subscription_repository.dart';
 import 'package:subctrl/data/seed/bootstrap.dart';
 
@@ -14,7 +15,7 @@ void main() {
     await BootstrapService(db).ensureInitialized();
     final subs = SubscriptionRepository(db);
     final finance = FinanceRepository(db);
-    final export = ExportService(db, subs, finance);
+    final export = ExportService(db, subs, finance, PurchaseRepository(db));
 
     await subs.create(
       serviceId: 'spotify',

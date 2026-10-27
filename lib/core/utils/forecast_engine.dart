@@ -3,6 +3,7 @@ import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/money.dart';
 import 'package:subctrl/data/models/finance_models.dart';
 import 'package:subctrl/data/models/views.dart';
+import 'package:subctrl/data/repositories/purchase_repository.dart';
 import 'package:subctrl/l10n/app_localizations.dart';
 
 export 'package:subctrl/data/models/finance_models.dart';
@@ -381,6 +382,38 @@ class CalendarEngine {
       }
     }
     out.sort((a, b) => a.date.compareTo(b.date));
+    return out;
+  }
+
+  static List<CalendarDayEvent> orderEvents(
+    List<PurchaseOrderView> orders,
+    CurrencyEngine fx, {
+    required DateTime month,
+  }) {
+    final start = DateTime(month.year, month.month, 1);
+    final end = DateTime(month.year, month.month + 1, 0);
+    final out = <CalendarDayEvent>[];
+    for (final o in orders.where((e) => e.isPending || e.status == PurchaseStatus.delivered)) {
+      void add(DateTime? d, CalendarEventKind kind, {double amount = 0}) {
+        if (d == null || !_in(d, start, end)) return;
+        final base = amount > 0 ? fx.quote(amount, o.currency ?? fx.baseCurrency).estimatedCharge : 0.0;
+        out.add(CalendarDayEvent(
+          date: BillingMath.dateOnly(d),
+          kind: kind.name,
+          subscriptionId: '',
+          orderId: o.id,
+          title: o.title,
+          amountBase: base,
+          currencyLabel: amount > 0 ? MoneyMath.format(amount, o.currency ?? fx.baseCurrency) : kind.name,
+        ));
+      }
+
+      add(o.expectedAt, CalendarEventKind.orderExpected, amount: o.totalAmount ?? 0);
+      add(o.reminderAt, CalendarEventKind.orderReminder);
+      if (o.deliveredAt != null) {
+        add(o.deliveredAt, CalendarEventKind.orderDelivered);
+      }
+    }
     return out;
   }
 

@@ -242,16 +242,39 @@ class PurchaseOrders extends Table {
   IntColumn get quantity => integer().withDefault(const Constant(1))();
   /// ordered | preorder | awaitingShipment | shipped | delivered | cancelled
   TextColumn get status => text()();
+  /// preorder | instock | proxy
+  TextColumn get orderKind => text().withDefault(const Constant('preorder'))();
   DateTimeColumn get orderedAt => dateTime()();
   DateTimeColumn get expectedAt => dateTime().nullable()();
   DateTimeColumn get deliveredAt => dateTime().nullable()();
   DateTimeColumn get reminderAt => dateTime().nullable()();
+  /// List / total price (legacy rows use this as the only amount).
   RealColumn get price => real().nullable()();
+  RealColumn get depositPaid => real().nullable()();
+  RealColumn get balanceDue => real().nullable()();
+  RealColumn get shippingFee => real().nullable()();
+  RealColumn get serviceFee => real().nullable()();
   TextColumn get currency => text().nullable()();
+  TextColumn get sellerName => text().nullable()();
+  TextColumn get orderNumber => text().nullable()();
+  TextColumn get trackingNumber => text().nullable()();
   TextColumn get trackingUrl => text().nullable()();
+  TextColumn get forwarder => text().nullable()();
+  TextColumn get paymentNote => text().nullable()();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class PurchaseOrderEvents extends Table {
+  TextColumn get id => text()();
+  TextColumn get orderId => text()();
+  TextColumn get type => text()();
+  DateTimeColumn get at => dateTime()();
+  TextColumn get title => text()();
+  TextColumn get detail => text().nullable()();
   @override
   Set<Column> get primaryKey => {id};
 }

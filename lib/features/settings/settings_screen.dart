@@ -9,7 +9,8 @@ import 'package:subctrl/core/constants/app_info.dart';
 import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
-import 'package:subctrl/core/services/notification_service.dart';
+import 'package:subctrl/core/utils/notification_prompt.dart';
+import 'package:subctrl/shared/widgets/theme_color_picker.dart';
 import 'package:subctrl/core/services/auth_service.dart';
 import 'package:subctrl/core/services/export_service.dart';
 import 'package:subctrl/data/database/app_database.dart';
@@ -193,11 +194,10 @@ class SettingsScreen extends ConsumerWidget {
                     await ref.read(settingsRepoProvider).patch(
                           UserPreferencesCompanion(notificationsEnabled: Value(v)),
                         );
-                    final enabled = v;
-                    await ref.read(notificationServiceProvider).resync(
-                          await ref.read(subscriptionRepoProvider).allReminders(),
-                          enabled: enabled,
-                        );
+                    if (v && context.mounted) {
+                      await ensureNotificationPermission(context, ref);
+                    }
+                    await resyncAllNotifications(ref, enabled: v);
                   },
                 ),
               ],
@@ -209,6 +209,7 @@ class SettingsScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   secondary: const Icon(Icons.fingerprint_rounded),
                   title: Text(l10n.biometricLock),
+                  subtitle: Text(l10n.securityBiometricHint),
                   value: prefs.biometricLock,
                   onChanged: (v) => ref.read(settingsRepoProvider).patch(
                         UserPreferencesCompanion(biometricLock: Value(v)),
@@ -218,6 +219,7 @@ class SettingsScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   secondary: const Icon(Icons.visibility_off_rounded),
                   title: Text(l10n.hideAmounts),
+                  subtitle: Text(l10n.securityHideAmountsHint),
                   value: prefs.hideAmounts,
                   onChanged: (v) => ref.read(settingsRepoProvider).patch(
                         UserPreferencesCompanion(hideAmounts: Value(v)),
@@ -640,39 +642,58 @@ class _CustomThemeEditor extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(preferencesProvider).valueOrNull;
-    return Column(
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(context.l10n.customThemeHelp),
-        ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _swatch(ref, prefs, 'accent', const Color(0xFF5EEAD4)),
-            _swatch(ref, prefs, 'background', const Color(0xFF0B0C0E)),
-            _swatch(ref, prefs, 'surface', const Color(0xFF14161A)),
-            _swatch(ref, prefs, 'border', const Color(0xFF2A2E35)),
-          ],
-        ),
-      ],
-    );
-  }
+    final l10n = context.l10n;
+    final map = <String, dynamic>{
+      ...?jsonDecode(prefs?.customThemeJson ?? '{}') as Map<String, dynamic>?,
+    };
+    Color read(String key, Color fallback) {
+      final v = map[key];
+      if (v is int) return Color(v);
+      return fallback;
+    }
 
-  Widget _swatch(WidgetRef ref, dynamic prefs, String key, Color fallback) {
-    return OutlinedButton(
-      onPressed: () async {
-        final next = key == 'accent' ? const Color(0xFFE11D2A) : fallback;
-        final map = <String, dynamic>{
-          ...?jsonDecode(prefs?.customThemeJson ?? '{}') as Map<String, dynamic>?,
-          key: next.toARGB32(),
-        };
-        await ref.read(settingsRepoProvider).patch(
-              UserPreferencesCompanion(customThemeJson: Value(jsonEncode(map))),
-            );
-      },
-      child: Text(key),
+    final slots = [
+      ('accent', l10n.customThemeAccent, const Color(0xFF5EEAD4)),
+      ('background', l10n.customThemeBackground, const Color(0xFF0D0E12)),
+      ('surface', l10n.customThemeSurface, const Color(0xFF17191F)),
+      ('border', l10n.customThemeBorder, const Color(0xFF3A3F4A)),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.customThemeHelp, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 12),
+        for (final slot in slots)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(slot.$2),
+              trailing: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: read(slot.$1, slot.$3),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: context.colors.border),
+                ),
+              ),
+              onTap: () async {
+                final picked = await showThemeColorPicker(
+                  context,
+                  initial: read(slot.$1, slot.$3),
+                  title: slot.$2,
+                );
+                if (picked == null) return;
+                final next = <String, dynamic>{...map, slot.$1: picked.toARGB32()};
+                await ref.read(settingsRepoProvider).patch(
+                      UserPreferencesCompanion(customThemeJson: Value(jsonEncode(next))),
+                    );
+              },
+            ),
+          ),
+      ],
     );
   }
 }

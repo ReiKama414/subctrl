@@ -31,15 +31,34 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     selected = DateTime(n.year, n.month, n.day);
   }
 
+  Future<void> _pickYearMonth() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: month,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      initialDatePickerMode: DatePickerMode.year,
+    );
+    if (picked == null) return;
+    setState(() {
+      month = DateTime(picked.year, picked.month);
+      selected = DateTime(picked.year, picked.month, picked.day);
+    });
+  }
+
   bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
     final subs = ref.watch(scopedSubscriptionsProvider);
+    final orders = ref.watch(scopedPurchaseOrdersProvider);
     final fx = ref.watch(currencyEngineProvider);
     final hide = ref.watch(preferencesProvider).valueOrNull?.hideAmounts == true;
     String money(double v) => hide ? '••••' : MoneyMath.format(v, fx.baseCurrency);
-    final events = CalendarEngine.events(subs, fx, month: month);
+    final events = [
+      ...CalendarEngine.events(subs, fx, month: month),
+      ...CalendarEngine.orderEvents(orders, fx, month: month),
+    ]..sort((a, b) => a.date.compareTo(b.date));
     final c = context.colors;
     final l10n = context.l10n;
     final first = DateTime(month.year, month.month, 1);
@@ -61,7 +80,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             subtitle: l10n.eventsCount(events.length),
             actions: [
               HeaderIconButton(
-                tooltip: l10n.dueToday,
+                tooltip: l10n.jumpToToday,
                 icon: Icons.today_rounded,
                 onPressed: () => setState(_goToday),
               ),
@@ -85,15 +104,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       icon: const Icon(Icons.chevron_left_rounded),
                     ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          Text(l10n.monthTitle(month.year, month.month), style: AppTypography.title(c.textPrimary)),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${l10n.monthTotal}  ${money(monthTotal)}',
-                            style: AppTypography.caption(c.textMuted),
+                      child: InkWell(
+                        onTap: _pickYearMonth,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(l10n.monthTitle(month.year, month.month), style: AppTypography.title(c.textPrimary)),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.arrow_drop_down_rounded, color: c.textMuted, size: 22),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${l10n.monthTotal}  ${money(monthTotal)}',
+                                style: AppTypography.caption(c.textMuted),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     IconButton(
@@ -210,7 +243,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: SurfaceCard(
                     padding: const EdgeInsets.all(14),
-                    onTap: () => context.push('/subs/${e.subscriptionId}'),
+                    onTap: () {
+                      final oid = e.orderId;
+                      if (oid != null && oid.isNotEmpty) {
+                        context.push('/orders/$oid');
+                      } else {
+                        context.push('/subs/${e.subscriptionId}');
+                      }
+                    },
                     child: Row(
                       children: [
                         ServiceAvatar(e.title, size: 42),
@@ -249,6 +289,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       'promoEnd' => AppPalette.swatches[4],
       'priceChange' => AppPalette.swatches[5],
       'expiry' => c.textMuted,
+      'orderExpected' => c.warning,
+      'orderReminder' => AppPalette.swatches[2],
+      'orderDelivered' => c.success,
       _ => c.textSecondary,
     };
   }

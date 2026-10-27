@@ -7,6 +7,7 @@ import 'package:subctrl/core/constants/currencies.dart';
 import 'package:subctrl/core/constants/enums.dart';
 import 'package:subctrl/core/providers.dart';
 import 'package:subctrl/core/services/notification_service.dart';
+import 'package:subctrl/core/utils/notification_prompt.dart';
 import 'package:subctrl/core/utils/sync_coordinator.dart';
 import 'package:subctrl/core/utils/billing_math.dart';
 import 'package:subctrl/core/utils/forecast_engine.dart';
@@ -800,11 +801,8 @@ class _AddSubscriptionScreenState extends ConsumerState<AddSubscriptionScreen> {
             ),
           ],
         );
-    final notifOn = ref.read(preferencesProvider).valueOrNull?.notificationsEnabled ?? true;
-    await ref.read(notificationServiceProvider).resync(
-          await ref.read(subscriptionRepoProvider).allReminders(),
-          enabled: notifOn,
-        );
+    if (mounted) await ensureNotificationPermission(context, ref);
+    await resyncAllNotifications(ref);
     await maybeCloudUpload(ref, context.l10n);
     if (!mounted) return;
     // Land on home first so detail has a back target (go() alone clears the stack).

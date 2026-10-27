@@ -103,6 +103,9 @@ extension EnumL10n on AppLocalizations {
         'cancelDeadline' => t('eventCancelDeadline'),
         'priceChange' => t('eventPriceChange'),
         'expiry' => t('eventExpiry'),
+        'orderExpected' => t('eventOrderExpected'),
+        'orderReminder' => t('eventOrderReminder'),
+        'orderDelivered' => t('eventOrderDelivered'),
         _ => kind,
       };
 

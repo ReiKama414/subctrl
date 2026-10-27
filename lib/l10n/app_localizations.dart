@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:subctrl/core/constants/enums.dart';
 
 export 'enum_l10n.dart';
 
@@ -229,7 +230,47 @@ class AppLocalizations {
     'themeAkira': 'Akira',
     'themeIce': 'Ice',
     'themeLight': 'Light',
+    'themeNoir': 'Noir',
+    'themeSakura': 'Sakura',
+    'themeMacaron': 'Macaron',
     'themeCustom': 'Custom',
+    'customThemeAccent': 'Accent',
+    'customThemeBackground': 'Background',
+    'customThemeSurface': 'Surface',
+    'customThemeBorder': 'Border',
+    'customThemeChannelRed': 'Red',
+    'customThemeChannelGreen': 'Green',
+    'customThemeChannelBlue': 'Blue',
+    'notificationPermissionTitle': 'Turn on notifications?',
+    'notificationPermissionBody': 'SUB//CTRL can remind you before renewals and preorder arrivals.',
+    'notNow': 'Not now',
+    'enableNotifications': 'Enable',
+    'jumpToToday': 'Jump to today',
+    'pickYearMonth': 'Pick year & month',
+    'ordersSearchHint': 'Search orders',
+    'ordersFilterAll': 'All',
+    'ordersFilterPending': 'Pending',
+    'ordersFilterOverdue': 'Overdue',
+    'orderKindPreorder': 'Preorder',
+    'orderKindInstock': 'In stock',
+    'orderKindProxy': 'Proxy buy',
+    'orderTimeline': 'Timeline',
+    'orderNextStep': 'Advance status',
+    'editOrder': 'Edit order',
+    'depositPaid': 'Deposit paid',
+    'balanceDue': 'Balance due',
+    'shippingFee': 'Shipping',
+    'serviceFee': 'Service fee',
+    'sellerName': 'Seller',
+    'orderNumber': 'Order no.',
+    'trackingNumber': 'Tracking no.',
+    'forwarder': 'Forwarder',
+    'paymentNote': 'Payment note',
+    'eventOrderExpected': 'Expected arrival',
+    'eventOrderReminder': 'Order reminder',
+    'eventOrderDelivered': 'Delivered',
+    'securityBiometricHint': 'Requires fingerprint / Face ID when opening the app.',
+    'securityHideAmountsHint': 'Masks prices on home, lists, and calendar.',
     'statusActive': 'Active',
     'statusTrial': 'Trial',
     'statusPromo': 'Promo',
@@ -624,7 +665,7 @@ class AppLocalizations {
     'providerGoogle': 'Google',
     'providerLine': 'LINE',
     'providerGuest': '訪客',
-    'customThemeHelp': '自訂主題以 VOID 為底。強調色／背景／表面／邊框會以 JSON 保存。',
+    'customThemeHelp': '點選色塊可調整強調色與背景層級，變更會即時套用',
     'weekdaySun': '日',
     'weekdayMon': '一',
     'weekdayTue': '二',
@@ -645,7 +686,47 @@ class AppLocalizations {
     'themeAkira': 'Akira',
     'themeIce': '冰晶',
     'themeLight': '明亮',
+    'themeNoir': '黑紫',
+    'themeSakura': '櫻花',
+    'themeMacaron': '馬卡龍',
     'themeCustom': '自訂',
+    'customThemeAccent': '強調色',
+    'customThemeBackground': '背景',
+    'customThemeSurface': '表面',
+    'customThemeBorder': '邊框',
+    'customThemeChannelRed': '紅',
+    'customThemeChannelGreen': '綠',
+    'customThemeChannelBlue': '藍',
+    'notificationPermissionTitle': '開啟通知？',
+    'notificationPermissionBody': '可在續訂扣款與預購到貨前提醒你',
+    'notNow': '稍後',
+    'enableNotifications': '開啟',
+    'jumpToToday': '回到今天',
+    'pickYearMonth': '選擇年月',
+    'ordersSearchHint': '搜尋訂單',
+    'ordersFilterAll': '全部',
+    'ordersFilterPending': '待收',
+    'ordersFilterOverdue': '逾期',
+    'orderKindPreorder': '預購',
+    'orderKindInstock': '現貨',
+    'orderKindProxy': '代購',
+    'orderTimeline': '時間軸',
+    'orderNextStep': '推進狀態',
+    'editOrder': '編輯訂單',
+    'depositPaid': '已付訂金',
+    'balanceDue': '待付尾款',
+    'shippingFee': '運費',
+    'serviceFee': '服務費',
+    'sellerName': '賣家',
+    'orderNumber': '訂單編號',
+    'trackingNumber': '物流單號',
+    'forwarder': '集運商',
+    'paymentNote': '付款備註',
+    'eventOrderExpected': '預計到貨',
+    'eventOrderReminder': '訂單提醒',
+    'eventOrderDelivered': '已收貨',
+    'securityBiometricHint': '開啟 App 時需指紋或 Face ID',
+    'securityHideAmountsHint': '首頁、列表與日曆的金額會顯示為 ••••',
     'statusActive': '進行中',
     'statusTrial': '試用',
     'statusPromo': '優惠',
@@ -1061,7 +1142,47 @@ class AppLocalizations {
     'themeAkira': 'Akira',
     'themeIce': 'Ice',
     'themeLight': 'Light',
+    'themeNoir': 'Noir',
+    'themeSakura': 'Sakura',
+    'themeMacaron': 'Macaron',
     'themeCustom': 'Custom',
+    'customThemeAccent': 'Accent',
+    'customThemeBackground': 'Background',
+    'customThemeSurface': 'Surface',
+    'customThemeBorder': 'Border',
+    'customThemeChannelRed': 'Red',
+    'customThemeChannelGreen': 'Green',
+    'customThemeChannelBlue': 'Blue',
+    'notificationPermissionTitle': '通知をオンにしますか？',
+    'notificationPermissionBody': '更新や予約商品の到着前にリマインドできます。',
+    'notNow': 'あとで',
+    'enableNotifications': 'オン',
+    'jumpToToday': '今日へ',
+    'pickYearMonth': '年月を選択',
+    'ordersSearchHint': '注文を検索',
+    'ordersFilterAll': 'すべて',
+    'ordersFilterPending': '未完了',
+    'ordersFilterOverdue': '期限超過',
+    'orderKindPreorder': '予約',
+    'orderKindInstock': '在庫',
+    'orderKindProxy': '代行購入',
+    'orderTimeline': 'タイムライン',
+    'orderNextStep': '次のステータス',
+    'editOrder': '注文を編集',
+    'depositPaid': '内金',
+    'balanceDue': '残額',
+    'shippingFee': '送料',
+    'serviceFee': '手数料',
+    'sellerName': '出品者',
+    'orderNumber': '注文番号',
+    'trackingNumber': '追跡番号',
+    'forwarder': '転送業者',
+    'paymentNote': '支払いメモ',
+    'eventOrderExpected': '到着予定',
+    'eventOrderReminder': '注文リマインド',
+    'eventOrderDelivered': '受取済み',
+    'securityBiometricHint': '起動時に生体認証が必要です。',
+    'securityHideAmountsHint': '金額をマスク表示します。',
     'statusActive': '有効',
     'statusTrial': 'トライアル',
     'statusPromo': 'プロモ',
@@ -1474,6 +1595,42 @@ class AppLocalizations {
   String get providerLine => t('providerLine');
   String get providerGuest => t('providerGuest');
   String get customThemeHelp => t('customThemeHelp');
+  String get customThemeAccent => t('customThemeAccent');
+  String get customThemeBackground => t('customThemeBackground');
+  String get customThemeSurface => t('customThemeSurface');
+  String get customThemeBorder => t('customThemeBorder');
+  String get customThemeChannelRed => t('customThemeChannelRed');
+  String get customThemeChannelGreen => t('customThemeChannelGreen');
+  String get customThemeChannelBlue => t('customThemeChannelBlue');
+  String get notificationPermissionTitle => t('notificationPermissionTitle');
+  String get notificationPermissionBody => t('notificationPermissionBody');
+  String get notNow => t('notNow');
+  String get enableNotifications => t('enableNotifications');
+  String get jumpToToday => t('jumpToToday');
+  String get pickYearMonth => t('pickYearMonth');
+  String get ordersSearchHint => t('ordersSearchHint');
+  String get ordersFilterAll => t('ordersFilterAll');
+  String get ordersFilterPending => t('ordersFilterPending');
+  String get ordersFilterOverdue => t('ordersFilterOverdue');
+  String get orderTimeline => t('orderTimeline');
+  String get orderNextStep => t('orderNextStep');
+  String get editOrder => t('editOrder');
+  String get depositPaid => t('depositPaid');
+  String get balanceDue => t('balanceDue');
+  String get shippingFee => t('shippingFee');
+  String get serviceFee => t('serviceFee');
+  String get sellerName => t('sellerName');
+  String get orderNumber => t('orderNumber');
+  String get trackingNumber => t('trackingNumber');
+  String get forwarder => t('forwarder');
+  String get paymentNote => t('paymentNote');
+  String get securityBiometricHint => t('securityBiometricHint');
+  String get securityHideAmountsHint => t('securityHideAmountsHint');
+  String orderKindLabel(PurchaseOrderKind k) => switch (k) {
+        PurchaseOrderKind.preorder => t('orderKindPreorder'),
+        PurchaseOrderKind.instock => t('orderKindInstock'),
+        PurchaseOrderKind.proxy => t('orderKindProxy'),
+      };
   String get weekdaySun => t('weekdaySun');
   String get weekdayMon => t('weekdayMon');
   String get weekdayTue => t('weekdayTue');
@@ -1602,6 +1759,9 @@ class AppLocalizations {
         'akira' => t('themeAkira'),
         'ice' => t('themeIce'),
         'light' => t('themeLight'),
+        'noir' => t('themeNoir'),
+        'sakura' => t('themeSakura'),
+        'macaron' => t('themeMacaron'),
         'custom' => t('themeCustom'),
         _ => name,
       };
