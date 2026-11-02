@@ -26,22 +26,32 @@ CI builds this automatically when you push a version tag.
 3. Add `android/app/google-services.json` from your Firebase project
 4. Deploy Firestore rules (required for cloud backup from the app):
 
+   - **Console:** [Firestore → Rules](https://console.firebase.google.com/project/sub-ctrl/firestore/rules) — paste `firestore.rules`, then **Publish**.
+   - **CLI** (uses repo `firebase.json`):
+
 ```bash
 firebase login
 firebase use sub-ctrl
 firebase deploy --only firestore:rules
 ```
 
-Rules allow each signed-in user to read/write only `users/{their uid}/**`.
+   App writes backup to `users/{uid}/meta/backup`. Rules allow each signed-in user to read/write only `users/{their uid}/**`. CMS content uses Admin SDK (separate env on your site), not these client rules.
 
 5. Cloud backup appears in Settings after **Google** sign-in (Firebase Auth session)
-6. Build:
+6. Build (prefer an ASCII clone path on Windows, e.g. `C:\Users\you\subctrl-apk`):
 
 ```powershell
 .\scripts\build-account-apk.ps1
 ```
 
 Output: `build/account/subctrl-account-release.apk` — install manually; **do not** attach to public Releases.
+
+To build the **local** APK locally (same as CI, not for account):
+
+```powershell
+flutter build apk --release --dart-define=APP_AUTH_MODE=local
+copy build\app\outputs\flutter-apk\app-release.apk build\local\subctrl-local-release.apk
+```
 
 ## Develop
 
@@ -58,9 +68,11 @@ On Windows, use an ASCII path (e.g. `C:\Users\you\subctrl-apk`) if Flutter fails
 
 ## Release tag
 
+Bump `version` in `pubspec.yaml` if needed, then:
+
 ```bash
 git tag v1.0.1
 git push origin v1.0.1
 ```
 
-Uploads **only** `subctrl-local-release.apk`.
+GitHub Actions uploads **only** `subctrl-local-release.apk` to that Release.
