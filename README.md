@@ -24,7 +24,16 @@ CI builds this automatically when you push a version tag.
 1. Copy `dart_defines.example.json` → `dart_defines.json` (gitignored)
 2. Set `APP_AUTH_MODE` to `account` and your `GOOGLE_SERVER_CLIENT_ID`, etc.
 3. Add `android/app/google-services.json` from your Firebase project
-4. Deploy `firestore.rules` to your Firebase project
+4. Deploy Firestore rules (required for cloud backup from the app):
+
+```bash
+firebase login
+firebase use sub-ctrl
+firebase deploy --only firestore:rules
+```
+
+Rules allow each signed-in user to read/write only `users/{their uid}/**`.
+
 5. Cloud backup appears in Settings after **Google** sign-in (Firebase Auth session)
 6. Build:
 

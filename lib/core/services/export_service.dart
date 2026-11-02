@@ -623,11 +623,18 @@ class SyncService {
     if (json.length > 900 * 1024) {
       throw SyncException(l10n.syncBackupTooLarge);
     }
-    await _doc(uid).set({
-      'payload': json,
-      'updatedAt': FieldValue.serverTimestamp(),
-      'version': 1,
-    });
+    try {
+      await _doc(uid).set({
+        'payload': json,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'version': 1,
+      });
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw SyncException(l10n.syncFirestoreDenied);
+      }
+      throw SyncException(e.message ?? e.code);
+    }
   }
 
   /// Returns backup JSON string, or null if document does not exist.
@@ -641,6 +648,9 @@ class SyncService {
       if (payload is! String || payload.isEmpty) return null;
       return payload;
     } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw SyncException(l10n.syncFirestoreDenied);
+      }
       throw SyncException(e.message ?? e.code);
     }
   }

@@ -261,17 +261,39 @@ class SettingsScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 12),
+                if (AppEnv.requireAccountLogin) ...[
+                  Builder(
+                    builder: (context) {
+                      final primary = identities
+                          .where((i) => i.provider == 'google' || i.provider == 'line')
+                          .firstOrNull;
+                      if (primary == null) return const SizedBox.shrink();
+                      final line = _identityLine(primary);
+                      final email = primary.email?.trim();
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.verified_user_outlined),
+                        title: Text(line ?? l10n.providerLabel(primary.provider)),
+                        subtitle: email != null && email.isNotEmpty && line != email ? Text(email) : null,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 ...[
                   'google',
                   if (!kIsWeb) 'line',
                   'guest',
                 ].map((p) {
-                  final linked = identities.any((i) => i.provider == p);
+                  final linkedId = _identityFor(identities, p);
+                  final linked = linkedId != null;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(p == 'guest' ? Icons.person_outline_rounded : Icons.account_circle_rounded),
                     title: Text(l10n.providerLabel(p)),
-                    subtitle: Text(linked ? l10n.connected : l10n.notConnected),
+                    subtitle: Text(
+                      linkedId == null ? l10n.notConnected : (_identityLine(linkedId) ?? l10n.connected),
+                    ),
                     trailing: linked
                         ? (p == 'guest'
                             ? null
@@ -506,26 +528,32 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _cloudUpload(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
+    _showCloudBusy(context, l10n.syncUploading);
     try {
       await ref.read(syncServiceProvider).upload(l10n);
       if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.syncUploaded)));
       }
     } on SyncException catch (e) {
       if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.syncFirestoreDenied)));
       }
     }
   }
 
   Future<void> _cloudDownload(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
+    _showCloudBusy(context, l10n.syncDownloading);
     try {
       final raw = await ref.read(syncServiceProvider).download(l10n);
+      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
       if (raw == null) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.syncNoCloudBackup)));
@@ -536,13 +564,38 @@ class SettingsScreen extends ConsumerWidget {
       await _confirmAndRestore(context, ref, raw);
     } on SyncException catch (e) {
       if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.syncFirestoreDenied)));
       }
     }
+  }
+
+  void _showCloudBusy(BuildContext context, String message) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 16),
+              Expanded(child: Text(message)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   List<Widget> _customProfileTiles(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
@@ -851,4 +904,19 @@ class _CustomThemeEditor extends ConsumerWidget {
       ],
     );
   }
+}
+
+String? _identityLine(LinkedIdentity id) {
+  final name = id.displayName?.trim();
+  if (name != null && name.isNotEmpty) return name;
+  final email = id.email?.trim();
+  if (email != null && email.isNotEmpty) return email;
+  return null;
+}
+
+LinkedIdentity? _identityFor(List<LinkedIdentity> identities, String provider) {
+  for (final i in identities) {
+    if (i.provider == provider) return i;
+  }
+  return null;
 }
