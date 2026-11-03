@@ -44,6 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# One-off history scrub (never commit real leaked substrings)
+scripts/scrub-history.sh
+scripts/scrub-patterns.local.txt
+
 # Local defines & Firebase / signing secrets (keep local only)
 dart_defines.json
 **/google-services.json
