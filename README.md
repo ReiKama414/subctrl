@@ -1,52 +1,69 @@
 # SUB//CTRL
 
-Subscription Control Center — local-first subscription and preorder ledger.
+[繁體中文](README.zh-TW.md)
 
-Distribution is **GitHub Releases only** (not open source). Two APK variants:
+**SUB//CTRL** (Subscription Control Center) is a local-first ledger for subscriptions and preorders  
+This repository is not open source  
+Public distribution is the **local** APK via **GitHub Releases**  
+The maintainer builds a separate **account** APK locally (never uploaded by CI)
 
-| APK | Who | How to get |
-| --- | --- | --- |
-| **Local** (`subctrl-local-release.apk`) | Everyone | GitHub Releases — tag `v*` |
-| **Account** (`subctrl-account-release.apk`) | Maintainer only | Build on your machine (never uploaded by CI) |
+## Two APK variants
 
-## Public release (local APK)
+| Build | Filename | Audience | How to get |
+| --- | --- | --- | --- |
+| **Local** | `subctrl-local-release.apk` | Everyone | GitHub Releases (tag `v*`) or your site download page |
+| **Account** | `subctrl-account-release.apk` | Maintainer only | Built only on your machine with `dart_defines.json`; **not on GitHub, Releases, or in the repo** |
 
-- **No login screen** — opens onboarding / home directly (guest session)
-- **No cloud backup**
-- **No Google / LINE / Firebase / cloud** — no developer API keys in CI
-- **FX refresh** uses public [open.er-api.com](https://open.er-api.com) when the user taps update rates (no key)
-- Data stays on device; backup via Settings → Data (JSON / file)
+## Local (public) APK
 
-CI builds this automatically when you push a version tag.
+- No login gate — guest / on-device session
+- No cloud backup
+- CI build has no Google / LINE / Firebase keys
+- FX rates: manual refresh in-app via [open.er-api.com](https://open.er-api.com) (no API key)
+- Backup/export: Settings → Data (JSON / file); data stays on device
 
-## Your private APK (account)
+Push a **version tag** to trigger GitHub Actions: tests, APK build, Release upload
 
-1. Copy `dart_defines.example.json` → `dart_defines.json` (gitignored)
-2. Set `APP_AUTH_MODE` to `account` and your `GOOGLE_SERVER_CLIENT_ID`, etc.
+**Private repository note**  
+Release URLs may return GitHub 404 without repo access  
+For anonymous downloads on your website, host the APK at a public HTTPS URL and set it in your site CMS (project fields); e.g. `/works/subctrl`  
+GitHub release asset links usually fail for anonymous users on private repos
+
+## Account (maintainer machine only)
+
+**This APK is not downloadable by the public**  
+GitHub Actions builds **local** only  
+The entire `build/` tree is gitignored — **no APK is ever pushed to GitHub**  
+Account builds require a local `dart_defines.json` and `google-services.json` that only you have
+
+1. Copy `dart_defines.example.json` → `dart_defines.json` (gitignored — **never commit**)
+2. Set `APP_AUTH_MODE=account`, `GOOGLE_SERVER_CLIENT_ID`, etc.
 3. Add `android/app/google-services.json` from your Firebase project
-4. Deploy Firestore rules (required for cloud backup from the app):
-
-   - **Console:** [Firestore → Rules](https://console.firebase.google.com/project/sub-ctrl/firestore/rules) — paste `firestore.rules`, then **Publish**.
-   - **CLI** (uses repo `firebase.json`):
+4. Deploy Firestore rules (required for cloud backup)  
+   - **Console:** Firebase Console → Firestore → Rules — paste `firestore.rules`, then **Publish**  
+   - **CLI** (repo `firebase.json`):
 
 ```bash
 firebase login
-firebase use sub-ctrl
+firebase use YOUR_PROJECT_ID
 firebase deploy --only firestore:rules
 ```
 
-   App writes backup to `users/{uid}/meta/backup`. Rules allow each signed-in user to read/write only `users/{their uid}/**`. CMS content uses Admin SDK (separate env on your site), not these client rules.
+   Backup path: `users/{uid}/meta/backup`  
+   Rules allow each signed-in user read/write only under `users/{their uid}/**`
 
-5. Cloud backup appears in Settings after **Google** sign-in (Firebase Auth session)
-6. Build (prefer an ASCII clone path on Windows, e.g. `C:\Users\you\subctrl-apk`):
+5. After **Google** sign-in, Settings offers cloud upload/restore
+6. Build (on Windows prefer an ASCII clone path, e.g. `C:\Users\you\subctrl-apk`):
 
 ```powershell
 .\scripts\build-account-apk.ps1
 ```
 
-Output: `build/account/subctrl-account-release.apk` — install manually; **do not** attach to public Releases.
+After the build, the file exists only on your PC at `build/account/subctrl-account-release.apk` (a **local path**, not a download URL)  
+Install on your own devices via USB/adb/etc.  
+**Do not** upload it to Releases, your site CMS, or any public URL
 
-To build the **local** APK locally (same as CI, not for account):
+Build **local** APK locally (same as CI, not account):
 
 ```powershell
 flutter build apk --release --dart-define=APP_AUTH_MODE=local
@@ -62,9 +79,15 @@ flutter test
 flutter run --dart-define=APP_AUTH_MODE=local
 ```
 
-With private defines: `.\scripts\run.ps1` (uses `dart_defines.json` when present).
+Private defines: run `.\scripts\run.ps1` when `dart_defines.json` exists
 
-On Windows, use an ASCII path (e.g. `C:\Users\you\subctrl-apk`) if Flutter fails on non-ASCII project paths.
+If Flutter fails on non-ASCII paths on Windows, clone to an ASCII directory
+
+## Stack (app)
+
+Flutter · Dart · Drift · SQLite · Riverpod · go_router  
+flutter_local_notifications · local_auth · fl_chart · http · intl  
+Account build: Firebase Auth · Firestore · Google Sign-In · LINE SDK
 
 ## Release tag
 
@@ -75,4 +98,14 @@ git tag v1.0.1
 git push origin v1.0.1
 ```
 
-GitHub Actions uploads **only** `subctrl-local-release.apk` to that Release.
+GitHub Actions uploads **only** `subctrl-local-release.apk` to that Release
+
+## Copyright
+
+Copyright © 2026 ReiKama414  
+All rights reserved  
+
+This repository and the SUB//CTRL application (including source code, assets, branding, and documentation) are proprietary  
+No license is granted to copy, modify, distribute, or create derivative works except as explicitly allowed by the copyright holder  
+
+Public **local** APK distribution via GitHub Releases or other channels named by the author does not constitute open-source licensing of the codebase

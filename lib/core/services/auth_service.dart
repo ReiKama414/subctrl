@@ -247,7 +247,7 @@ class LineAuthProvider implements AuthProvider {
     if (!AuthConfig.lineConfigured) {
       throw AuthException(
         '需要 LINE Login 設定（LINE_CHANNEL_ID）。\n'
-        '請用：flutter run --dart-define=LINE_CHANNEL_ID=YOUR_CHANNEL_ID',
+        '請在 dart_defines.json 或 --dart-define=LINE_CHANNEL_ID=… 設定 Channel ID',
       );
     }
     if (kIsWeb) {

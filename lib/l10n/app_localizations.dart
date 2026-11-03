@@ -241,7 +241,7 @@ class AppLocalizations {
     'syncUploading': 'Uploading cloud backup…',
     'syncDownloading': 'Downloading cloud backup…',
     'syncFirestoreDenied':
-        'Cloud backup was blocked (Firestore rules). Deploy firestore.rules to project sub-ctrl in Firebase Console',
+        'Cloud backup was blocked (Firestore rules). Deploy firestore.rules in your Firebase project (Firebase Console)',
     'privacyFull':
         'SUB//CTRL keeps subscription and order data on your device.\n\n'
         'The distributed app does not include sign-in, cloud backup, or developer-registered API keys.\n\n'
@@ -735,7 +735,7 @@ class AppLocalizations {
     'syncBackupTooLarge': '備份太大無法上傳雲端，請改用本機匯出 JSON',
     'syncUploading': '正在上傳雲端備份…',
     'syncDownloading': '正在下載雲端備份…',
-    'syncFirestoreDenied': '雲端備份被拒絕（Firestore 規則）。請在 Firebase 專案 sub-ctrl 部署 firestore.rules',
+    'syncFirestoreDenied': '雲端備份被拒絕（Firestore 規則）。請在你的 Firebase 專案部署 firestore.rules',
     'privacyFull':
         'SUB//CTRL 將訂閱與訂單資料保存在你的裝置上\n\n'
         '公開發行版不含登入、雲端備份或開發者申請的 API 金鑰\n\n'
@@ -1229,7 +1229,7 @@ class AppLocalizations {
     'syncBackupTooLarge': 'バックアップが大きすぎます。ローカルでJSONを書き出してください',
     'syncUploading': 'クラウドバックアップをアップロード中…',
     'syncDownloading': 'クラウドバックアップを取得中…',
-    'syncFirestoreDenied': 'Firestore ルールにより拒否されました。sub-ctrl に firestore.rules をデプロイしてください',
+    'syncFirestoreDenied': 'Firestore ルールにより拒否されました。Firebase プロジェクトに firestore.rules をデプロイしてください',
     'privacyFull':
         'SUB//CTRL は契約と注文データを端末に保存します\n\n'
         '配布版にはログイン、クラウドバックアップ、開発者登録の API キーは含まれません\n\n'

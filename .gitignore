@@ -53,3 +53,6 @@ dart_defines.json
 *.keystore
 key.properties
 android/key.properties
+
+# Web build artifacts (may contain local machine paths)
+web/drift_worker.js.deps
